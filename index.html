@@ -183,8 +183,22 @@
     .toast.show { opacity:1;transform:translate(-50%,0); }
     .hidden { display:none !important; }
     .objective-switch { display:flex;justify-content:flex-end;margin:0 0 12px; }
-    .objective-switch button { border:1px solid #bfd6e7;background:#fff;color:#376b91;border-radius:999px;padding:10px 16px;font-weight:800;box-shadow:0 4px 14px #315f7c12; }
+    .objective-switch button { border:1px solid #bfd6e7;background:#fff;color:#376b91;border-radius:999px;padding:8px 13px;font-size:14px;font-weight:800;box-shadow:0 4px 14px #315f7c12; }
     .objective-switch button:hover { background:#f0f8fd; }
+    .objective-head.compact { padding:clamp(18px,2.2vw,28px);gap:22px; }
+    .objective-head.compact h1 { font-size:clamp(29px,3.3vw,42px); }
+    .objective-head.compact .subtitle { margin-top:9px;font-size:16px;line-height:1.45; }
+    .objective-head.compact .start-card { padding:18px; }
+    .objective-head.compact .start-card p { margin-bottom:12px; }
+    .objective-reference { margin-top:13px;padding:0 18px;border-radius:20px; }
+    .objective-reference summary { list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;cursor:pointer;color:#315d7e; }
+    .objective-reference summary::-webkit-details-marker { display:none; }
+    .objective-reference summary:after { content:"＋";color:#5485a5;font-size:20px;font-weight:800; }
+    .objective-reference[open] summary:after { content:"−"; }
+    .guide-summary-title { font-size:15px;font-weight:900; }
+    .guide-summary-note { margin-left:auto;color:#8095a5;font-size:12px; }
+    .objective-reference .section-grid { margin-top:12px; }
+    .objective-reference .section-card { box-shadow:none; }
     .observe-intro { display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch; }
     .observe-callout { border-radius:18px;background:#f2f8fc;border:1px solid #dbe9f2;padding:18px;color:#57738a;line-height:1.55; }
     .observe-prompts { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px; }
@@ -232,20 +246,21 @@
     <main class="layout">
       <section class="screen active" id="objectiveScreen" aria-labelledby="objectiveTitle">
         <div class="objective-switch"><button id="openFeelings">Explore Objective 1a · Manages Feelings&nbsp; →</button></div>
-        <div class="panel objective-head">
+        <div class="panel objective-head compact">
           <div>
             <p class="eyebrow">Gross Motor · Objective 4</p>
             <h1 id="objectiveTitle">Demonstrates Traveling Skills</h1>
             <p class="subtitle">Moves from place to place with increasing coordination, control, and purpose.</p>
-            <p class="grow-line">Move&nbsp; · &nbsp;Explore&nbsp; · &nbsp;Grow</p>
           </div>
           <div class="start-card">
-            <h3>Ready for a movement check?</h3>
-            <p>Invite the child to try three playful movement prompts. Watch how they move; you’ll record what you observe afterward.</p>
+            <h3>Ready to begin?</h3>
+            <p>Three playful prompts on the SmartBoard, followed by your observation.</p>
             <button class="primary wide" id="startCheck">Start Movement Check&nbsp; →</button>
           </div>
         </div>
-        <div class="section-grid">
+        <details class="panel objective-reference">
+          <summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary>
+          <div class="section-grid">
           <section class="panel section-card">
             <h2 class="section-title"><span class="icon">↗</span> Developmental progression</h2>
             <div class="level-list" id="progression"></div>
@@ -261,26 +276,27 @@
             </div>
             <p class="small-note">Look across free play, recess, PE, and transitions. Consider consistency over time; use the movement check as one helpful observation opportunity.</p>
           </aside>
-        </div>
-        <div class="footer-action"><button class="text-button" id="skipToRecord">Open teacher recording view&nbsp; →</button></div>
+          </div>
+        </details>
       </section>
 
       <section class="screen" id="feelingsObjectiveScreen" aria-labelledby="feelingsTitle">
         <div class="objective-switch"><button id="backToTraveling">← Objective 4 · Traveling Skills</button></div>
-        <div class="panel objective-head">
+        <div class="panel objective-head compact">
           <div>
             <p class="eyebrow">Social-Emotional · Objective 1a</p>
             <h1 id="feelingsTitle">Manages Feelings</h1>
             <p class="subtitle">With growing independence, the child manages feelings and uses strategies to feel safe, calm, and ready to take part.</p>
-            <p class="grow-line">Notice&nbsp; · &nbsp;Support&nbsp; · &nbsp;Grow</p>
           </div>
           <div class="start-card">
-            <h3>Ready to reflect on an observation?</h3>
-            <p>This objective is best understood through real classroom moments. Use the guide to notice how the child responds when feelings become strong.</p>
-            <button class="primary wide" id="startFeelingsGuide">Open Observation Guide&nbsp; →</button>
+            <h3>Ready to begin?</h3>
+            <p>Think about real classroom moments. No child task is needed for this objective.</p>
+            <button class="primary wide" id="startFeelingsGuide">Start Guided Check&nbsp; →</button>
           </div>
         </div>
-        <div class="section-grid">
+        <details class="panel objective-reference">
+          <summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary>
+          <div class="section-grid">
           <section class="panel section-card">
             <h2 class="section-title"><span class="icon">↗</span> Developmental progression</h2>
             <div class="level-list" id="feelingsProgression"></div>
@@ -295,19 +311,18 @@
             </div>
             <p class="small-note">Look for the child’s own response, what support helped, and whether the skill appears across routines and time. A SmartBoard task is not appropriate for this objective.</p>
           </aside>
-        </div>
-        <div class="section-grid" style="margin-top:18px">
+          </div>
+          <div class="section-grid">
           <section class="panel section-card">
             <h2 class="section-title"><span class="icon">⌕</span> How to collect evidence</h2>
-            <p class="subtitle" style="font-size:15px">Observe authentic moments such as waiting, transitions, a change in plan, or a minor frustration. Write what happened just before, what the child did, and what support was needed. Use notes, a brief voice note, or a photo/video when appropriate.</p>
+            <p class="subtitle" style="font-size:15px">Observe authentic moments such as waiting, transitions, a change in plan, or a minor frustration. Notice what happened just before, what the child did, and what support was needed. Add notes or media only when useful.</p>
           </section>
           <section class="panel section-card">
             <h2 class="section-title"><span class="icon">✧</span> Quick reflection</h2>
             <p class="small-note">What feelings or situations are easiest for the child to manage? What support helps them recover or rejoin play?</p>
-            <button class="secondary" id="recordFeelingsNow">＋ Add an observation</button>
           </section>
-        </div>
-        <div class="footer-action"><button class="text-button" id="skipFeelingsGuide">Open teacher recording view&nbsp; →</button></div>
+          </div>
+        </details>
       </section>
 
       <section class="screen" id="feelingsGuideScreen" aria-labelledby="feelingsGuideTitle">
@@ -590,7 +605,6 @@
         pairRole=null;pairSessionId=null;pairToken=null;show('objectiveScreen');
       }else openRecording();
     });
-    document.getElementById('skipToRecord').addEventListener('click',openRecording);
     document.getElementById('backToObjective').addEventListener('click',()=>{document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';show('objectiveScreen')});
     document.querySelectorAll('[data-rating]').forEach(button=>button.addEventListener('click',()=>{const i=Number(button.dataset.rating);ratings[i]=Number(button.dataset.value);renderRatingSelections();renderSuggestion()}));
     document.querySelectorAll('[data-consistency]').forEach(button=>button.addEventListener('click',()=>{consistency=button.dataset.consistency;document.querySelectorAll('[data-consistency]').forEach(b=>b.classList.toggle('selected',b===button));if(!userChangedLevel)renderSuggestion()}));
@@ -689,8 +703,6 @@
     document.getElementById('startFeelingsGuide').addEventListener('click',()=>show('feelingsGuideScreen'));
     document.getElementById('guideBack').addEventListener('click',()=>show('feelingsObjectiveScreen'));
     document.getElementById('guideToRecord').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsQuestion()});
-    document.getElementById('recordFeelingsNow').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsQuestion()});
-    document.getElementById('skipFeelingsGuide').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsQuestion()});
     document.getElementById('guideBack').setAttribute('aria-label','Return to Objective 1a');
     document.getElementById('feelingsBack').addEventListener('click',()=>show('feelingsObjectiveScreen'));
     document.getElementById('finishFeelings').addEventListener('click',()=>toast('Teacher review complete. Long-term child records are not set up yet.'));

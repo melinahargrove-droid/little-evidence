@@ -11,7 +11,8 @@ Open the published GitHub Pages URL on the SmartBoard. Select **Start Movement C
 - An Objective 1a · Manages Feelings teacher observation flow alongside Objective 4
 - Objective 1a observation guide for authentic classroom moments; it deliberately has no child-facing SmartBoard task
 - Objective 1a tap-through teacher interview with an adaptive behavior-specific follow-up, frequency question, optional notes/evidence controls, an editable suggested continuum point, next-level evidence, and family-friendly wording
-- Objective page with the saved Objective 4 progression and Level 6 examples
+- Compact teacher objective home screens with expandable progression, examples, and evidence guidance
+- Objective 4 page with the saved progression and Level 6 examples
 - One-at-a-time, full-screen child movement prompts with large text, a visual, an optional spoken direction, and progress dots
 - A cheerful completion screen followed by the separate teacher recording view
 - Live SmartBoard and iPad pairing through a short-lived Supabase session
