@@ -37,6 +37,24 @@
     .layout { max-width:1480px; margin:auto; }
     .screen { display:none; animation:appear .24s ease-out; }
     .screen.active { display:block; }
+    .app.child-mode { width:100%;max-width:none;min-height:100vh;padding:0;background:#f3f9fd; }
+    .app.child-mode .topbar { display:none; }
+    .app.child-mode .layout { width:100%;max-width:none;margin:0; }
+    .app.child-mode .move-screen { width:100%;height:100vh;height:100dvh;min-height:100dvh;margin:0;border:0;border-radius:0;box-shadow:none;padding:clamp(18px,3vw,42px); }
+    .app.child-mode .move-inner { width:min(100%,1200px); }
+    .app.child-mode .step-label { display:inline-flex;align-items:center;gap:12px;margin:0 auto 18px;padding:10px 18px;border:1px solid #d6eafa;border-radius:999px;background:#ffffffd9;font-size:clamp(14px,1.5vw,20px);letter-spacing:.02em;text-transform:none;color:#285f8c; }
+    .app.child-mode .move-screen h1 { font-size:clamp(34px,5vw,64px); }
+    .app.child-mode .move-screen .direction { margin:12px 0 20px;color:var(--navy);font-size:clamp(38px,6vw,76px);line-height:1.12; }
+    .app.child-mode .hear-direction { display:inline-flex;align-items:center;gap:9px;margin:0 auto 10px;border:1px solid #d5e8f5;border-radius:999px;padding:10px 17px;background:#fff;color:#346e99;font-size:clamp(15px,1.6vw,20px);font-weight:800; }
+    .app.child-mode .hear-direction:hover { background:#edf7fd; }
+    .app.child-mode .illustration { width:min(76vw,900px);height:min(37vh,350px);min-height:190px;margin:0 auto 16px;border:0;border-radius:36px;background:linear-gradient(145deg,#f0f8fc,#f7faf4); }
+    .app.child-mode .illustration svg { max-height:100%; }
+    .app.child-mode .move-tip { margin:0 0 20px;font-size:clamp(16px,1.8vw,22px); }
+    .app.child-mode .move-next { min-width:220px;padding:17px 34px;border-radius:22px;font-size:clamp(20px,2vw,26px); }
+    .app.child-mode .progress { margin-top:18px; }
+    .app.child-mode .progress i { width:14px;height:14px; }
+    .app.child-mode .celebration .move-inner { max-width:900px; }
+    @media(max-width:700px) { .app.child-mode .illustration { width:100%;height:30vh;min-height:165px; } }
     @keyframes appear { from { opacity:.35; transform:translateY(5px) } to { opacity:1; transform:translateY(0) } }
     .panel { background:rgba(255,255,255,.93); border:1px solid #dce8f0; border-radius:26px; box-shadow:var(--shadow); }
     .objective-head { padding:clamp(22px,3vw,38px); display:grid; grid-template-columns:minmax(0,1.3fr) minmax(270px,.7fr); gap:28px; align-items:center; overflow:hidden; position:relative; }
@@ -189,10 +207,11 @@
         <div class="move-inner">
           <p class="step-label" id="stepLabel">Movement check · 1 of 3</p>
           <h1 id="moveTitle">Let’s move!</h1>
+          <button class="hear-direction" id="hearDirection" type="button" aria-label="Hear the movement direction again">🔊 Hear it again</button>
           <p class="direction" id="movePrompt">Run to the blue cone!</p>
           <div class="illustration" id="movementArt" aria-hidden="true"></div>
           <p class="move-tip">You can go at your own pace. Ready?</p>
-          <button class="move-next" id="moveNext">I’m ready!&nbsp; →</button>
+          <button class="move-next" id="moveNext">I did it!&nbsp; →</button>
           <div class="progress" id="progressDots" aria-hidden="true"><i class="done"></i><i></i><i></i></div>
         </div>
       </section>
@@ -318,14 +337,15 @@
       return `<svg viewBox="0 0 700 300" role="img" aria-label="Watercolor illustration of a child moving through a soft green play space"><defs><filter id="soft"><feGaussianBlur stdDeviation="7"/></filter></defs><ellipse cx="176" cy="78" rx="125" ry="45" fill="#d8ebf2" opacity=".55" filter="url(#soft)"/><ellipse cx="536" cy="78" rx="99" ry="39" fill="#e6efda" opacity=".7" filter="url(#soft)"/><circle cx="94" cy="52" r="4" fill="#e5be69"/><circle cx="607" cy="100" r="5" fill="#b9d2e0"/>${scene}</svg>`;
     }
     function show(id){document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-    function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Movement check · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.getElementById('moveNext').textContent=promptIndex===prompts.length-1?'I did it!  ✓':'I’m ready!  →';document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
-    function start(){promptIndex=0;movementCompleted=false;renderPrompt();show('movementScreen')}
+    function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Movement check · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.getElementById('moveNext').textContent=promptIndex===prompts.length-1?'I did it!  ✓':'I did it!  →';document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
+    document.getElementById('hearDirection').addEventListener('click',()=>{const p=prompts[promptIndex];if('speechSynthesis' in window){window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(p.text);utterance.rate=.88;window.speechSynthesis.speak(utterance)}else{toast('Ask a grown-up to read the direction aloud.')}});
+    function start(){promptIndex=0;movementCompleted=false;document.querySelector('.app').classList.add('child-mode');renderPrompt();show('movementScreen')}
     document.getElementById('startCheck').addEventListener('click',start);
     document.getElementById('moveNext').addEventListener('click',()=>{if(promptIndex<prompts.length-1){promptIndex++;renderPrompt()}else{movementCompleted=true;document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';show('completeScreen')}});
-    function openRecording(){document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';document.getElementById('recordBadge').innerHTML=movementCompleted?'<span>●</span> Movement Check · 3 prompts completed':'<span>●</span> Teacher review · movement check not run';show('recordScreen');renderSuggestion()}
+    function openRecording(){document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';document.getElementById('recordBadge').innerHTML=movementCompleted?'<span>●</span> Movement Check · 3 prompts completed':'<span>●</span> Teacher review · movement check not run';show('recordScreen');renderSuggestion()}
     document.getElementById('toRecording').addEventListener('click',openRecording);
     document.getElementById('skipToRecord').addEventListener('click',openRecording);
-    document.getElementById('backToObjective').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';show('objectiveScreen')});
+    document.getElementById('backToObjective').addEventListener('click',()=>{document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';show('objectiveScreen')});
     document.querySelectorAll('[data-rating]').forEach(button=>button.addEventListener('click',()=>{const i=Number(button.dataset.rating);ratings[i]=Number(button.dataset.value);document.querySelectorAll(`[data-rating="${i}"]`).forEach(b=>b.classList.toggle('selected',b===button));renderSuggestion()}));
     document.querySelectorAll('[data-consistency]').forEach(button=>button.addEventListener('click',()=>{consistency=button.dataset.consistency;document.querySelectorAll('[data-consistency]').forEach(b=>b.classList.toggle('selected',b===button));if(!userChangedLevel)renderSuggestion()}));
     document.getElementById('emergingNext').addEventListener('click',event=>{emergingNext=!emergingNext;event.currentTarget.classList.toggle('selected',emergingNext);userChangedLevel=false;renderSuggestion()});
