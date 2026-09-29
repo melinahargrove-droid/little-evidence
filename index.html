@@ -436,18 +436,8 @@
           <button class="hear-direction" id="hearDirection" type="button" aria-label="Hear the movement direction again">🔊 Hear it again</button>
           <p class="direction" id="movePrompt">Run to the blue cone!</p>
           <div class="illustration" id="movementArt" aria-hidden="true"></div>
-          <p class="move-tip">You can go at your own pace. Ready?</p>
-          <button class="move-next" id="moveNext">I did it!&nbsp; →</button>
+          <p class="move-tip">Your teacher will move to the next prompt when you are ready.</p>
           <div class="progress" id="progressDots" aria-hidden="true"><i class="done"></i><i></i><i></i></div>
-        </div>
-        <div class="teacher-quick-access">
-          <button class="teacher-quick-toggle" id="teacherQuickToggle" type="button" aria-expanded="false" aria-controls="teacherQuickPanel">Teacher Quick Mark</button>
-          <div class="teacher-quick-panel" id="teacherQuickPanel" role="dialog" aria-label="Teacher movement observation" hidden>
-            <div class="quick-panel-heading"><span>Quick movement observation</span><button class="quick-panel-close" id="closeQuickMark" type="button" aria-label="Close observation panel">×</button></div>
-            <p class="quick-prompt" id="quickPromptText">What did you observe?</p>
-            <div class="quick-rating-options" id="quickRatingOptions"></div>
-            <p class="quick-helper">This saves to the teacher review. No GOLD level is shown here.</p>
-          </div>
         </div>
       </section>
 
@@ -552,12 +542,6 @@
       card.innerHTML=`<p>${index+1}. ${prompt.text}</p><div class="rating-options">${ratingNames.map((name,option)=>`<button class="choice" data-rating="${index}" data-value="${option}">${name}</button>`).join('')}</div>`;
       ratingList.append(card);
     });
-    const quickRatingOptions=document.getElementById('quickRatingOptions');
-    ratingNames.forEach((name,option)=>{
-      const button=document.createElement('button');button.className='quick-rating';button.textContent=name;button.dataset.quickRating=option;
-      button.addEventListener('click',()=>{ratings[promptIndex]=option;renderRatingSelections();renderQuickMark();closeQuickMark()});
-      quickRatingOptions.append(button);
-    });
     const anchorOptions=document.getElementById('anchorOptions');
     levels.forEach(level=>{
       const button=document.createElement('button');button.className='anchor-choice';button.dataset.anchor=level.n;
@@ -579,24 +563,11 @@
       return `<svg viewBox="0 0 700 300" role="img" aria-label="Watercolor illustration of a child moving through a soft green play space"><defs><filter id="soft"><feGaussianBlur stdDeviation="7"/></filter></defs><ellipse cx="176" cy="78" rx="125" ry="45" fill="#d8ebf2" opacity=".55" filter="url(#soft)"/><ellipse cx="536" cy="78" rx="99" ry="39" fill="#e6efda" opacity=".7" filter="url(#soft)"/><circle cx="94" cy="52" r="4" fill="#e5be69"/><circle cx="607" cy="100" r="5" fill="#b9d2e0"/>${scene}</svg>`;
     }
     function show(id){document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-    function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Movement check · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('quickPromptText').textContent=`${promptIndex+1}. ${p.text} How did the child do?`;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.getElementById('moveNext').textContent=promptIndex===prompts.length-1?'I did it!  ✓':'I did it!  →';document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));renderQuickMark();}
+    function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Movement check · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
     function renderRatingSelections(){document.querySelectorAll('[data-rating]').forEach(button=>button.classList.toggle('selected',ratings[Number(button.dataset.rating)]===Number(button.dataset.value)));}
-    function renderQuickMark(){document.querySelectorAll('[data-quick-rating]').forEach(button=>button.classList.toggle('selected',ratings[promptIndex]===Number(button.dataset.quickRating)));}
-    function openQuickMark(){document.getElementById('teacherQuickPanel').hidden=false;document.getElementById('teacherQuickToggle').setAttribute('aria-expanded','true');renderQuickMark()}
-    function closeQuickMark(){document.getElementById('teacherQuickPanel').hidden=true;document.getElementById('teacherQuickToggle').setAttribute('aria-expanded','false')}
-    document.getElementById('teacherQuickToggle').addEventListener('click',()=>document.getElementById('teacherQuickPanel').hidden?openQuickMark():closeQuickMark());
-    document.getElementById('closeQuickMark').addEventListener('click',closeQuickMark);
     document.getElementById('hearDirection').addEventListener('click',()=>{const p=prompts[promptIndex];if('speechSynthesis' in window){window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(p.text);utterance.rate=.88;window.speechSynthesis.speak(utterance)}else{toast('Ask a grown-up to read the direction aloud.')}});
     function start(){promptIndex=0;movementCompleted=false;document.querySelector('.app').classList.add('child-mode');renderPrompt();show('movementScreen')}
     document.getElementById('startCheck').addEventListener('click',startPairedSession);
-    document.getElementById('moveNext').addEventListener('click',async()=>{
-      if(pairRole==='display'){
-        const button=document.getElementById('moveNext');button.disabled=true;button.textContent='Nice job! Waiting for your teacher…';
-        try{await pairApi({action:'done',id:pairSessionId,role:'display',token:pairToken})}catch(error){button.disabled=false;toast(error.message)}
-        return;
-      }
-      if(promptIndex<prompts.length-1){promptIndex++;renderPrompt()}else{movementCompleted=true;document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';show('completeScreen')}
-    });
     function openRecording(){document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';document.getElementById('recordBadge').innerHTML=movementCompleted?'<span>●</span> Movement Check · 3 prompts completed':'<span>●</span> Teacher review · movement check not run';show('recordScreen');renderSuggestion()}
     document.getElementById('toRecording').addEventListener('click',()=>{
       if(pairRole==='display'){
@@ -795,10 +766,8 @@
         if(state.status==='active'){
           document.querySelector('.app').classList.add('child-mode');document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';
           if(lastDisplayStatus!=='active'||promptIndex!==state.prompt_index){promptIndex=state.prompt_index;renderPrompt();show('movementScreen')}
-          document.getElementById('moveNext').disabled=!!state.display_done;
-          document.getElementById('moveNext').textContent=state.display_done?'Nice job! Waiting for your teacher…':'I did it!  →';
         }else if(state.status==='done'){
-          document.querySelector('.app').classList.add('child-mode');document.getElementById('moveNext').disabled=true;document.getElementById('moveNext').textContent='Nice job! Waiting for your teacher…';
+          document.querySelector('.app').classList.add('child-mode');
         }else if(state.status==='complete'){
           movementCompleted=true;document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';document.querySelector('.app').classList.add('child-mode');if(lastDisplayStatus!=='complete')show('completeScreen');
         }
@@ -812,16 +781,15 @@
     function showControllerState(state){
       document.getElementById('controllerConnection').textContent='● Connected to the SmartBoard';
       document.getElementById('controllerLobby').classList.toggle('hidden',state.status!=='waiting');
-      document.getElementById('controllerActive').classList.toggle('hidden',!['active','done'].includes(state.status));
+      document.getElementById('controllerActive').classList.toggle('hidden',state.status!=='active');
       document.getElementById('controllerDone').classList.toggle('hidden',state.status!=='complete');
-      if(['active','done'].includes(state.status)){
+      if(state.status==='active'){
         promptIndex=state.prompt_index;document.getElementById('controllerStep').textContent=`Movement ${promptIndex+1} of ${prompts.length}`;
         document.getElementById('controllerPrompt').textContent=prompts[promptIndex].text;
-        const done=state.status==='done';document.getElementById('controllerWait').dataset.childDone=done?'true':'';
-        document.getElementById('controllerWait').textContent=done?'The child tried this movement. Choose your quick observation.':'Waiting for the child to try the movement on the SmartBoard.';
-        document.getElementById('controllerObserveLabel').textContent=done?'What did you observe?':'Observation choices unlock when the child is done.';
-        document.querySelectorAll('.controller-rating').forEach(button=>{button.disabled=!done;button.classList.toggle('selected',controllerRating!==null&&button.textContent===ratingNames[controllerRating])});
-        const next=document.getElementById('controllerAdvance');next.textContent=promptIndex===prompts.length-1?'Complete movement check  ✓':'Next movement  →';next.disabled=!done||controllerRating===null;
+        document.getElementById('controllerWait').textContent='Watch the child try the movement. When you are ready, choose your observation and tap Next movement.';
+        document.getElementById('controllerObserveLabel').textContent='What did you observe?';
+        document.querySelectorAll('.controller-rating').forEach(button=>{button.disabled=false;button.classList.toggle('selected',controllerRating!==null&&button.textContent===ratingNames[controllerRating])});
+        const next=document.getElementById('controllerAdvance');next.textContent=promptIndex===prompts.length-1?'Complete movement check  ✓':'Next movement  →';next.disabled=controllerRating===null;
       }
       if(state.status==='complete'){movementCompleted=true;}
     }
