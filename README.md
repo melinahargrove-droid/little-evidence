@@ -18,6 +18,8 @@ Open the published GitHub Pages URL on the SmartBoard. Select **Start Movement C
 
 The child prompts do not score physical performance. Prompt ratings are supporting notes only and stay in the teacher's browser. The pairing service stores only a random temporary session ID, hashed pairing tokens, the current prompt, and workflow status; sessions expire after 45 minutes. It stores no child name, notes, photo, video, checkpoint level, or teacher rating. The level suggestion follows the teacher-selected highest indicator; marking the next even-numbered indicator as emerging suggests the in-between level. This interaction is a prototype, not a validated Teaching Strategies GOLD scoring rule. The teacher makes the final checkpoint decision in GOLD. Photo, video, and voice controls are placeholders.
 
+QR rendering is bundled locally with the MIT-licensed qrcode-generator 2.0.4 library so pairing does not depend on a third-party CDN. Its license is included in `vendor/qrcode-generator-LICENSE.txt`.
+
 ## Supabase setup
 
 The Edge Function source is in `supabase/functions/little-evidence-session/index.ts`. The Supabase project uses a private table with RLS enabled and no browser table access. The function is deployed with JWT verification disabled because it authenticates each request with separate, high-entropy teacher and SmartBoard pairing tokens. Only the publishable API key is embedded in the public page; the server secret remains inside Supabase.
