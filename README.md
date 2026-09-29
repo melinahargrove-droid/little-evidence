@@ -4,12 +4,13 @@ A standalone, browser-openable prototype for the Teaching Strategies GOLD Checkp
 
 ## Try it
 
-Open `index.html` in a modern browser. Select **Start Movement Check**, move through the three child-facing prompts, finish the child flow, then record teacher observations.
+Open `index.html` in a modern browser. Select **Start Movement Check** to switch to a full-screen child view. The child sees one movement prompt at a time, can hear the direction read aloud, and taps **I did it!** to continue. After the cheerful completion screen, the flow returns to the separate teacher recording view.
 
 ## Prototype scope
 
 - Objective page with the saved Objective 4 progression and Level 6 examples
-- Three full-screen movement prompts and a cheerful completion screen
+- One-at-a-time, full-screen child movement prompts with large text, a visual, an optional spoken direction, and progress dots
+- A cheerful completion screen followed by the separate teacher recording view
 - Teacher-selected observation ratings, consistency, notes, and evidence placeholders
 - Teacher-selected developmental indicators, an optional in-between-level suggestion when the next anchor is emerging, editable levels 1–12, next-level evidence, and a family-friendly summary
 
