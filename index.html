@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#edf6fc" />
-  <title>Little Evidence · Traveling Skills</title>
+  <title>Little Evidence · Checkpoint Companion</title>
   <style>
     :root {
       --navy: #173b66;
@@ -182,6 +182,23 @@
     .toast { position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#234e70;color:#fff;padding:12px 18px;border-radius:14px;box-shadow:var(--shadow);font-weight:700;transition:.2s;z-index:5; }
     .toast.show { opacity:1;transform:translate(-50%,0); }
     .hidden { display:none !important; }
+    .objective-switch { display:flex;justify-content:flex-end;margin:0 0 12px; }
+    .objective-switch button { border:1px solid #bfd6e7;background:#fff;color:#376b91;border-radius:999px;padding:10px 16px;font-weight:800;box-shadow:0 4px 14px #315f7c12; }
+    .objective-switch button:hover { background:#f0f8fd; }
+    .observe-intro { display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch; }
+    .observe-callout { border-radius:18px;background:#f2f8fc;border:1px solid #dbe9f2;padding:18px;color:#57738a;line-height:1.55; }
+    .observe-prompts { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px; }
+    .observe-prompt { background:#fff;border:1px solid #dce9f1;border-radius:16px;padding:16px;min-height:150px; }
+    .observe-prompt .prompt-number { color:#6a9bbd;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase; }
+    .observe-prompt h3 { color:#2d5676;margin:8px 0;font-size:17px; }
+    .observe-prompt p { color:#71879a;font-size:14px;line-height:1.45;margin:0; }
+    .observe-actions { display:flex;justify-content:flex-end;gap:10px;margin-top:20px; }
+    .anchor-grid-1a { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+    .anchor-chip-1a { border:1px solid #d7e5ee;border-radius:14px;background:#fff;padding:12px 14px;text-align:left;color:#49677f;line-height:1.4; }
+    .anchor-chip-1a strong { display:block;color:#2f5e81;margin-bottom:4px; }
+    .anchor-chip-1a.selected { border-color:#548ab1;box-shadow:0 0 0 2px #c8e0f0 inset;background:#f2f9fd; }
+    .short-strength { background:#eef6f1;border:1px solid #d8e9dd;color:#52735f;border-radius:16px;padding:16px;line-height:1.5; }
+    @media(max-width:760px){.observe-intro,.observe-prompts{grid-template-columns:1fr}.anchor-grid-1a{grid-template-columns:1fr}.objective-switch{justify-content:stretch}.objective-switch button{width:100%}}
     @media(max-width:920px) { .objective-head,.section-grid,.record-grid { grid-template-columns:1fr; } .start-card { justify-self:stretch; width:100%; } .record-side { grid-template-columns:1fr; } }
     @media(max-width:600px) { .app{padding:16px 12px 26px}.topbar{margin-bottom:14px}.objective-head{padding:20px;border-radius:20px}.section-card{padding:18px}.level-list{grid-template-columns:1fr}.mode-tag{font-size:10px;padding:7px 9px}.move-screen{padding:14px;min-height:calc(100vh - 90px)}.illustration{height:220px}.illustration svg{max-height:220px}.record-head{padding:21px;align-items:flex-start;flex-direction:column}.consistency{grid-template-columns:1fr}.select-levels{grid-template-columns:repeat(6,1fr)}.bottom-actions{align-items:stretch;flex-direction:column-reverse}.bottom-actions .primary{width:100%} }
   </style>
@@ -198,6 +215,7 @@
 
     <main class="layout">
       <section class="screen active" id="objectiveScreen" aria-labelledby="objectiveTitle">
+        <div class="objective-switch"><button id="openFeelings">Explore Objective 1a · Manages Feelings&nbsp; →</button></div>
         <div class="panel objective-head">
           <div>
             <p class="eyebrow">Gross Motor · Objective 4</p>
@@ -229,6 +247,119 @@
           </aside>
         </div>
         <div class="footer-action"><button class="text-button" id="skipToRecord">Open teacher recording view&nbsp; →</button></div>
+      </section>
+
+      <section class="screen" id="feelingsObjectiveScreen" aria-labelledby="feelingsTitle">
+        <div class="objective-switch"><button id="backToTraveling">← Objective 4 · Traveling Skills</button></div>
+        <div class="panel objective-head">
+          <div>
+            <p class="eyebrow">Social-Emotional · Objective 1a</p>
+            <h1 id="feelingsTitle">Manages Feelings</h1>
+            <p class="subtitle">With growing independence, the child manages feelings and uses strategies to feel safe, calm, and ready to take part.</p>
+            <p class="grow-line">Notice&nbsp; · &nbsp;Support&nbsp; · &nbsp;Grow</p>
+          </div>
+          <div class="start-card">
+            <h3>Ready to reflect on an observation?</h3>
+            <p>This objective is best understood through real classroom moments. Use the guide to notice how the child responds when feelings become strong.</p>
+            <button class="primary wide" id="startFeelingsGuide">Open Observation Guide&nbsp; →</button>
+          </div>
+        </div>
+        <div class="section-grid">
+          <section class="panel section-card">
+            <h2 class="section-title"><span class="icon">↗</span> Developmental progression</h2>
+            <div class="level-list" id="feelingsProgression"></div>
+          </section>
+          <aside class="panel section-card">
+            <h2 class="section-title"><span class="icon">♡</span> Examples around Level 6</h2>
+            <div class="examples">
+              <div class="example"><span class="checkmark">✓</span><span>Waits briefly for a turn or a wanted item with adult reassurance.</span></div>
+              <div class="example"><span class="checkmark">✓</span><span>Adjusts when a plan changes or a preferred activity ends.</span></div>
+              <div class="example"><span class="checkmark">✓</span><span>Tries another plan after a small disappointment.</span></div>
+              <div class="example"><span class="checkmark">✓</span><span>Accepts a familiar calming reminder and returns to play.</span></div>
+            </div>
+            <p class="small-note">Look for the child’s own response, what support helped, and whether the skill appears across routines and time. A SmartBoard task is not appropriate for this objective.</p>
+          </aside>
+        </div>
+        <div class="section-grid" style="margin-top:18px">
+          <section class="panel section-card">
+            <h2 class="section-title"><span class="icon">⌕</span> How to collect evidence</h2>
+            <p class="subtitle" style="font-size:15px">Observe authentic moments such as waiting, transitions, a change in plan, or a minor frustration. Write what happened just before, what the child did, and what support was needed. Use notes, a brief voice note, or a photo/video when appropriate.</p>
+          </section>
+          <section class="panel section-card">
+            <h2 class="section-title"><span class="icon">✧</span> Quick reflection</h2>
+            <p class="small-note">What feelings or situations are easiest for the child to manage? What support helps them recover or rejoin play?</p>
+            <button class="secondary" id="recordFeelingsNow">＋ Add an observation</button>
+          </section>
+        </div>
+        <div class="footer-action"><button class="text-button" id="skipFeelingsGuide">Open teacher recording view&nbsp; →</button></div>
+      </section>
+
+      <section class="screen" id="feelingsGuideScreen" aria-labelledby="feelingsGuideTitle">
+        <div class="panel section-card">
+          <p class="eyebrow">Teacher observation guide · Objective 1a</p>
+          <h1 id="feelingsGuideTitle">Notice feelings in real moments</h1>
+          <div class="observe-intro">
+            <p class="subtitle">This is a teacher-facing guide. Do not create distress or ask the child to perform a feelings task. Notice naturally occurring moments and respond with the support the child needs.</p>
+            <div class="observe-callout"><strong>Keep it specific:</strong> Capture the situation, the child’s action or words, the support offered, and what happened next. One moment is a starting point; use evidence across days and settings for a checkpoint.</div>
+          </div>
+          <div class="observe-prompts">
+            <article class="observe-prompt"><span class="prompt-number">Look for · 1</span><h3>When something is disappointing</h3><p>For example, a toy is unavailable or a turn is delayed. Does the child seek comfort, wait, adjust, or try another plan?</p></article>
+            <article class="observe-prompt"><span class="prompt-number">Look for · 2</span><h3>During a transition</h3><p>Notice what helps the child shift away from a preferred activity and how they communicate their feelings.</p></article>
+            <article class="observe-prompt"><span class="prompt-number">Look for · 3</span><h3>After a strong feeling</h3><p>Watch whether the child accepts support, uses a calming strategy, and returns to play or a routine.</p></article>
+          </div>
+          <div class="observe-actions"><button class="secondary" id="guideBack">← Back to objective</button><button class="primary" id="guideToRecord">Record an observation&nbsp; →</button></div>
+        </div>
+      </section>
+
+      <section class="screen" id="feelingsRecordScreen" aria-labelledby="feelingsRecordTitle">
+        <div class="panel record-head">
+          <div><p class="eyebrow">Objective 1a · Teacher recording</p><h1 id="feelingsRecordTitle">Manages Feelings</h1><p>Use this reflection with your everyday observations. The selected indicators support a suggestion; you make the checkpoint decision.</p></div>
+          <span class="badge"><span>●</span> Teacher observation · no child task</span>
+        </div>
+        <div class="record-grid">
+          <div class="record-main">
+            <section class="panel section-card">
+              <h2 class="section-title"><span class="icon">◎</span> What did you observe?</h2>
+              <p class="small-note" style="margin:-7px 0 14px">Select the developmental indicators supported by your observations. Choose only what you have seen; the system cannot observe feelings for you.</p>
+              <div class="anchor-grid-1a" id="feelingsAnchors"></div>
+            </section>
+            <section class="panel section-card">
+              <h2 class="section-title"><span class="icon">✎</span> Quick note & evidence</h2>
+              <label class="field-label" for="feelingsNotes">What was happening, and what did the child do next?</label>
+              <textarea id="feelingsNotes" placeholder="During ____, the child ____. They needed / used ____. Then they ____. "></textarea>
+              <div class="evidence-tools"><button class="secondary" data-feelings-evidence="Photo">＋ Photo</button><button class="secondary" data-feelings-evidence="Video">＋ Video</button><button class="secondary" data-feelings-evidence="Voice note">＋ Voice note</button></div>
+              <p class="small-note" id="feelingsEvidenceStatus" style="margin-bottom:0">Evidence attachments are visual prototype controls.</p>
+            </section>
+            <section class="panel section-card">
+              <h2 class="section-title"><span class="icon">⌕</span> Adaptive reflection</h2>
+              <p class="small-note" id="feelingsQuestion">What support helped the child manage the feeling and return to the activity?</p>
+              <div class="consistency" id="feelingsSupportChoices">
+                <button class="choice" data-support="adult">Adult comfort or co-regulation</button>
+                <button class="choice" data-support="reminder">A reminder or visual cue</button>
+                <button class="choice" data-support="strategy">Child used a strategy</button>
+                <button class="choice" data-support="independent">No extra support needed</button>
+              </div>
+            </section>
+          </div>
+          <aside class="record-side">
+            <section class="panel section-card">
+              <h2 class="section-title"><span class="icon">✧</span> Checkpoint support</h2>
+              <div class="suggest-box">
+                <div class="suggest-kicker">Prototype suggestion · teacher decides</div>
+                <div class="suggested" id="feelingsSuggested">Select observed indicators to see a suggested checkpoint level.</div>
+                <p class="suggest-text" id="feelingsRationale">Use authentic observations across play and time. No child-facing task is used for this objective.</p>
+                <button class="choice emerging" id="feelingsEmerging">＋ Beginning to show parts of the next indicator</button>
+                <div class="select-levels" id="feelingsLevelPicks" aria-label="Select or change checkpoint level"></div>
+                <p class="level-help">Tap a level to accept or change the suggested checkpoint.</p>
+              </div>
+              <div style="margin-top:18px"><label class="field-label">How often have you seen these skills?</label><div class="consistency" id="feelingsConsistency"><button class="choice" data-fconsistency="one">One moment</button><button class="choice" data-fconsistency="several">More than once</button><button class="choice" data-fconsistency="consistent">Across settings / time</button></div></div>
+              <p class="small-note">Teaching Strategies GOLD remains the checkpoint record. Review the evidence and make the final level decision there.</p>
+            </section>
+            <section class="panel section-card"><h2 class="section-title"><span class="icon">↗</span> Evidence to look for next</h2><div class="next-evidence" id="feelingsNextEvidence"><strong>Next-level evidence</strong>Select an observed indicator to see what to notice next.</div></section>
+            <section class="parent-copy"><strong>Family-friendly strength & next step</strong><p id="feelingsParentCopy">Your child is building skills for managing big feelings. We’ll continue to offer comfort and simple strategies during everyday routines.</p></section>
+          </aside>
+        </div>
+        <div class="bottom-actions"><button class="text-button" id="feelingsBack">← Back to objective</button><button class="primary" id="finishFeelings">Finish teacher review&nbsp; ✓</button></div>
       </section>
 
       <section class="screen panel section-card" id="pairScreen" aria-labelledby="pairTitle">
@@ -477,6 +608,54 @@
     document.querySelectorAll('[data-evidence]').forEach(button=>button.addEventListener('click',()=>{const type=button.dataset.evidence;document.getElementById('evidenceStatus').textContent=`${type} capture is a placeholder in this prototype; attach supporting evidence in your usual record.`;toast(`${type} evidence capture is shown as a prototype control.`)}));
     document.getElementById('finishReview').addEventListener('click',()=>toast('Demo review complete. Long-term child records are not set up yet.'));
     function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500)}
+
+    // Objective 1a is intentionally teacher-observed. The child is never asked to
+    // demonstrate or discuss feelings for the prototype to make its suggestion.
+    const feelingsLevels=[
+      {n:2,text:'Calms with help from a familiar adult.'},
+      {n:4,text:'Seeks a familiar person or comfort item when upset.'},
+      {n:6,text:'Adjusts to disappointment, waits briefly, or tries another plan.'},
+      {n:8,text:'Expresses strong feelings in appropriate ways.'},
+      {n:10,text:'Intentionally uses strategies to manage feelings.'},
+      {n:12,text:'Anticipates a difficult moment and manages feelings with growing independence.'}
+    ];
+    const feelingsObserved=new Set();
+    let feelingsSuggested=null,feelingsSelected=null,feelingsConsistency=null,feelingsUserChanged=false,feelingsEmerging=false;
+    const feelingsProgression=document.getElementById('feelingsProgression');
+    feelingsLevels.forEach(level=>{const row=document.createElement('div');row.className='level-row';row.innerHTML=`<div class="level-n">${level.n}</div><div><strong>Level ${level.n}</strong><span>${level.text}</span></div>`;feelingsProgression.append(row)});
+    const feelingsAnchors=document.getElementById('feelingsAnchors');
+    feelingsLevels.forEach(level=>{const button=document.createElement('button');button.type='button';button.className='anchor-chip-1a';button.dataset.fanchor=level.n;button.innerHTML=`<strong>Level ${level.n}</strong>${level.text}`;button.addEventListener('click',()=>{if(feelingsObserved.has(level.n))feelingsObserved.delete(level.n);else feelingsObserved.add(level.n);button.classList.toggle('selected',feelingsObserved.has(level.n));feelingsUserChanged=false;renderFeelingsSuggestion()});feelingsAnchors.append(button)});
+    const feelingsLevelPicks=document.getElementById('feelingsLevelPicks');
+    for(let n=1;n<=12;n++){const button=document.createElement('button');button.type='button';button.className='level-pick';button.textContent=n;button.setAttribute('aria-label',`Select Objective 1a checkpoint level ${n}`);button.dataset.flevel=n;button.addEventListener('click',()=>{feelingsSelected=n;feelingsUserChanged=true;renderFeelingsSuggestion()});feelingsLevelPicks.append(button)}
+    document.getElementById('openFeelings').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsObjectiveScreen')});
+    document.getElementById('backToTraveling').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';show('objectiveScreen')});
+    document.getElementById('startFeelingsGuide').addEventListener('click',()=>show('feelingsGuideScreen'));
+    document.getElementById('guideBack').addEventListener('click',()=>show('feelingsObjectiveScreen'));
+    document.getElementById('guideToRecord').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsSuggestion()});
+    document.getElementById('recordFeelingsNow').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsSuggestion()});
+    document.getElementById('skipFeelingsGuide').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsSuggestion()});
+    document.getElementById('guideBack').setAttribute('aria-label','Return to Objective 1a');
+    document.getElementById('feelingsBack').addEventListener('click',()=>show('feelingsObjectiveScreen'));
+    document.getElementById('finishFeelings').addEventListener('click',()=>toast('Teacher review complete. Long-term child records are not set up yet.'));
+    document.getElementById('feelingsEmerging').addEventListener('click',event=>{feelingsEmerging=!feelingsEmerging;event.currentTarget.classList.toggle('selected',feelingsEmerging);feelingsUserChanged=false;renderFeelingsSuggestion()});
+    document.querySelectorAll('[data-fconsistency]').forEach(button=>button.addEventListener('click',()=>{feelingsConsistency=button.dataset.fconsistency;document.querySelectorAll('[data-fconsistency]').forEach(b=>b.classList.toggle('selected',b===button));if(!feelingsUserChanged)renderFeelingsSuggestion()}));
+    document.querySelectorAll('[data-support]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-support]').forEach(b=>b.classList.toggle('selected',b===button));const prompts={adult:'What did the child do after receiving comfort or co-regulation?',reminder:'After the reminder or visual cue, what did the child do next?',strategy:'What strategy did the child choose, and how did it help?',independent:'What did the child do independently to manage the feeling?'};document.getElementById('feelingsQuestion').textContent=prompts[button.dataset.support]}));
+    document.querySelectorAll('[data-feelings-evidence]').forEach(button=>button.addEventListener('click',()=>{const type=button.dataset.feelingsEvidence;document.getElementById('feelingsEvidenceStatus').textContent=`${type} capture is a placeholder in this prototype; attach supporting evidence in your usual record.`;toast(`${type} capture is shown as a prototype control.`)}));
+    function renderFeelingsSuggestion(){
+      const anchors=[...feelingsObserved].sort((a,b)=>a-b);const highest=anchors.length?anchors[anchors.length-1]:null;
+      feelingsSuggested=highest===null?null:(feelingsEmerging&&highest<12?highest+1:highest);if(!feelingsUserChanged)feelingsSelected=feelingsSuggested;
+      const exact=feelingsLevels.find(l=>l.n===feelingsSelected);const lower=[...feelingsLevels].reverse().find(l=>l.n<feelingsSelected);const upper=feelingsLevels.find(l=>l.n>feelingsSelected);
+      const desc=exact|| (feelingsSelected?{text:`Shows emerging parts of Level ${upper?.n||12} while building on Level ${lower?.n||2}.`}:null);
+      const suggestion=document.getElementById('feelingsSuggested');const rationale=document.getElementById('feelingsRationale');
+      if(desc){suggestion.textContent=`Level ${feelingsSelected} · ${desc.text}`;rationale.textContent=`Based on ${anchors.length} selected observed indicator${anchors.length===1?'':'s'}${feelingsEmerging?' and a teacher-marked emerging next skill':''}${feelingsConsistency?`; evidence noted “${({one:'one moment',several:'more than once',consistent:'across settings and time'})[feelingsConsistency]}”`:''}. Review your notes and decide whether this matches what you know about the child.`}
+      else{suggestion.textContent='Select observed indicators to see a suggested checkpoint level.';rationale.textContent='Use authentic observations across play and time. No child-facing task is used for this objective.'}
+      document.querySelectorAll('[data-flevel]').forEach(button=>{button.classList.toggle('selected',Number(button.dataset.flevel)===feelingsSelected);button.classList.toggle('system',Number(button.dataset.flevel)===feelingsSuggested)});
+      const next=feelingsSelected?feelingsLevels.find(level=>level.n>feelingsSelected):null;
+      document.getElementById('feelingsNextEvidence').innerHTML=!feelingsSelected?'<strong>Next-level evidence</strong>Select an observed indicator to see what to notice next.':next?`<strong>Look for evidence of Level ${next.n}</strong>${next.text} Notice whether the child begins to use this skill with less adult support and across different routines.`:'<strong>At the highest listed indicator</strong>Continue noticing how the child anticipates difficult moments and chooses a helpful strategy across routines.';
+      document.getElementById('feelingsParentCopy').textContent=feelingsParentLanguage(feelingsSelected);
+    }
+    function feelingsParentLanguage(n){if(!n)return 'Your child is building skills for managing big feelings. We’ll continue to offer comfort and simple strategies during everyday routines.';const lower=[...feelingsLevels].reverse().find(l=>l.n<=n)||feelingsLevels[0];const strengths={2:'is learning to feel calm with help from a trusted adult',4:'is beginning to seek a familiar person or comfort item when upset',6:'is practicing waiting, adjusting, or trying another plan when something feels hard',8:'is finding appropriate ways to express strong feelings',10:'is choosing strategies to help manage big feelings',12:'is beginning to anticipate challenging moments and use strategies independently'};const next=feelingsLevels.find(l=>l.n>n);const nextSteps={2:'accept comfort and return to play',4:'wait briefly or try another plan with support',6:'express strong feelings in safe, clear ways',8:'choose a helpful strategy when feelings grow',10:'use a strategy before a difficult moment becomes overwhelming',12:'keep using strategies in different routines'};return `Your child ${strengths[lower.n]}. Next, we’ll encourage them to ${nextSteps[next?.n]||'keep using helpful strategies in different routines'}.`;}
+    renderFeelingsSuggestion();
 
     const PAIR_API='https://pvgewltlxenguxmhiszm.supabase.co/functions/v1/little-evidence-session';
     const PAIR_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
