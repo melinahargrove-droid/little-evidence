@@ -118,6 +118,8 @@
     .small-note { color:#7990a3; font-size:12px; line-height:1.5; margin:15px 0 0; }
     .footer-action { display:flex; justify-content:flex-end; margin-top:20px; }
     .move-screen { min-height:min(740px,calc(100vh - 120px)); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden; padding:24px; }
+    .screen.move-screen { display:none; }
+    .screen.move-screen.active { display:flex; }
     .move-screen:before,.move-screen:after { content:"";position:absolute;border-radius:50%;filter:blur(1px);pointer-events:none; }
     .move-screen:before { width:390px;height:320px;left:-95px;bottom:-150px;background:#e3f0e8a6;transform:rotate(-24deg); }
     .move-screen:after { width:400px;height:280px;right:-145px;top:-90px;background:#e0eff9b3;transform:rotate(22deg); }
