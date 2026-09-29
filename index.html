@@ -361,7 +361,7 @@
             </section>
           </aside>
         </div>
-        <div class="bottom-actions"><button class="text-button" id="backToObjective">← Back to objective</button><button class="primary" id="finishReview">Save teacher review&nbsp; ✓</button></div>
+        <div class="bottom-actions"><button class="text-button" id="backToObjective">← Back to objective</button><button class="primary" id="finishReview">Finish teacher review&nbsp; ✓</button></div>
       </section>
     </main>
   </div>
@@ -475,7 +475,7 @@
     function parentLanguage(n){if(!n)return 'This child is building coordination and confidence as they move through play. We’ll keep offering playful ways to explore movement.';const lower=[...levels].reverse().find(l=>l.n<=n)||levels[0];const phrases={1:'is practicing reaching, rolling, and shifting their body while staying steady',2:'is moving to explore the space around them',4:'is trying different ways to move during play',6:'is moving from place to place with growing control',8:'is combining more challenging movements during play and games',10:'is changing speed, direction, and pathways as they move',12:'is coordinating several complex movements while traveling'};const next=levels.find(l=>l.n>n);return `Your child ${phrases[lower.n]||'is building confidence as they move'}. Next, we’ll encourage them to ${next?parentNext(next.n):'keep combining complex movements in active play'}.`;}
     function parentNext(n){const p={2:'move to explore nearby spaces',4:'try different ways to travel',6:'move from place to place with more control',8:'combine more challenging movements in play',10:'vary their speed, direction, and pathway',12:'coordinate several movements while traveling'};return p[n]||'keep exploring movement in play';}
     document.querySelectorAll('[data-evidence]').forEach(button=>button.addEventListener('click',()=>{const type=button.dataset.evidence;document.getElementById('evidenceStatus').textContent=`${type} capture is a placeholder in this prototype; attach supporting evidence in your usual record.`;toast(`${type} evidence capture is shown as a prototype control.`)}));
-    document.getElementById('finishReview').addEventListener('click',()=>toast('Teacher review saved for this demo session.'));
+    document.getElementById('finishReview').addEventListener('click',()=>toast('Demo review complete. Long-term child records are not set up yet.'));
     function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500)}
 
     const PAIR_API='https://pvgewltlxenguxmhiszm.supabase.co/functions/v1/little-evidence-session';
