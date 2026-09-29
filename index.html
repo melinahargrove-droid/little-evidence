@@ -197,6 +197,22 @@
     .anchor-chip-1a { border:1px solid #d7e5ee;border-radius:14px;background:#fff;padding:12px 14px;text-align:left;color:#49677f;line-height:1.4; }
     .anchor-chip-1a strong { display:block;color:#2f5e81;margin-bottom:4px; }
     .anchor-chip-1a.selected { border-color:#548ab1;box-shadow:0 0 0 2px #c8e0f0 inset;background:#f2f9fd; }
+    .guided-question { border:1px solid #dce9f1;background:#fbfdfe;border-radius:18px;padding:20px; }
+    .guided-question h3 { color:#2c5778;font-size:22px;line-height:1.3;margin:10px 0 7px; }
+    .question-progress { color:#6e8aa0;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase; }
+    .question-choices { display:grid;gap:9px;margin:18px 0; }
+    .question-choice { display:flex;gap:12px;align-items:flex-start;width:100%;border:1px solid #d9e6ee;background:#fff;border-radius:14px;padding:13px 15px;text-align:left;color:#4d687e;line-height:1.4; }
+    .question-choice:before { content:"";flex:0 0 20px;width:20px;height:20px;border:2px solid #adc3d2;border-radius:50%;margin-top:1px;background:#fff; }
+    .question-choice.selected { border-color:#5688ab;background:#f0f8fd;box-shadow:0 0 0 1px #5688ab inset; }
+    .question-choice.selected:before { border:6px solid #5688ab; }
+    .question-choice strong { display:block;color:#315d7e;margin-bottom:3px; }
+    .question-actions { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:15px; }
+    .question-actions .primary:disabled { opacity:.48;cursor:not-allowed; }
+    .answer-summary { display:grid;gap:9px; }
+    .answer-summary div { background:#f2f8fc;border-radius:12px;padding:11px 13px;color:#60798d;font-size:13px; }
+    .answer-summary strong { color:#315d7e;display:block;margin-bottom:3px; }
+    details.optional-note { margin:0 0 14px; }
+    details.optional-note summary { color:#557894;font-weight:800;cursor:pointer;margin-bottom:10px; }
     .short-strength { background:#eef6f1;border:1px solid #d8e9dd;color:#52735f;border-radius:16px;padding:16px;line-height:1.5; }
     @media(max-width:760px){.observe-intro,.observe-prompts{grid-template-columns:1fr}.anchor-grid-1a{grid-template-columns:1fr}.objective-switch{justify-content:stretch}.objective-switch button{width:100%}}
     @media(max-width:920px) { .objective-head,.section-grid,.record-grid { grid-template-columns:1fr; } .start-card { justify-self:stretch; width:100%; } .record-side { grid-template-columns:1fr; } }
@@ -319,26 +335,22 @@
         <div class="record-grid">
           <div class="record-main">
             <section class="panel section-card">
-              <h2 class="section-title"><span class="icon">◎</span> What did you observe?</h2>
-              <p class="small-note" style="margin:-7px 0 14px">Select the developmental indicators supported by your observations. Choose only what you have seen; the system cannot observe feelings for you.</p>
-              <div class="anchor-grid-1a" id="feelingsAnchors"></div>
+              <h2 class="section-title"><span class="icon">◎</span> Guided checkpoint questions</h2>
+              <p class="small-note" style="margin:-7px 0 14px">Tap the answer that best fits what you have observed. The next question changes to help narrow the continuum point.</p>
+              <div class="guided-question" id="feelingsQuestionPanel" aria-live="polite">
+                <div class="question-progress" id="feelingsQuestionProgress">Question 1 of 3</div>
+                <h3 id="feelingsQuestionTitle">When strong feelings come up, what does the child usually do?</h3>
+                <p class="small-note" id="feelingsQuestionHelp">Choose the closest description. Think about what the child does, not what you hope they will do.</p>
+                <div class="question-choices" id="feelingsQuestionChoices"></div>
+                <div class="question-actions"><button class="text-button" id="feelingsQuestionBack" type="button" disabled>← Back</button><button class="primary" id="feelingsQuestionNext" type="button" disabled>Next question&nbsp; →</button></div>
+              </div>
+              <div class="answer-summary hidden" id="feelingsAnswerSummary"></div>
             </section>
             <section class="panel section-card">
               <h2 class="section-title"><span class="icon">✎</span> Quick note & evidence</h2>
-              <label class="field-label" for="feelingsNotes">What was happening, and what did the child do next?</label>
-              <textarea id="feelingsNotes" placeholder="During ____, the child ____. They needed / used ____. Then they ____. "></textarea>
+              <details class="optional-note"><summary>Add a note (optional)</summary><label class="field-label" for="feelingsNotes">What was happening, and what did the child do next?</label><textarea id="feelingsNotes" placeholder="Optional: During ____, the child ____. They needed / used ____. Then they ____. "></textarea></details>
               <div class="evidence-tools"><button class="secondary" data-feelings-evidence="Photo">＋ Photo</button><button class="secondary" data-feelings-evidence="Video">＋ Video</button><button class="secondary" data-feelings-evidence="Voice note">＋ Voice note</button></div>
-              <p class="small-note" id="feelingsEvidenceStatus" style="margin-bottom:0">Evidence attachments are visual prototype controls.</p>
-            </section>
-            <section class="panel section-card">
-              <h2 class="section-title"><span class="icon">⌕</span> Adaptive reflection</h2>
-              <p class="small-note" id="feelingsQuestion">What support helped the child manage the feeling and return to the activity?</p>
-              <div class="consistency" id="feelingsSupportChoices">
-                <button class="choice" data-support="adult">Adult comfort or co-regulation</button>
-                <button class="choice" data-support="reminder">A reminder or visual cue</button>
-                <button class="choice" data-support="strategy">Child used a strategy</button>
-                <button class="choice" data-support="independent">No extra support needed</button>
-              </div>
+              <p class="small-note" id="feelingsEvidenceStatus" style="margin-bottom:0">Notes and evidence are optional. The guided questions are enough to create a suggestion.</p>
             </section>
           </div>
           <aside class="record-side">
@@ -346,20 +358,18 @@
               <h2 class="section-title"><span class="icon">✧</span> Checkpoint support</h2>
               <div class="suggest-box">
                 <div class="suggest-kicker">Prototype suggestion · teacher decides</div>
-                <div class="suggested" id="feelingsSuggested">Select observed indicators to see a suggested checkpoint level.</div>
-                <p class="suggest-text" id="feelingsRationale">Use authentic observations across play and time. No child-facing task is used for this objective.</p>
-                <button class="choice emerging" id="feelingsEmerging">＋ Beginning to show parts of the next indicator</button>
-                <div class="select-levels" id="feelingsLevelPicks" aria-label="Select or change checkpoint level"></div>
-                <p class="level-help">Tap a level to accept or change the suggested checkpoint.</p>
+                <div class="suggested" id="feelingsSuggested">Answer the guided questions to see a suggested continuum point.</div>
+                <p class="suggest-text" id="feelingsRationale">The teacher answers by tapping; notes are optional. No child-facing task is used for this objective.</p>
+                <div class="select-levels hidden" id="feelingsLevelPicks" aria-label="Select or change checkpoint level"></div>
+                <p class="level-help">After answering, tap a level to accept or change the suggestion.</p>
               </div>
-              <div style="margin-top:18px"><label class="field-label">How often have you seen these skills?</label><div class="consistency" id="feelingsConsistency"><button class="choice" data-fconsistency="one">One moment</button><button class="choice" data-fconsistency="several">More than once</button><button class="choice" data-fconsistency="consistent">Across settings / time</button></div></div>
               <p class="small-note">Teaching Strategies GOLD remains the checkpoint record. Review the evidence and make the final level decision there.</p>
             </section>
             <section class="panel section-card"><h2 class="section-title"><span class="icon">↗</span> Evidence to look for next</h2><div class="next-evidence" id="feelingsNextEvidence"><strong>Next-level evidence</strong>Select an observed indicator to see what to notice next.</div></section>
             <section class="parent-copy"><strong>Family-friendly strength & next step</strong><p id="feelingsParentCopy">Your child is building skills for managing big feelings. We’ll continue to offer comfort and simple strategies during everyday routines.</p></section>
           </aside>
         </div>
-        <div class="bottom-actions"><button class="text-button" id="feelingsBack">← Back to objective</button><button class="primary" id="finishFeelings">Finish teacher review&nbsp; ✓</button></div>
+        <div class="bottom-actions"><button class="text-button" id="feelingsBack">← Back to objective</button><button class="primary" id="finishFeelings" disabled>Finish teacher review&nbsp; ✓</button></div>
       </section>
 
       <section class="screen panel section-card" id="pairScreen" aria-labelledby="pairTitle">
@@ -609,8 +619,8 @@
     document.getElementById('finishReview').addEventListener('click',()=>toast('Demo review complete. Long-term child records are not set up yet.'));
     function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500)}
 
-    // Objective 1a is intentionally teacher-observed. The child is never asked to
-    // demonstrate or discuss feelings for the prototype to make its suggestion.
+    // Objective 1a uses a tap-through teacher interview. The first answer branches
+    // to a behavior-specific follow-up; no typing or child-facing feelings task is needed.
     const feelingsLevels=[
       {n:2,text:'Calms with help from a familiar adult.'},
       {n:4,text:'Seeks a familiar person or comfort item when upset.'},
@@ -619,43 +629,124 @@
       {n:10,text:'Intentionally uses strategies to manage feelings.'},
       {n:12,text:'Anticipates a difficult moment and manages feelings with growing independence.'}
     ];
-    const feelingsObserved=new Set();
-    let feelingsSuggested=null,feelingsSelected=null,feelingsConsistency=null,feelingsUserChanged=false,feelingsEmerging=false;
+    const feelingsBranches={
+      adult:{title:'What usually happens after an adult offers comfort?',choices:[
+        {label:'They calm with support from a familiar adult.',point:2},
+        {label:'They are just beginning to settle, but still need a lot of help.',point:1},
+        {label:'They do not yet settle, even with adult comfort.',point:'Not Yet'},
+        {label:'I have not seen this clearly enough.',point:null}
+      ]},
+      seek:{title:'How does the child get comfort?',choices:[
+        {label:'An adult prompts the child to seek comfort.',point:3},
+        {label:'The child seeks a familiar person or comfort item on their own.',point:4},
+        {label:'It varies or I am not sure.',point:null}
+      ]},
+      adjust:{title:'When waiting or plans change, how does the child manage?',choices:[
+        {label:'With a reminder, the child waits, adjusts, or tries another plan.',point:5},
+        {label:'The child waits, adjusts, or tries another plan without a reminder.',point:6},
+        {label:'It varies or I am not sure.',point:null}
+      ]},
+      express:{title:'How does the child express strong feelings?',choices:[
+        {label:'The child expresses feelings appropriately after an adult cue.',point:7},
+        {label:'The child expresses strong feelings appropriately on their own.',point:8},
+        {label:'It varies or I am not sure.',point:null}
+      ]},
+      strategy:{title:'How does the child use a calming strategy?',choices:[
+        {label:'The child uses a strategy after an adult suggests it.',point:9},
+        {label:'The child intentionally chooses and uses a strategy.',point:10},
+        {label:'It varies or I am not sure.',point:null}
+      ]},
+      anticipate:{title:'How does the child handle a difficult moment they can see coming?',choices:[
+        {label:'The child prepares or uses a strategy with adult support.',point:11},
+        {label:'The child anticipates the challenge and manages feelings independently.',point:12},
+        {label:'It varies or I am not sure.',point:null}
+      ]},
+      notyet:{title:'What have you noticed when an adult supports the child?',choices:[
+        {label:'Adult comfort helps the child settle.',point:2},
+        {label:'The child accepts comfort but is not yet able to settle.',point:'Not Yet'},
+        {label:'I have not observed enough to tell.',point:null}
+      ]},
+      unsure:{title:'Which is the highest response you have seen, even once?',choices:[
+        {label:'Adult comfort helps the child calm.',point:2},
+        {label:'The child seeks a familiar person or comfort item.',point:4},
+        {label:'The child waits, adjusts, or tries another plan.',point:6},
+        {label:'The child expresses strong feelings appropriately.',point:8},
+        {label:'The child chooses a strategy to manage feelings.',point:10},
+        {label:'The child anticipates a difficult moment and manages it.',point:12},
+        {label:'No clear example yet.',point:null}
+      ]}
+    };
+    const feelingsAnswers={behavior:null,detail:null,frequency:null};
+    let feelingsStep=0,feelingsSuggested=null,feelingsSelected=null,feelingsUserChanged=false,feelingsReady=false;
     const feelingsProgression=document.getElementById('feelingsProgression');
     feelingsLevels.forEach(level=>{const row=document.createElement('div');row.className='level-row';row.innerHTML=`<div class="level-n">${level.n}</div><div><strong>Level ${level.n}</strong><span>${level.text}</span></div>`;feelingsProgression.append(row)});
-    const feelingsAnchors=document.getElementById('feelingsAnchors');
-    feelingsLevels.forEach(level=>{const button=document.createElement('button');button.type='button';button.className='anchor-chip-1a';button.dataset.fanchor=level.n;button.innerHTML=`<strong>Level ${level.n}</strong>${level.text}`;button.addEventListener('click',()=>{if(feelingsObserved.has(level.n))feelingsObserved.delete(level.n);else feelingsObserved.add(level.n);button.classList.toggle('selected',feelingsObserved.has(level.n));feelingsUserChanged=false;renderFeelingsSuggestion()});feelingsAnchors.append(button)});
     const feelingsLevelPicks=document.getElementById('feelingsLevelPicks');
-    for(let n=1;n<=12;n++){const button=document.createElement('button');button.type='button';button.className='level-pick';button.textContent=n;button.setAttribute('aria-label',`Select Objective 1a checkpoint level ${n}`);button.dataset.flevel=n;button.addEventListener('click',()=>{feelingsSelected=n;feelingsUserChanged=true;renderFeelingsSuggestion()});feelingsLevelPicks.append(button)}
+    const notYetPick=document.createElement('button');notYetPick.type='button';notYetPick.className='level-pick';notYetPick.textContent='NY';notYetPick.setAttribute('aria-label','Select Not Yet');notYetPick.dataset.flevel='Not Yet';feelingsLevelPicks.append(notYetPick);
+    for(let n=1;n<=13;n++){const button=document.createElement('button');button.type='button';button.className='level-pick';button.textContent=n;button.setAttribute('aria-label',`Select Objective 1a checkpoint level ${n}`);button.dataset.flevel=n;feelingsLevelPicks.append(button)}
+    feelingsLevelPicks.querySelectorAll('[data-flevel]').forEach(button=>button.addEventListener('click',()=>{feelingsSelected=button.dataset.flevel==='Not Yet'?'Not Yet':Number(button.dataset.flevel);feelingsUserChanged=true;renderFeelingsSuggestion()}));
     document.getElementById('openFeelings').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsObjectiveScreen')});
     document.getElementById('backToTraveling').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';show('objectiveScreen')});
     document.getElementById('startFeelingsGuide').addEventListener('click',()=>show('feelingsGuideScreen'));
     document.getElementById('guideBack').addEventListener('click',()=>show('feelingsObjectiveScreen'));
-    document.getElementById('guideToRecord').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsSuggestion()});
-    document.getElementById('recordFeelingsNow').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsSuggestion()});
-    document.getElementById('skipFeelingsGuide').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsSuggestion()});
+    document.getElementById('guideToRecord').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsQuestion()});
+    document.getElementById('recordFeelingsNow').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsQuestion()});
+    document.getElementById('skipFeelingsGuide').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsQuestion()});
     document.getElementById('guideBack').setAttribute('aria-label','Return to Objective 1a');
     document.getElementById('feelingsBack').addEventListener('click',()=>show('feelingsObjectiveScreen'));
     document.getElementById('finishFeelings').addEventListener('click',()=>toast('Teacher review complete. Long-term child records are not set up yet.'));
-    document.getElementById('feelingsEmerging').addEventListener('click',event=>{feelingsEmerging=!feelingsEmerging;event.currentTarget.classList.toggle('selected',feelingsEmerging);feelingsUserChanged=false;renderFeelingsSuggestion()});
-    document.querySelectorAll('[data-fconsistency]').forEach(button=>button.addEventListener('click',()=>{feelingsConsistency=button.dataset.fconsistency;document.querySelectorAll('[data-fconsistency]').forEach(b=>b.classList.toggle('selected',b===button));if(!feelingsUserChanged)renderFeelingsSuggestion()}));
-    document.querySelectorAll('[data-support]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-support]').forEach(b=>b.classList.toggle('selected',b===button));const prompts={adult:'What did the child do after receiving comfort or co-regulation?',reminder:'After the reminder or visual cue, what did the child do next?',strategy:'What strategy did the child choose, and how did it help?',independent:'What did the child do independently to manage the feeling?'};document.getElementById('feelingsQuestion').textContent=prompts[button.dataset.support]}));
+    document.getElementById('feelingsQuestionNext').addEventListener('click',()=>{if(feelingsStep<2){feelingsStep++;renderFeelingsQuestion()}else finishFeelingsQuestions()});
+    document.getElementById('feelingsQuestionBack').addEventListener('click',()=>{if(feelingsStep>0){feelingsStep--;renderFeelingsQuestion()}});
     document.querySelectorAll('[data-feelings-evidence]').forEach(button=>button.addEventListener('click',()=>{const type=button.dataset.feelingsEvidence;document.getElementById('feelingsEvidenceStatus').textContent=`${type} capture is a placeholder in this prototype; attach supporting evidence in your usual record.`;toast(`${type} capture is shown as a prototype control.`)}));
-    function renderFeelingsSuggestion(){
-      const anchors=[...feelingsObserved].sort((a,b)=>a-b);const highest=anchors.length?anchors[anchors.length-1]:null;
-      feelingsSuggested=highest===null?null:(feelingsEmerging&&highest<12?highest+1:highest);if(!feelingsUserChanged)feelingsSelected=feelingsSuggested;
-      const exact=feelingsLevels.find(l=>l.n===feelingsSelected);const lower=[...feelingsLevels].reverse().find(l=>l.n<feelingsSelected);const upper=feelingsLevels.find(l=>l.n>feelingsSelected);
-      const desc=exact|| (feelingsSelected?{text:`Shows emerging parts of Level ${upper?.n||12} while building on Level ${lower?.n||2}.`}:null);
-      const suggestion=document.getElementById('feelingsSuggested');const rationale=document.getElementById('feelingsRationale');
-      if(desc){suggestion.textContent=`Level ${feelingsSelected} · ${desc.text}`;rationale.textContent=`Based on ${anchors.length} selected observed indicator${anchors.length===1?'':'s'}${feelingsEmerging?' and a teacher-marked emerging next skill':''}${feelingsConsistency?`; evidence noted “${({one:'one moment',several:'more than once',consistent:'across settings and time'})[feelingsConsistency]}”`:''}. Review your notes and decide whether this matches what you know about the child.`}
-      else{suggestion.textContent='Select observed indicators to see a suggested checkpoint level.';rationale.textContent='Use authentic observations across play and time. No child-facing task is used for this objective.'}
-      document.querySelectorAll('[data-flevel]').forEach(button=>{button.classList.toggle('selected',Number(button.dataset.flevel)===feelingsSelected);button.classList.toggle('system',Number(button.dataset.flevel)===feelingsSuggested)});
-      const next=feelingsSelected?feelingsLevels.find(level=>level.n>feelingsSelected):null;
-      document.getElementById('feelingsNextEvidence').innerHTML=!feelingsSelected?'<strong>Next-level evidence</strong>Select an observed indicator to see what to notice next.':next?`<strong>Look for evidence of Level ${next.n}</strong>${next.text} Notice whether the child begins to use this skill with less adult support and across different routines.`:'<strong>At the highest listed indicator</strong>Continue noticing how the child anticipates difficult moments and chooses a helpful strategy across routines.';
-      document.getElementById('feelingsParentCopy').textContent=feelingsParentLanguage(feelingsSelected);
+    function renderFeelingsQuestion(){
+      const title=document.getElementById('feelingsQuestionTitle'),help=document.getElementById('feelingsQuestionHelp'),box=document.getElementById('feelingsQuestionChoices');
+      document.getElementById('feelingsQuestionProgress').textContent=`Question ${feelingsStep+1} of 3`;
+      let question;
+      if(feelingsStep===0){question={title:'When strong feelings come up, what does the child usually do?',help:'Choose the closest description. Think about what you have observed, not what you hope they will do.',key:'behavior',choices:[
+        {id:'adult',label:'Needs adult comfort to calm',detail:'An adult helps the child settle and return to the activity.'},
+        {id:'seek',label:'Seeks a trusted adult or comfort item',detail:'The child goes to a familiar person or item when upset.'},
+        {id:'adjust',label:'Waits, adjusts, or tries another plan',detail:'The child manages a delay or small disappointment, sometimes with support.'},
+        {id:'express',label:'Expresses strong feelings appropriately',detail:'The child communicates or shows feelings in an acceptable way.'},
+        {id:'strategy',label:'Intentionally uses a calming strategy',detail:'The child chooses a strategy such as breathing, asking for help, or taking space.'},
+        {id:'anticipate',label:'Anticipates a hard moment',detail:'The child sees a challenge coming and prepares or manages feelings.'},
+        {id:'notyet',label:'Not yet / needs substantial help',detail:'The child is not yet settling even when an adult offers comfort.'},
+        {id:'unsure',label:'It varies / I need more evidence',detail:'I cannot choose one description confidently yet.'}
+      ]}}
+      else if(feelingsStep===1){question={...feelingsBranches[feelingsAnswers.behavior],help:'This follow-up helps distinguish a skill that is emerging from one the child is using more independently.',key:'detail',choices:feelingsBranches[feelingsAnswers.behavior].choices.map((c,i)=>({...c,id:`detail-${i}`}))}}
+      else{question={title:'How often have you seen this response?',help:'Think about what you have observed over time and in everyday routines.',key:'frequency',choices:[
+        {id:'once',label:'One clear moment',detail:'I have seen this once or twice.'},
+        {id:'repeated',label:'More than once in familiar routines',detail:'The response is showing up repeatedly in situations the child knows.'},
+        {id:'varied',label:'Across different routines or settings',detail:'I have seen the response with different people or in different parts of the day.'},
+        {id:'inconsistent',label:'It changes a lot / I am not sure',detail:'I need more observations to know how consistent it is.'}
+      ]}}
+      title.textContent=question.title;help.textContent=question.help;box.innerHTML='';
+      question.choices.forEach(choice=>{const button=document.createElement('button');button.type='button';button.className='question-choice';button.innerHTML=`<span><strong>${choice.label}</strong>${choice.detail||''}</span>`;const isSelected=feelingsStep===1?feelingsAnswers.detail?.id===choice.id:feelingsAnswers[question.key]===choice.id;button.classList.toggle('selected',!!isSelected);button.setAttribute('aria-pressed',String(!!isSelected));button.addEventListener('click',()=>{if(question.key==='behavior'&&feelingsAnswers.behavior!==choice.id){feelingsAnswers.detail=null;feelingsAnswers.frequency=null;clearFeelingsResult()}if(question.key==='detail'&&feelingsAnswers.detail?.id!==choice.id){feelingsAnswers.frequency=null;clearFeelingsResult()}if(question.key==='detail')feelingsAnswers.detail={id:choice.id,point:choice.point,label:choice.label};else feelingsAnswers[question.key]=choice.id;renderFeelingsQuestion()});box.append(button)});
+      const back=document.getElementById('feelingsQuestionBack'),next=document.getElementById('feelingsQuestionNext');back.disabled=feelingsStep===0;back.classList.toggle('hidden',feelingsStep===0);next.textContent=feelingsStep===2?'See suggested continuum point  →':'Next question  →';next.disabled=feelingsStep===1?!feelingsAnswers.detail:!feelingsAnswers[question.key];
+      document.getElementById('feelingsQuestionPanel').classList.remove('hidden');document.getElementById('feelingsAnswerSummary').classList.add('hidden');
     }
-    function feelingsParentLanguage(n){if(!n)return 'Your child is building skills for managing big feelings. We’ll continue to offer comfort and simple strategies during everyday routines.';const lower=[...feelingsLevels].reverse().find(l=>l.n<=n)||feelingsLevels[0];const strengths={2:'is learning to feel calm with help from a trusted adult',4:'is beginning to seek a familiar person or comfort item when upset',6:'is practicing waiting, adjusting, or trying another plan when something feels hard',8:'is finding appropriate ways to express strong feelings',10:'is choosing strategies to help manage big feelings',12:'is beginning to anticipate challenging moments and use strategies independently'};const next=feelingsLevels.find(l=>l.n>n);const nextSteps={2:'accept comfort and return to play',4:'wait briefly or try another plan with support',6:'express strong feelings in safe, clear ways',8:'choose a helpful strategy when feelings grow',10:'use a strategy before a difficult moment becomes overwhelming',12:'keep using strategies in different routines'};return `Your child ${strengths[lower.n]}. Next, we’ll encourage them to ${nextSteps[next?.n]||'keep using helpful strategies in different routines'}.`;}
-    renderFeelingsSuggestion();
+    function finishFeelingsQuestions(){
+      feelingsReady=true;feelingsSuggested=feelingsAnswers.detail?.point??null;feelingsSelected=feelingsSuggested;feelingsUserChanged=false;
+      const behaviorLabel=document.querySelector('#feelingsQuestionChoices .question-choice.selected strong')?.textContent||feelingsAnswers.behavior;
+      const behaviorNames={adult:'Needs adult comfort to calm',seek:'Seeks a trusted adult or comfort item',adjust:'Waits, adjusts, or tries another plan',express:'Expresses strong feelings appropriately',strategy:'Intentionally uses a calming strategy',anticipate:'Anticipates a hard moment',notyet:'Not yet / needs substantial help',unsure:'It varies / more evidence needed'};
+      const branch=feelingsBranches[feelingsAnswers.behavior];const detailChoice=branch.choices[Number(feelingsAnswers.detail.id.split('-')[1])];
+      const freqNames={once:'One clear moment',repeated:'More than once in familiar routines',varied:'Across different routines or settings',inconsistent:'It varies / not sure'};
+      document.getElementById('feelingsAnswerSummary').innerHTML=`<div><strong>What the child usually does</strong>${behaviorNames[feelingsAnswers.behavior]}</div><div><strong>What happens in more detail</strong>${detailChoice.label}</div><div><strong>How often it is seen</strong>${freqNames[feelingsAnswers.frequency]}</div><button class="secondary" id="feelingsEditAnswers" type="button">← Change answers</button>`;
+      document.getElementById('feelingsQuestionPanel').classList.add('hidden');document.getElementById('feelingsAnswerSummary').classList.remove('hidden');document.getElementById('finishFeelings').disabled=false;feelingsLevelPicks.classList.remove('hidden');renderFeelingsSuggestion();
+      document.getElementById('feelingsEditAnswers').addEventListener('click',()=>{feelingsStep=0;clearFeelingsResult();renderFeelingsQuestion()});
+    }
+    function clearFeelingsResult(){feelingsReady=false;feelingsSuggested=null;feelingsSelected=null;feelingsUserChanged=false;feelingsLevelPicks.classList.add('hidden');document.getElementById('finishFeelings').disabled=true}
+    function renderFeelingsSuggestion(){
+      if(!feelingsReady)return;
+      const selected=feelingsSelected;const exact=feelingsLevels.find(level=>level.n===Number(selected));
+      const suggestion=document.getElementById('feelingsSuggested'),rationale=document.getElementById('feelingsRationale');
+      if(selected===null){suggestion.textContent='Not enough evidence yet';rationale.textContent='Your answers did not identify a clear response to place on the continuum. You can select a level if your broader observations support one, or collect another observation.'}
+      else if(selected==='Not Yet'){suggestion.textContent='Not Yet · needs adult support but is not yet settling';rationale.textContent='Based on your answers: the child accepts comfort, but is not yet able to settle. Confirm this with observations across routines and time.'}
+      else{suggestion.textContent=`Level ${selected}${exact?` · ${exact.text}`:selected===13?' · Teacher-selected continuum point':` · Emerging between the neighboring descriptions`}`;const detail=feelingsBranches[feelingsAnswers.behavior].choices[Number(feelingsAnswers.detail.id.split('-')[1])].label;const confidence={once:'This is a preliminary suggestion from one or two moments.',repeated:'The response has been seen more than once in familiar routines.',varied:'The response has been seen across routines or settings.',inconsistent:'The response varies; gather another example before settling on a checkpoint.'}[feelingsAnswers.frequency];rationale.textContent=`Your answers: “${detail}” · ${confidence} Review the evidence and confirm or change the suggested point.`}
+      document.querySelectorAll('[data-flevel]').forEach(button=>{button.classList.toggle('selected',String(button.dataset.flevel)===String(selected));button.classList.toggle('system',String(button.dataset.flevel)===String(feelingsSuggested))});
+      const numeric=Number(selected);const next=Number.isFinite(numeric)?feelingsLevels.find(level=>level.n>numeric):null;
+      document.getElementById('feelingsNextEvidence').innerHTML=selected===null?'<strong>What to observe next</strong>Notice a naturally occurring moment of disappointment or transition. Watch what helps the child settle and return to play.':selected==='Not Yet'?'<strong>Evidence to look for next</strong>Notice whether comfort from a familiar adult helps the child settle, and what support is needed.':next?`<strong>Look for evidence of Level ${next.n}</strong>${next.text} Notice whether the child begins using this response with less adult support and across routines.`:'<strong>Continue documenting</strong>Use the official GOLD continuum to confirm higher-level evidence across different routines and over time.';
+      document.getElementById('feelingsParentCopy').textContent=feelingsParentLanguage(selected);
+    }
+    function feelingsParentLanguage(n){if(n===null)return 'We are learning what helps your child manage big feelings. We will keep offering support and noticing what works in everyday routines.';if(n==='Not Yet')return 'Your child is learning what helps them feel calm. We will continue offering comfort and support during everyday routines.';const numeric=Number(n);const lower=[...feelingsLevels].reverse().find(level=>level.n<=numeric)||feelingsLevels[0];const strengths={2:'is learning to feel calm with help from a trusted adult',4:'is beginning to seek a familiar person or comfort item when upset',6:'is practicing waiting, adjusting, or trying another plan when something feels hard',8:'is finding appropriate ways to express strong feelings',10:'is choosing strategies to help manage big feelings',12:'is beginning to anticipate challenging moments and use strategies independently'};const next=feelingsLevels.find(level=>level.n>numeric);const nextSteps={2:'accept comfort and return to play',4:'wait briefly or try another plan with support',6:'express strong feelings in safe, clear ways',8:'choose a helpful strategy when feelings grow',10:'use a strategy before a difficult moment becomes overwhelming',12:'keep using strategies in different routines'};return `Your child ${strengths[lower.n]||'is growing in managing big feelings'}. Next, we’ll encourage them to ${nextSteps[next?.n]||'keep using helpful strategies in different routines'}.`;}
 
     const PAIR_API='https://pvgewltlxenguxmhiszm.supabase.co/functions/v1/little-evidence-session';
     const PAIR_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';

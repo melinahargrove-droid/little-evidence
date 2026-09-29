@@ -10,7 +10,7 @@ Open the published GitHub Pages URL on the SmartBoard. Select **Start Movement C
 
 - An Objective 1a · Manages Feelings teacher observation flow alongside Objective 4
 - Objective 1a observation guide for authentic classroom moments; it deliberately has no child-facing SmartBoard task
-- Objective 1a teacher recording with selectable observed indicators, an adaptive reflection, optional notes/evidence controls, an editable suggested level, next-level evidence, and family-friendly wording
+- Objective 1a tap-through teacher interview with an adaptive behavior-specific follow-up, frequency question, optional notes/evidence controls, an editable suggested continuum point, next-level evidence, and family-friendly wording
 - Objective page with the saved Objective 4 progression and Level 6 examples
 - One-at-a-time, full-screen child movement prompts with large text, a visual, an optional spoken direction, and progress dots
 - A cheerful completion screen followed by the separate teacher recording view
@@ -19,7 +19,7 @@ Open the published GitHub Pages URL on the SmartBoard. Select **Start Movement C
 - Teacher-selected observation ratings, consistency, notes, and evidence placeholders
 - Teacher-selected developmental indicators, an optional in-between-level suggestion when the next anchor is emerging, editable levels 1–12, next-level evidence, and a family-friendly summary
 
-The child prompts do not score physical performance. Prompt ratings are supporting notes only and stay in the teacher's browser. Objective 1a is teacher-observed and does not ask the child to perform or talk about feelings. The pairing service stores only a random temporary session ID, hashed pairing tokens, the current prompt, and workflow status; sessions expire after 45 minutes. It stores no child name, notes, photo, video, checkpoint level, or teacher rating. The prototype level suggestions use teacher-selected indicators; marking an upcoming indicator as emerging suggests an in-between level. This interaction is not a validated Teaching Strategies GOLD scoring rule. The teacher makes the final checkpoint decision in GOLD. Photo, video, and voice controls are placeholders, and teacher review data is not saved as a long-term child record.
+The child prompts do not score physical performance. Prompt ratings are supporting notes only and stay in the teacher's browser. Objective 1a is teacher-observed and does not ask the child to perform or talk about feelings. The teacher answers the guided 1a questions by tapping; typing a note is optional. The 1a follow-up distinguishes supported or emerging behavior from more independent behavior, and a final frequency question adds context to the suggested continuum point. These suggestions are decision support, not validated Teaching Strategies GOLD scoring rules. The teacher makes the final checkpoint decision in GOLD. The pairing service stores only a random temporary session ID, hashed pairing tokens, the current prompt, and workflow status; sessions expire after 45 minutes. It stores no child name, notes, photo, video, checkpoint level, or teacher rating. Photo, video, and voice controls are placeholders, and teacher review data is not saved as a long-term child record.
 
 QR rendering is bundled locally with the MIT-licensed qrcode-generator 2.0.4 library so pairing does not depend on a third-party CDN. Its license is included in `vendor/qrcode-generator-LICENSE.txt`.
 
