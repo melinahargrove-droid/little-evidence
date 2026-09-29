@@ -54,11 +54,24 @@
     .app.child-mode .progress { margin-top:18px; }
     .app.child-mode .progress i { width:14px;height:14px; }
     .app.child-mode .celebration .move-inner { max-width:900px; }
-    .teacher-quick-access { position:absolute;left:20px;bottom:18px;z-index:4;text-align:left; }
+    .teacher-quick-access { display:none;position:absolute;left:20px;bottom:18px;z-index:4;text-align:left; }
     .teacher-quick-toggle { border:1px solid #d4e4ee;border-radius:999px;background:#ffffffed;color:#54748d;padding:10px 15px;font-size:13px;font-weight:800;box-shadow:0 5px 14px #234e7014; }
     .teacher-quick-toggle:hover { background:#edf6fb;color:#285f8c; }
     .teacher-quick-panel { width:min(440px,calc(100vw - 32px));margin-top:10px;padding:18px;border:1px solid #d9e8f1;border-radius:20px;background:#fffffff7;box-shadow:0 15px 45px #173b6633; }
     .teacher-quick-panel[hidden] { display:none; }
+    .pairing-grid { display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.7fr);gap:22px;align-items:center; }
+    .pairing-qr { display:grid;place-items:center;min-height:260px;padding:18px;border:1px dashed #c6dce9;border-radius:22px;background:#f7fbfd; }
+    .pairing-qr img { width:min(100%,240px);height:auto;image-rendering:pixelated;border-radius:8px;background:white;padding:8px; }
+    .pairing-link { display:block;overflow-wrap:anywhere;color:#54748d;font-size:12px;line-height:1.45;margin-top:12px; }
+    .controller-card { max-width:920px;margin:0 auto;padding:clamp(22px,4vw,42px); }
+    .controller-status { color:#67869c;font-size:13px;font-weight:800;margin:0 0 12px; }
+    .controller-prompt { margin:14px 0 18px;padding:18px;border-radius:20px;background:linear-gradient(145deg,#edf6fb,#f8faf5);color:#285f8c;font-size:clamp(22px,3vw,34px);font-weight:900;line-height:1.3; }
+    .controller-ratings { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px; }
+    .controller-rating { border:1px solid #d8e5ed;border-radius:14px;background:white;color:#547087;padding:14px 10px;font-size:14px;font-weight:800; }
+    .controller-rating.selected { border-color:#75a5c5;background:#eaf4fb;color:#234f73;box-shadow:inset 0 0 0 1px #75a5c5; }
+    .controller-actions { display:flex;gap:10px;flex-wrap:wrap;margin-top:18px; }
+    .controller-actions .primary { flex:1;min-width:210px; }
+    @media(max-width:700px) { .pairing-grid {grid-template-columns:1fr}.pairing-qr{min-height:220px}.controller-ratings{grid-template-columns:1fr}.controller-actions{display:grid}.controller-actions .primary{width:100%} }
     .quick-panel-heading { display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--navy);font-weight:900;font-size:16px; }
     .quick-panel-close { border:0;border-radius:50%;width:32px;height:32px;background:#edf5fa;color:#416784;font-size:20px; }
     .quick-prompt { margin:10px 0 12px;color:#5a758a;font-size:14px;line-height:1.4; }
@@ -216,6 +229,48 @@
         <div class="footer-action"><button class="text-button" id="skipToRecord">Open teacher recording view&nbsp; →</button></div>
       </section>
 
+      <section class="screen panel section-card" id="pairScreen" aria-labelledby="pairTitle">
+        <p class="eyebrow">Teacher setup · Objective 4</p>
+        <h1 id="pairTitle">Connect your iPad</h1>
+        <p class="subtitle">Scan this code with your iPad camera. The teacher controls and observation ratings will stay on the iPad.</p>
+        <div class="pairing-grid" style="margin-top:22px">
+          <div class="pairing-qr" id="pairingQr"><span class="small-note">Preparing your secure session…</span></div>
+          <div>
+            <h2 class="section-title">On your iPad</h2>
+            <p class="subtitle" style="font-size:16px">1. Open the camera and scan the code.<br>2. Tap the link to open the teacher controller.<br>3. Start the movement check when you’re ready.</p>
+            <button class="secondary" id="copyPairLink" type="button">Copy iPad link</button>
+            <span class="pairing-link" id="pairLinkText"></span>
+            <p class="small-note" id="pairStatus">This temporary session closes automatically.</p>
+          </div>
+        </div>
+        <div class="footer-action"><button class="text-button" id="cancelPairing" type="button">← Back to objective</button></div>
+      </section>
+
+      <section class="screen" id="controllerScreen" aria-labelledby="controllerTitle">
+        <div class="panel controller-card">
+          <p class="eyebrow">Early Eagle Academy · Teacher iPad</p>
+          <h1 id="controllerTitle">Traveling Skills</h1>
+          <p class="controller-status" id="controllerConnection" role="status">Connecting to the SmartBoard…</p>
+          <div id="controllerLobby">
+            <p class="subtitle">Your observation controls are on this device. The child will see one movement prompt at a time on the SmartBoard.</p>
+            <button class="primary wide" id="controllerStart" type="button">Start Movement Check&nbsp; →</button>
+          </div>
+          <div id="controllerActive" class="hidden">
+            <p class="small-note" id="controllerStep">Movement 1 of 3</p>
+            <div class="controller-prompt" id="controllerPrompt"></div>
+            <p class="field-label" id="controllerObserveLabel">After the child tries it, choose what you observed:</p>
+            <div class="controller-ratings" id="controllerRatings"></div>
+            <div class="controller-actions"><button class="primary" id="controllerAdvance" type="button" disabled>Next movement&nbsp; →</button></div>
+            <p class="small-note" id="controllerWait">Waiting for the child to try the movement on the SmartBoard.</p>
+          </div>
+          <div id="controllerDone" class="hidden">
+            <span class="badge">● Movement check complete</span>
+            <p class="subtitle">Your three quick observations are ready for teacher review.</p>
+            <button class="primary wide" id="openTeacherRecord" type="button">Review observations&nbsp; →</button>
+          </div>
+        </div>
+      </section>
+
       <section class="screen panel move-screen" id="movementScreen" aria-live="polite" aria-labelledby="moveTitle">
         <div class="move-inner">
           <p class="step-label" id="stepLabel">Movement check · 1 of 3</p>
@@ -310,6 +365,7 @@
   </div>
   <div class="toast" id="toast" role="status"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/qrcode.js" crossorigin="anonymous"></script>
   <script>
     const levels = [
       {n:1, text:"Reaches, rolls, and shifts position while maintaining stability."},
@@ -374,10 +430,23 @@
     document.getElementById('closeQuickMark').addEventListener('click',closeQuickMark);
     document.getElementById('hearDirection').addEventListener('click',()=>{const p=prompts[promptIndex];if('speechSynthesis' in window){window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(p.text);utterance.rate=.88;window.speechSynthesis.speak(utterance)}else{toast('Ask a grown-up to read the direction aloud.')}});
     function start(){promptIndex=0;movementCompleted=false;document.querySelector('.app').classList.add('child-mode');renderPrompt();show('movementScreen')}
-    document.getElementById('startCheck').addEventListener('click',start);
-    document.getElementById('moveNext').addEventListener('click',()=>{if(promptIndex<prompts.length-1){promptIndex++;renderPrompt()}else{movementCompleted=true;document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';show('completeScreen')}});
+    document.getElementById('startCheck').addEventListener('click',startPairedSession);
+    document.getElementById('moveNext').addEventListener('click',async()=>{
+      if(pairRole==='display'){
+        const button=document.getElementById('moveNext');button.disabled=true;button.textContent='Nice job! Waiting for your teacher…';
+        try{await pairApi({action:'done',id:pairSessionId,role:'display',token:pairToken})}catch(error){button.disabled=false;toast(error.message)}
+        return;
+      }
+      if(promptIndex<prompts.length-1){promptIndex++;renderPrompt()}else{movementCompleted=true;document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';show('completeScreen')}
+    });
     function openRecording(){document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';document.getElementById('recordBadge').innerHTML=movementCompleted?'<span>●</span> Movement Check · 3 prompts completed':'<span>●</span> Teacher review · movement check not run';show('recordScreen');renderSuggestion()}
-    document.getElementById('toRecording').addEventListener('click',openRecording);
+    document.getElementById('toRecording').addEventListener('click',()=>{
+      if(pairRole==='display'){
+        clearTimeout(pairPollTimer);
+        document.querySelector('.app').classList.remove('child-mode');
+        pairRole=null;pairSessionId=null;pairToken=null;show('objectiveScreen');
+      }else openRecording();
+    });
     document.getElementById('skipToRecord').addEventListener('click',openRecording);
     document.getElementById('backToObjective').addEventListener('click',()=>{document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';show('objectiveScreen')});
     document.querySelectorAll('[data-rating]').forEach(button=>button.addEventListener('click',()=>{const i=Number(button.dataset.rating);ratings[i]=Number(button.dataset.value);renderRatingSelections();renderSuggestion()}));
@@ -406,6 +475,101 @@
     document.querySelectorAll('[data-evidence]').forEach(button=>button.addEventListener('click',()=>{const type=button.dataset.evidence;document.getElementById('evidenceStatus').textContent=`${type} capture is a placeholder in this prototype; attach supporting evidence in your usual record.`;toast(`${type} evidence capture is shown as a prototype control.`)}));
     document.getElementById('finishReview').addEventListener('click',()=>toast('Teacher review saved for this demo session.'));
     function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500)}
+
+    const PAIR_API='https://pvgewltlxenguxmhiszm.supabase.co/functions/v1/little-evidence-session';
+    const PAIR_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
+    let pairRole=null,pairSessionId=null,pairToken=null,pairPollTimer=null,controllerRating=null,lastDisplayStatus='';
+    async function pairApi(payload){
+      const response=await fetch(PAIR_API,{method:'POST',headers:{'Content-Type':'application/json','apikey':PAIR_PUBLIC_KEY},body:JSON.stringify(payload)});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||'Could not reach the paired session.');
+      return data;
+    }
+    async function startPairedSession(){
+      const button=document.getElementById('startCheck');button.disabled=true;button.textContent='Starting secure session…';
+      try{
+        const created=await pairApi({action:'create'});
+        pairRole='display';pairSessionId=created.id;pairToken=created.display_token;promptIndex=0;movementCompleted=false;
+        const teacherUrl=new URL(location.href);teacherUrl.hash=`controller=${created.id}.${created.teacher_token}`;
+        const link=teacherUrl.toString();document.getElementById('pairLinkText').textContent=link;
+        document.getElementById('pairStatus').textContent=`Temporary pairing expires at ${new Date(created.expires_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}.`;
+        const qrBox=document.getElementById('pairingQr');
+        if(window.qrcode){const qr=window.qrcode(0,'M');qr.addData(link);qr.make();qrBox.innerHTML=`<img alt="Secure teacher iPad pairing QR code" src="${qr.createDataURL(8,4)}">`}
+        else qrBox.innerHTML='<span class="small-note">QR code is unavailable here. Use “Copy iPad link” below.</span>';
+        show('pairScreen');
+        clearTimeout(pairPollTimer);pollDisplay();
+      }catch(error){toast(error.message)}
+      finally{button.disabled=false;button.innerHTML='Start Movement Check&nbsp; →'}
+    }
+    document.getElementById('copyPairLink').addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText(document.getElementById('pairLinkText').textContent);toast('iPad link copied.')}
+      catch{toast('Open your camera and scan the QR code on this screen.')}
+    });
+    document.getElementById('cancelPairing').addEventListener('click',()=>{clearTimeout(pairPollTimer);pairRole=null;pairSessionId=null;pairToken=null;show('objectiveScreen')});
+    function pollDisplay(){
+      pairApi({action:'state',id:pairSessionId,role:'display',token:pairToken}).then(({state})=>{
+        if(state.status==='active'){
+          document.querySelector('.app').classList.add('child-mode');document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';
+          if(lastDisplayStatus!=='active'||promptIndex!==state.prompt_index){promptIndex=state.prompt_index;renderPrompt();show('movementScreen')}
+          document.getElementById('moveNext').disabled=!!state.display_done;
+          document.getElementById('moveNext').textContent=state.display_done?'Nice job! Waiting for your teacher…':'I did it!  →';
+        }else if(state.status==='done'){
+          document.querySelector('.app').classList.add('child-mode');document.getElementById('moveNext').disabled=true;document.getElementById('moveNext').textContent='Nice job! Waiting for your teacher…';
+        }else if(state.status==='complete'){
+          movementCompleted=true;document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';document.querySelector('.app').classList.add('child-mode');if(lastDisplayStatus!=='complete')show('completeScreen');
+        }
+        lastDisplayStatus=state.status;
+      }).catch(error=>{document.getElementById('pairStatus').textContent=`Reconnecting… ${error.message}`}).finally(()=>{pairPollTimer=setTimeout(pollDisplay,1800)});
+    }
+    function setupControllerRatings(){
+      const box=document.getElementById('controllerRatings');
+      ratingNames.forEach((name,index)=>{const button=document.createElement('button');button.type='button';button.className='controller-rating';button.textContent=name;button.addEventListener('click',()=>{controllerRating=index;document.querySelectorAll('.controller-rating').forEach((item,i)=>item.classList.toggle('selected',i===index));document.getElementById('controllerAdvance').disabled=!document.getElementById('controllerWait').dataset.childDone});box.append(button)});
+    }
+    function showControllerState(state){
+      document.getElementById('controllerConnection').textContent='● Connected to the SmartBoard';
+      document.getElementById('controllerLobby').classList.toggle('hidden',state.status!=='waiting');
+      document.getElementById('controllerActive').classList.toggle('hidden',!['active','done'].includes(state.status));
+      document.getElementById('controllerDone').classList.toggle('hidden',state.status!=='complete');
+      if(['active','done'].includes(state.status)){
+        promptIndex=state.prompt_index;document.getElementById('controllerStep').textContent=`Movement ${promptIndex+1} of ${prompts.length}`;
+        document.getElementById('controllerPrompt').textContent=prompts[promptIndex].text;
+        const done=state.status==='done';document.getElementById('controllerWait').dataset.childDone=done?'true':'';
+        document.getElementById('controllerWait').textContent=done?'The child tried this movement. Choose your quick observation.':'Waiting for the child to try the movement on the SmartBoard.';
+        document.getElementById('controllerObserveLabel').textContent=done?'What did you observe?':'Observation choices unlock when the child is done.';
+        document.querySelectorAll('.controller-rating').forEach(button=>{button.disabled=!done;button.classList.toggle('selected',controllerRating!==null&&button.textContent===ratingNames[controllerRating])});
+        const next=document.getElementById('controllerAdvance');next.textContent=promptIndex===prompts.length-1?'Complete movement check  ✓':'Next movement  →';next.disabled=!done||controllerRating===null;
+      }
+      if(state.status==='complete'){movementCompleted=true;}
+    }
+    function beginController(){
+      const match=location.hash.match(/^#controller=([0-9a-f-]{36})\.([A-Za-z0-9_-]{43})$/i);
+      if(!match)return;
+      pairRole='teacher';pairSessionId=match[1];pairToken=match[2];
+      document.getElementById('modeTag').textContent='TEACHER IPAD · PAIRED';
+      setupControllerRatings();show('controllerScreen');
+      const poll=()=>pairApi({action:'state',id:pairSessionId,role:'teacher',token:pairToken})
+        .then(({state})=>showControllerState(state))
+        .catch(error=>document.getElementById('controllerConnection').textContent=`Reconnecting… ${error.message}`)
+        .finally(()=>{pairPollTimer=setTimeout(poll,1600)});
+      poll();
+    }
+    document.getElementById('controllerStart').addEventListener('click',async()=>{
+      const button=document.getElementById('controllerStart');button.disabled=true;
+      try{const {state}=await pairApi({action:'start',id:pairSessionId,role:'teacher',token:pairToken});showControllerState(state)}
+      catch(error){toast(error.message)}finally{button.disabled=false}
+    });
+    document.getElementById('controllerAdvance').addEventListener('click',async()=>{
+      if(controllerRating===null)return;
+      ratings[promptIndex]=controllerRating;renderRatingSelections();renderSuggestion();
+      const action=promptIndex===prompts.length-1?'finish':'advance';const button=document.getElementById('controllerAdvance');button.disabled=true;
+      try{const {state}=await pairApi({action,id:pairSessionId,role:'teacher',token:pairToken});controllerRating=null;showControllerState(state)}
+      catch(error){button.disabled=false;toast(error.message)}
+    });
+    document.getElementById('openTeacherRecord').addEventListener('click',()=>{
+      document.getElementById('recordBadge').innerHTML='<span>●</span> Paired Movement Check · 3 prompts completed';
+      document.getElementById('modeTag').textContent='TEACHER IPAD · RECORDING';show('recordScreen');renderSuggestion();
+    });
+    beginController();
     renderSuggestion();
   </script>
 </body>
