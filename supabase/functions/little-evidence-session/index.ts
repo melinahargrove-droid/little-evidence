@@ -99,9 +99,9 @@ Deno.serve(async (req: Request) => {
       patch = { status: 'active', prompt_index: 0, display_done: false }
     } else if (action === 'done' && role === 'display' && row.status === 'active') {
       patch = { status: 'done', display_done: true }
-    } else if (action === 'advance' && role === 'teacher' && row.status === 'done' && row.prompt_index < 2) {
+    } else if (action === 'advance' && role === 'teacher' && (row.status === 'active' || row.status === 'done') && row.prompt_index < 2) {
       patch = { status: 'active', prompt_index: row.prompt_index + 1, display_done: false }
-    } else if (action === 'finish' && role === 'teacher' && row.status === 'done' && row.prompt_index === 2) {
+    } else if (action === 'finish' && role === 'teacher' && (row.status === 'active' || row.status === 'done') && row.prompt_index === 2) {
       patch = { status: 'complete', display_done: false }
     }
     if (!patch) return reply({ error: 'That action is not available yet.' }, 409, origin)
