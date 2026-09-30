@@ -482,7 +482,7 @@
               <div class="suggest-box">
                 <div class="suggest-kicker">Prototype suggestion · teacher decides</div>
                 <div class="suggested" id="suggestedText">Select observations to see a suggested checkpoint level.</div>
-                <p class="suggest-text" id="suggestionRationale">The suggestion will use your selected observations and consistency note. SmartBoard movement prompts do not determine the level.</p>
+                <p class="suggest-text" id="suggestionRationale">Your movement ratings will create a preliminary starting suggestion. You can also select developmental indicators you have observed during play and routines.</p>
                 <button class="choice emerging" id="emergingNext">＋ Beginning to show parts of the next indicator</button>
                 <div class="select-levels" id="levelPicks" aria-label="Select or change checkpoint level"></div>
                 <p class="level-help">Tap a level to accept or change the suggested checkpoint.</p>
@@ -582,18 +582,32 @@
     document.getElementById('emergingNext').addEventListener('click',event=>{emergingNext=!emergingNext;event.currentTarget.classList.toggle('selected',emergingNext);userChangedLevel=false;renderSuggestion()});
     function renderSuggestion(){
       const anchors=[...observedAnchors].sort((a,b)=>a-b);
-      const highest=anchors.length?anchors[anchors.length-1]:null;
-      // Odd-numbered levels are suggested only when the teacher selects the next even anchor and marks it as emerging.
+      const scoredRatings=ratings.filter(value=>value!==null&&value>0);
+      const averageRating=scoredRatings.length?scoredRatings.reduce((sum,value)=>sum+value,0)/scoredRatings.length:null;
+      // Movement prompts are supporting physical-performance evidence, not an automatic GOLD score.
+      // They provide a cautious starting point; observed developmental indicators can raise or refine it.
+      const ratingAnchor=averageRating===null?null:(averageRating<1.5?4:averageRating<2.5?6:8);
+      const highest=anchors.length?anchors[anchors.length-1]:ratingAnchor;
+      // Odd-numbered levels are suggested only when the teacher marks the next even anchor as emerging.
       suggestedAnchor=highest===null?null:(emergingNext&&highest<12?highest+1:highest);
       if(!userChangedLevel)selectedLevel=suggestedAnchor;
       const desc=descriptorForCheckpoint(selectedLevel);
       const text=document.getElementById('suggestedText');
       const rationale=document.getElementById('suggestionRationale');
-      if(desc){text.textContent=`Level ${selectedLevel} · ${desc.text}`;const basis=anchors.length?`Based on ${anchors.length} selected developmental indicator${anchors.length===1?'':'s'}${emergingNext?' and a teacher-marked emerging next skill':''}`:'Teacher-selected checkpoint level';rationale.textContent=`${basis}${consistency?`; evidence noted “${consistencyLabel(consistency)}”`:''}. Prompt ratings are supporting notes, not a score. Confirm or change this suggestion using observations across play and time.`;}
-      else {text.textContent='Select observations to see a suggested checkpoint level.';rationale.textContent='The suggestion will use your selected observations and consistency note. SmartBoard movement prompts do not determine the level.';}
+      if(desc){
+        text.textContent='Level '+selectedLevel+' · '+desc.text;
+        const basis=anchors.length
+          ?'Based on '+anchors.length+' selected developmental indicator'+(anchors.length===1?'':'s')+(emergingNext?' and a teacher-marked emerging next skill':'')
+          :'Preliminary suggestion from '+scoredRatings.length+' observed movement prompt'+(scoredRatings.length===1?'':'s')+(emergingNext?' and a teacher-marked emerging next skill':'');
+        const limit=anchors.length?'Use the prompt ratings as supporting notes.':'The check suggests a starting point through Level 8; select a higher developmental indicator if you have observed it during play or routines.';
+        rationale.textContent=basis+(consistency?'; evidence noted “'+consistencyLabel(consistency)+'”':'')+'. '+limit+' Confirm or change this suggestion using observations across play and time.';
+      } else {
+        text.textContent='Choose an observation rating to see a suggested checkpoint level.';
+        rationale.textContent='Your movement ratings will create a preliminary starting suggestion. You can also select developmental indicators you have observed during play and routines.';
+      }
       document.querySelectorAll('.level-pick').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.level)===selectedLevel);b.classList.toggle('system',Number(b.dataset.level)===suggestedAnchor)});
       const next=selectedLevel?levels.find(l=>l.n>selectedLevel):null;
-      document.getElementById('nextEvidence').innerHTML=!selectedLevel?'<strong>Next-level evidence</strong>Select an observed indicator to see what skill comes next.':next?`<strong>Look for evidence of Level ${next.n}</strong>${next.text} Notice this during free play, recess, PE, or transitions and look for the skill across time.`:'<strong>At the highest listed indicator</strong>Continue documenting how the child coordinates complex traveling movements in different play settings.';
+      document.getElementById('nextEvidence').innerHTML=!selectedLevel?'<strong>Next-level evidence</strong>Select an observed indicator to see what skill comes next.':next?'<strong>Look for evidence of Level '+next.n+'</strong>'+next.text+' Notice this during free play, recess, PE, or transitions and look for the skill across time.':'<strong>At the highest listed indicator</strong>Continue documenting how the child coordinates complex traveling movements in different play settings.';
       document.getElementById('parentCopy').textContent=parentLanguage(selectedLevel);
     }
     function descriptorForCheckpoint(n){if(!n)return null;const exact=levels.find(l=>l.n===n);if(exact)return exact;const lower=[...levels].reverse().find(l=>l.n<n);const upper=levels.find(l=>l.n>n);return {n,text:`Shows emerging parts of Level ${upper?.n||12} while building on Level ${lower?.n||1}.`}}
