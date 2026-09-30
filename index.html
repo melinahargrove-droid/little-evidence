@@ -1091,7 +1091,18 @@
           '2d':[[2,'is showing interest in particular playmates'],[4,'is returning to familiar friends for play'],[6,'is building a special friendship'],[8,'is keeping a friendship going through shared play'],[10,'can describe qualities they value in a friend'],[12,'is showing trust and support in friendships']],
           '3a':[[2,'is beginning to notice what other children want'],[4,'is practicing taking turns'],[6,'is starting to share with others'],[8,'is cooperating and sharing ideas and materials'],[10,'is completing projects together with peers'],[12,'can think about their role in group work']],
           '3b':[[2,'is beginning to express feelings when a problem happens'],[4,'is learning to ask an adult for help'],[6,'is suggesting ideas to solve problems with peers'],[8,'is practicing negotiation and compromise'],[10,'is working to solve problems while caring for friendships'],[12,'is considering more than one person’s point of view']]
-        };const list=copy[id]||[];return [...list].reverse().find(x=>x[0]<=n)?.[1]||'is building new skills with others'}
+        };const draftCopy={
+          '7a':'is using hands and fingers with growing control','7b':'is gaining control with drawing and writing tools',
+          '8a':'is understanding more of the words and stories around them','8b':'is following familiar directions with growing independence',
+          '9a':'is adding words to share ideas','9b':'is sharing ideas in ways more people can understand',
+          '9c':'is putting words together to share complete ideas','9d':'is beginning to tell about experiences beyond the here and now',
+          '10a':'is joining back-and-forth conversations','10b':'is learning to adjust communication to people and situations',
+          '11a':'is focusing and staying engaged in activities','11b':'is sticking with challenges and trying again',
+          '11c':'is noticing problems and testing ways to solve them','11d':'is exploring ideas with curiosity',
+          '11e':'is using imagination and trying new ideas','12a':'is remembering people, events, and experiences',
+          '12b':'is connecting what they know with new experiences'
+        };
+        const list=copy[id]||[];return [...list].reverse().find(x=>x[0]<=n)?.[1]||draftCopy[id]||'is building new skills'}
       function familyNext(id,n){
         const nextLevel=d.anchors.find(a=>a.n>n)?.n;
         const steps={
@@ -1103,7 +1114,7 @@
           '3a':{2:'respond to what another child wants',4:'take turns with peers',6:'begin sharing with others',8:'cooperate and share ideas and materials',10:'complete a project together with peers',12:'think about each person’s role in group work'},
           '3b':{2:'express feelings when a problem happens',4:'ask an adult for help',6:'suggest an idea to solve the problem',8:'negotiate and practice compromise',10:'solve problems while caring for friendships',12:'consider more than one person’s point of view'}
         };
-        return (steps[id]&&steps[id][nextLevel])||d.next.toLowerCase().replace(/^look for (the child to |evidence of )?/,'')
+        return (steps[id]&&steps[id][nextLevel])||d.next.toLowerCase().replace(/^look for (the child to |evidence of )?/,'').replace(/[.]$/,'')
       }
       function updateFamilyCopy(){const shown=Number(r.selected)||0;const el=document.getElementById('guidedFamilyCopy');if(el)el.textContent=shown===0?'Your child is building skills in '+d.family.toLowerCase()+'. We will keep noticing what helps.':'Your child '+familyStrength(d.id,shown)+'. Next, we’ll encourage them to '+familyNext(d.id,shown)+'.'}
     }
