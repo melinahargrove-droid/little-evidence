@@ -466,6 +466,44 @@
     .checkpoint-evidence-list{display:grid;gap:7px;margin-top:10px}
     .checkpoint-evidence-list a{color:var(--blue);font-weight:700;overflow-wrap:anywhere}
     .checkpoint-save-status{padding:10px 12px;border-radius:12px;background:#edf6fb;color:#446983}
+    .family-report-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0 auto 16px;max-width:900px}
+    .family-report-pages{display:grid;gap:22px;max-width:900px;margin:0 auto}
+    .family-report-page{position:relative;min-height:850px;padding:42px 46px;background:#fff;border:1px solid #dce8f0;border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+    .family-report-page:after{content:"";position:absolute;right:-75px;top:-95px;width:230px;height:230px;border-radius:50%;background:radial-gradient(ellipse,#e5f1f8 0 42%,#edf6f5 43% 62%,transparent 63%);pointer-events:none}
+    .family-report-brand{position:relative;z-index:1;display:flex;align-items:center;gap:10px;color:var(--blue);font-weight:900;letter-spacing:.06em;font-size:12px;text-transform:uppercase}
+    .family-report-brand span{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:#e5f1f8;color:var(--blue);font-size:20px}
+    .family-report-page h1{font-size:34px;margin:24px 0 6px}
+    .family-report-meta{color:#71879a;font-size:13px;margin-bottom:20px}
+    .family-domain-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .family-domain-card,.family-practice-card{padding:13px 15px;border:1px solid #dce9f1;border-radius:16px;background:#fbfdfe;break-inside:avoid}
+    .family-domain-card h2,.family-practice-card h2{font-size:14px;color:#315d7e;margin:0 0 7px}
+    .family-domain-card ul{margin:0;padding-left:17px;color:#526f84;font-size:12px;line-height:1.4}
+    .family-domain-card li+li{margin-top:4px}
+    .family-empty{padding:15px;border-radius:15px;background:#f2f8fc;color:#698297;font-size:13px;line-height:1.5}
+    .family-report-note{position:absolute;bottom:22px;left:46px;right:46px;margin:0;color:#8a9caa;font-size:10px;line-height:1.4}
+    .family-practice-list{position:relative;z-index:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .family-practice-card{background:linear-gradient(145deg,#f5fafc,#fbfcf7)}
+    .family-practice-card p{margin:0;color:#5a7488;font-size:12px;line-height:1.45}
+    .family-report-actions{display:flex;justify-content:center;gap:10px;margin-top:16px}
+    @media(max-width:700px){.family-report-page{min-height:720px;padding:28px 22px}.family-domain-grid,.family-practice-list{grid-template-columns:1fr}.family-report-note{left:22px;right:22px}.family-report-toolbar{align-items:stretch;flex-direction:column}}
+    @page{size:letter portrait;margin:0}
+    @media print{
+      body.family-report-printing{background:#fff!important}
+      body.family-report-printing *{visibility:hidden!important}
+      body.family-report-printing #parentReportScreen,body.family-report-printing #parentReportScreen *{visibility:visible!important}
+      body.family-report-printing #parentReportScreen{display:block!important;position:absolute;inset:0;width:100%;margin:0;padding:0;background:#fff}
+      body.family-report-printing .family-report-toolbar,body.family-report-printing .family-report-actions,body.family-report-printing .topbar{display:none!important}
+      body.family-report-printing .family-report-pages{display:block;max-width:none;margin:0}
+      body.family-report-printing .family-report-page{width:8.5in;height:11in;min-height:0;max-height:11in;padding:.48in .55in;border:0;border-radius:0;box-shadow:none;overflow:hidden;break-after:page;page-break-after:always}
+      body.family-report-printing .family-report-page:last-child{break-after:auto;page-break-after:auto}
+      body.family-report-printing .family-report-page h1{font-size:27px;margin:14px 0 4px}
+      body.family-report-printing .family-report-meta{margin-bottom:13px}
+      body.family-report-printing .family-domain-grid,body.family-report-printing .family-practice-list{gap:7px}
+      body.family-report-printing .family-domain-card,body.family-report-printing .family-practice-card{padding:9px 11px}
+      body.family-report-printing .family-domain-card h2,body.family-report-printing .family-practice-card h2{font-size:11px;margin-bottom:4px}
+      body.family-report-printing .family-domain-card ul,body.family-report-printing .family-practice-card p{font-size:9px;line-height:1.32}
+      body.family-report-printing .family-report-note{bottom:.28in;left:.55in;right:.55in;font-size:8px}
+    }
     @media(max-width:700px){.checkpoint-nav{padding:8px 10px;font-size:12px}.checkpoint-form-row{align-items:stretch}.checkpoint-form-row button{width:100%}.checkpoint-record-row{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
@@ -711,9 +749,16 @@
               <h2 class="section-title">Saved objectives</h2>
               <div id="activeCheckpointLabel" class="small-note">Choose a child and checkpoint to see saved assessments.</div>
               <div id="checkpointSavedRecords" class="checkpoint-record-list"></div>
+              <button type="button" class="primary wide" id="createParentReport" disabled style="margin-top:16px">Create 2-page family report&nbsp; →</button>
             </section>
           </div>
         </div>
+      </section>
+
+      <section class="screen" id="parentReportScreen" aria-labelledby="parentReportTitle">
+        <div class="family-report-toolbar"><button type="button" class="text-button" id="backToCheckpointReport">← Back to checkpoint</button><span class="badge">Family-friendly · GOLD numbers hidden</span></div>
+        <div class="family-report-pages" id="parentReportPages" aria-live="polite"></div>
+        <div class="family-report-actions"><button type="button" class="secondary" id="closeParentReport">Back to checkpoint</button><button type="button" class="primary" id="printParentReport">Print / Save as PDF&nbsp; ↓</button></div>
       </section>
 
       <section class="screen panel section-card" id="pairScreen" aria-labelledby="pairTitle">
@@ -989,7 +1034,11 @@
       });
       document.getElementById('addCheckpointChild').addEventListener('click',addCheckpointChild);
       document.getElementById('openCheckpoint').addEventListener('click',openOrCreateCheckpoint);
-      document.getElementById('checkpointChildSelect').addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML=''});
+      document.getElementById('checkpointChildSelect').addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true});
+      document.getElementById('createParentReport').addEventListener('click',openParentReport);
+      document.getElementById('backToCheckpointReport').addEventListener('click',()=>show('checkpointScreen'));
+      document.getElementById('closeParentReport').addEventListener('click',()=>show('checkpointScreen'));
+      document.getElementById('printParentReport').addEventListener('click',()=>{document.body.classList.add('family-report-printing');window.print();setTimeout(()=>document.body.classList.remove('family-report-printing'),1200)});
       document.getElementById('checkpointBack').addEventListener('click',()=>show(returnScreenAfterWorkspace||'objectiveLibraryScreen'));
       document.getElementById('checkpointReturnAssessment').addEventListener('click',()=>{const target=returnScreenAfterWorkspace||'guidedObjectiveScreen';show(target);if(target==='guidedObjectiveScreen'&&activeDefinition)void hydrateGuidedObjectiveRecord(activeDefinition);if(target==='recordScreen')void hydrateMovementObjectiveRecord();if(target==='feelingsRecordScreen')void hydrateFeelingsObjectiveRecord();if(target==='limitsRecordScreen')void hydrateLimitsObjectiveRecord()});
       document.getElementById('openCheckpoints').addEventListener('click',()=>{returnScreenAfterWorkspace=activeScreenId();void openCheckpointWorkspace()});
@@ -1103,6 +1152,7 @@
       const contexts={'4':'movement','1a':'feelings','1b':'limits'};
       (data||[]).forEach(record=>{const context=contexts[record.objective_id];if(context)evidenceRecordIds[context]=record.id});
       const grid=document.getElementById('checkpointSavedRecords');
+      document.getElementById('createParentReport').disabled=!data?.length;
       if(!data?.length){grid.innerHTML='<p class="small-note">No objectives saved yet. Save an assessment and it will appear here.</p>';return}
       grid.innerHTML=data.map(record=>{
         const def=(typeof objectiveDefinitions!=='undefined'?objectiveDefinitions:[]).find(item=>item.id===record.objective_id);
@@ -1110,6 +1160,75 @@
         const level=record.final_level===null?'Not selected':record.final_level===0?'Not Yet':'Level '+record.final_level;
         return '<div class="checkpoint-record-row"><span><strong>'+escapeHTML(record.objective_id+' · '+title)+'</strong><br><span class="small-note">'+escapeHTML(level)+'</span></span><span class="small-note">Saved '+new Date(record.updated_at).toLocaleDateString()+'</span></div>'
       }).join('')
+    }
+    const familyDomainOrder=['Social-Emotional','Physical','Language','Cognitive','Literacy','Mathematics','Science','Science & Technology','Social Studies','The Arts','English Language Acquisition'];
+    const familyDomainNames={'Social-Emotional':'Social & Emotional Growth','Physical':'Physical Development','Language':'Language & Communication','Cognitive':'Thinking & Learning','Literacy':'Early Literacy','Mathematics':'Math','Science':'Science & Discovery','Science & Technology':'Science & Technology','Social Studies':'Community & People','The Arts':'Creative Arts','English Language Acquisition':'Learning English'};
+    function parentObjectiveDefinition(id){
+      const d=objectiveDefinitions.find(item=>item.id===String(id));
+      if(d)return d;
+      const legacy={
+        '1a':{id:'1a',domain:'Social-Emotional',family:'Managing Feelings',anchors:feelingsLevels,next:'Name feelings together during stories or everyday moments, and practice a calming choice when your child is already calm.'},
+        '1b':{id:'1b',domain:'Social-Emotional',family:'Classroom Routines',anchors:limitsAnchors,next:'Practice familiar routines with a calm reminder, then invite your child to explain how a rule helps keep people safe.'},
+        '4':{id:'4',domain:'Physical',family:'Moving from Place to Place',anchors:levels,next:'Enjoy active play with running, stepping around objects, and changing direction or pathways at a comfortable pace.'}
+      };
+      return legacy[String(id)]||{id:String(id),domain:'Other Learning',family:'Learning & Growth',anchors:[],next:'Keep exploring this skill through playful everyday activities.'}
+    }
+    function familySkillCopy(record,definition){
+      const n=Number(record.final_level);
+      if(!Number.isFinite(n)||n<=0)return 'This is an area we are continuing to support and learn about.';
+      const anchor=[...(definition.anchors||[])].sort((a,b)=>a.n-b.n).reverse().find(item=>item.n<=n);
+      if(!anchor)return 'Your child is building this skill through everyday experiences.';
+      return anchor.text.replace(/[.]$/,'');
+    }
+    function parentPracticeCopy(record,definition){
+      const id=String(record.objective_id),tasks=record.child_responses?.tasks||[];
+      if(id==='16a'){
+        const missed=tasks.filter(task=>task.matched===false).map(task=>task.prompt?.match(/letter\s+([A-Z])/i)?.[1]).filter(Boolean);
+        if(missed.length)return `Play an uppercase-letter hunt together. Revisit ${[...new Set(missed)].join(' and ')} in storybooks, names, or signs.`;
+        return 'Keep noticing uppercase letters in names, books, and signs. This short check sampled A, M, and S; it did not measure every letter.';
+      }
+      if(id==='20a'){
+        const missed=tasks.filter(task=>task.matched===false).map(task=>String(task.expected||'').match(/\d+/)?.[0]).filter(Boolean);
+        if(missed.length)return `Count small groups together, touching each object once. Revisit groups of ${[...new Set(missed)].join(' and ')} with toys, snacks, or steps.`;
+        return 'Count small groups together, touching each object once, then gradually add more. This check used groups up to four; it did not measure how far your child can count aloud.';
+      }
+      const specific=tasks.filter(task=>task.matched===false).map(task=>String(task.expected||'').replace(/[📏🪣🥃🥣🍎⭐🐟⚽🐶🪑📦🌳🔵🔺🟦🟨🌙🌞🌅🪙🍂🧩●\s]/gu,'').trim()).filter(value=>value.length>1&&value.length<35);
+      if(specific.length&&['16b','20b','20c','21a','21b','22a','22b','22c'].includes(id))return `Revisit ${[...new Set(specific)].slice(0,2).join(' and ')} in a playful game, using real objects or pictures together.`;
+      if(id==='4')return 'Try a playful movement path together: go around a pillow, step over a line, or change direction as you move.';
+      const next=String(definition.next||'').split(';')[0].replace(/[.]$/,'');
+      return next?next.charAt(0).toLowerCase()+next.slice(1):'Explore this skill together through books, play, and daily routines.';
+    }
+    async function openParentReport(){
+      if(!activeCheckpoint||!leUser){toast('Open a child checkpoint first.');return}
+      const button=document.getElementById('createParentReport');button.disabled=true;button.textContent='Building report…';
+      try{
+        const {data,error}=await leDb.from('little_evidence_objective_records').select('objective_id,final_level,suggested_level,teacher_answers,child_responses,updated_at').eq('checkpoint_id',activeCheckpoint.id).order('objective_id');
+        if(error)throw error;
+        renderParentReport((data||[]).filter(record=>record.final_level!==null&&record.final_level!==undefined));
+        document.getElementById('modeTag').textContent='FAMILY REPORT · 2 PAGES';show('parentReportScreen');
+      }catch(error){toast('Could not build the report: '+error.message)}
+      finally{button.disabled=false;button.textContent='Create 2-page family report  →'}
+    }
+    function renderParentReport(records){
+      const season=(activeCheckpoint?.season||'').replace(/^./,letter=>letter.toUpperCase());
+      const caption=activeCheckpoint?`${season} ${activeCheckpoint.school_year}`:'';
+      const byDomain=new Map();
+      records.forEach(record=>{const definition=parentObjectiveDefinition(record.objective_id);if(!byDomain.has(definition.domain))byDomain.set(definition.domain,[]);byDomain.get(definition.domain).push({record,definition})});
+      const domains=[...byDomain.keys()].sort((a,b)=>{const ai=familyDomainOrder.indexOf(a),bi=familyDomainOrder.indexOf(b);return (ai<0?999:ai)-(bi<0?999:bi)||a.localeCompare(b)});
+      const domainMarkup=domains.length?domains.map(domain=>{
+        const items=byDomain.get(domain).sort((a,b)=>String(a.definition.family).localeCompare(String(b.definition.family))).slice(0,3);
+        return `<article class="family-domain-card"><h2>${escapeHTML(familyDomainNames[domain]||domain)}</h2><ul>${items.map(({record,definition})=>`<li><strong>${escapeHTML(definition.family||definition.title||'Area')}:</strong> ${escapeHTML(familySkillCopy(record,definition))}.</li>`).join('')}</ul></article>`
+      }).join(''):'<div class="family-empty">No teacher-approved checkpoint levels have been saved for this checkpoint yet. Complete and save an assessment to add a domain summary.</div>';
+      const candidates=records.map(record=>{const definition=parentObjectiveDefinition(record.objective_id);return {record,definition,practice:parentPracticeCopy(record,definition),hasMiss:!!record.child_responses?.tasks?.some(task=>task.matched===false)}});
+      const picked=[],seenDomains=new Set();
+      candidates.sort((a,b)=>Number(b.hasMiss)-Number(a.hasMiss)||String(b.record.updated_at).localeCompare(String(a.record.updated_at)));
+      for(const item of candidates){if(!seenDomains.has(item.definition.domain)){picked.push(item);seenDomains.add(item.definition.domain)}if(picked.length===8)break}
+      for(const item of candidates){if(picked.length===8)break;if(!picked.includes(item))picked.push(item)}
+      const practiceMarkup=picked.length?picked.map(({definition,practice})=>`<article class="family-practice-card"><h2>${escapeHTML(definition.family||definition.title||'At-home idea')}</h2><p>${escapeHTML(practice)}</p></article>`).join(''):'<div class="family-empty">When there is assessment evidence to build on, this page will offer a few simple activities to try together.</div>';
+      const name=escapeHTML(activeCheckpointChildName||'Your child');
+      const pageOne=`<article class="family-report-page" aria-label="Family report, page 1 of 2"><div class="family-report-brand"><span>✦</span> Early Eagle Academy · Little Evidence</div><h1 id="parentReportTitle">${name}’s learning snapshot</h1><p class="family-report-meta">${escapeHTML(caption)} checkpoint · A look at the skills your child is showing</p><h2 class="section-title">Growth across learning areas</h2><div class="family-domain-grid">${domainMarkup}</div><p class="family-report-note">This snapshot describes skills recorded at this checkpoint. Each learning area includes different skills, so the report shares demonstrated strengths instead of combining them into one score.</p><div class="family-report-brand" style="position:absolute;bottom:22px;right:46px;color:#94a6b2;font-size:10px">PAGE 1 OF 2</div></article>`;
+      const pageTwo=`<article class="family-report-page" aria-label="Family report, page 2 of 2"><div class="family-report-brand"><span>♡</span> Little things to practice together</div><h1>Ideas for home</h1><p class="family-report-meta">${name} · Small playful moments help new skills grow.</p><div class="family-practice-list">${practiceMarkup}</div><p class="family-report-note">These ideas are based on the checkpoint entries saved by your child’s teacher. Short activities are samples, so a result on one task does not describe everything your child knows.</p><div class="family-report-brand" style="position:absolute;bottom:22px;right:46px;color:#94a6b2;font-size:10px">PAGE 2 OF 2</div></article>`;
+      document.getElementById('parentReportPages').innerHTML=pageOne+pageTwo;
     }
     function openCheckpointFromAssessment(){
       returnScreenAfterWorkspace=activeScreenId();
