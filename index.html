@@ -245,7 +245,7 @@
 
     <main class="layout">
       <section class="screen active" id="objectiveScreen" aria-labelledby="objectiveTitle">
-        <div class="objective-switch"><button id="openFeelings">Explore Objective 1a · Manages Feelings&nbsp; →</button></div>
+        <div class="objective-switch"><button id="openFeelings">Explore Objective 1a · Manages Feelings&nbsp; →</button><button id="openLimits">Explore Objective 1b · Follows Limits&nbsp; →</button></div>
         <div class="panel objective-head compact">
           <div>
             <p class="eyebrow">Gross Motor · Objective 4</p>
@@ -281,7 +281,7 @@
       </section>
 
       <section class="screen" id="feelingsObjectiveScreen" aria-labelledby="feelingsTitle">
-        <div class="objective-switch"><button id="backToTraveling">← Objective 4 · Traveling Skills</button></div>
+        <div class="objective-switch"><button id="backToTraveling">← Objective 4 · Traveling Skills</button><button id="openLimitsFromFeelings">Explore Objective 1b · Follows Limits&nbsp; →</button></div>
         <div class="panel objective-head compact">
           <div>
             <p class="eyebrow">Social-Emotional · Objective 1a</p>
@@ -385,6 +385,45 @@
           </aside>
         </div>
         <div class="bottom-actions"><button class="text-button" id="feelingsBack">← Back to objective</button><button class="primary" id="finishFeelings" disabled>Finish teacher review&nbsp; ✓</button></div>
+      </section>
+
+      <section class="screen" id="limitsObjectiveScreen" aria-labelledby="limitsTitle">
+        <div class="objective-switch"><button id="backToTravelingFromLimits">← Objective 4 · Traveling Skills</button><button id="backToFeelingsFromLimits">← Objective 1a · Manages Feelings</button></div>
+        <div class="panel objective-head compact"><div><p class="eyebrow">Social-Emotional · Objective 1b</p><h1 id="limitsTitle">Follows Limits and Expectations</h1><p class="subtitle">Notices, follows, and begins to understand familiar expectations in the classroom and beyond.</p></div><div class="start-card"><h3>Ready to begin?</h3><p>Think about everyday rules, redirection, and transitions. No SmartBoard task is needed.</p><button class="primary wide" id="startLimitsCheck">Start Guided Check&nbsp; →</button></div></div>
+        <details class="panel objective-reference"><summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary>
+          <div class="section-grid"><section class="panel section-card"><h2 class="section-title">Developmental progression</h2><div class="level-list">
+            <div class="level-row"><div class="level-n">NY</div><div><strong>Not Yet</strong><span>Needs substantial adult support to notice or respond to limits.</span></div></div>
+            <div class="level-row"><div class="level-n">1–2</div><div><strong>Notices and responds to adult cues</strong><span>Watches adult actions and responds to changes in tone or expression.</span></div></div>
+            <div class="level-row"><div class="level-n">3–4</div><div><strong>Responds to redirection</strong><span>Begins to change behavior after an adult reminder and accepts redirection.</span></div></div>
+            <div class="level-row"><div class="level-n">5–6</div><div><strong>Follows familiar expectations</strong><span>Manages classroom rules, routines, and transitions with reminders.</span></div></div>
+            <div class="level-row"><div class="level-n">7–8</div><div><strong>Applies expectations in similar new situations</strong><span>Uses familiar rules in another classroom or group situation.</span></div></div>
+            <div class="level-row"><div class="level-n">9–10</div><div><strong>Understands why rules matter</strong><span>Explains reasons for rules, sometimes with a prompt or example.</span></div></div>
+            <div class="level-row"><div class="level-n">11–12</div><div><strong>Understands broad “big rule” ideas</strong><span>Reasons about safety, kindness, respect, and caring for people and materials.</span></div></div>
+            <p class="small-note">Odd-numbered points reflect emerging or in-between evidence. Confirm with the official GOLD continuum and observations over time.</p>
+          </div></section>
+          <aside class="panel section-card"><h2 class="section-title">Examples to notice</h2><div class="examples">
+            <div class="example"><span class="checkmark">✓</span><span>Accepts an adult's redirection and changes what they are doing.</span></div>
+            <div class="example"><span class="checkmark">✓</span><span>Follows familiar classroom routines with only occasional reminders.</span></div>
+            <div class="example"><span class="checkmark">✓</span><span>Uses a familiar expectation in a new but similar setting.</span></div>
+            <div class="example"><span class="checkmark">✓</span><span>Explains that a rule helps keep people safe or materials cared for.</span></div></div></aside></div>
+          <div class="section-grid"><section class="panel section-card"><h2 class="section-title">How to collect evidence</h2><p class="subtitle" style="font-size:15px">Observe regular classroom routines, transitions, adult redirection, and familiar expectations used in a new situation. Notice what the child does before and after a reminder, and whether understanding carries across adults and settings.</p></section>
+            <section class="panel section-card"><h2 class="section-title">Optional child prompt</h2><p class="small-note">For higher-level understanding, ask in conversation: “Why can we run outside but not in the hallway?” or “What does it mean to take care of our classroom?” A spoken response supports your observation; it is never required.</p></section></div>
+        </details>
+      </section>
+      <section class="screen" id="limitsRecordScreen" aria-labelledby="limitsRecordTitle">
+        <div class="panel record-head"><div><p class="eyebrow">Objective 1b · Teacher recording</p><h1 id="limitsRecordTitle">Follows Limits and Expectations</h1><p>Use real classroom observations. Your taps create a suggested continuum point; you make the final decision.</p></div><span class="badge"><span>●</span> Teacher observation · no child task</span></div>
+        <div class="record-grid"><div class="record-main">
+          <section class="panel section-card"><h2 class="section-title">Guided checkpoint questions</h2><p class="small-note" style="margin:-7px 0 14px">Tap the closest answer. The follow-up changes based on what you observed. No typing is needed.</p>
+            <div class="guided-question" id="limitsQuestionPanel" aria-live="polite"><div class="question-progress" id="limitsQuestionProgress">Question 1 of 3</div><h3 id="limitsQuestionTitle"></h3><p class="small-note" id="limitsQuestionHelp"></p><div class="question-choices" id="limitsQuestionChoices"></div><div id="limitsChildPromptBox" class="observe-callout hidden"></div><div class="question-actions"><button class="text-button" id="limitsQuestionBack" type="button" disabled>← Back</button><button class="primary" id="limitsQuestionNext" type="button" disabled>Next question&nbsp; →</button></div></div>
+            <div class="answer-summary hidden" id="limitsAnswerSummary"></div>
+          </section>
+          <section class="panel section-card"><h2 class="section-title">Quick note & evidence</h2><details class="optional-note"><summary>Add a note (optional)</summary><label class="field-label" for="limitsNotes">What was happening, and what did the child do?</label><textarea id="limitsNotes" placeholder="Optional note"></textarea></details><div class="evidence-tools"><button class="secondary" data-limits-evidence="Photo">＋ Photo</button><button class="secondary" data-limits-evidence="Video">＋ Video</button><button class="secondary" data-limits-evidence="Voice note">＋ Voice note</button></div><p class="small-note" id="limitsEvidenceStatus">Notes and evidence are optional. The guided taps are enough to create a suggestion.</p></section>
+        </div><aside class="record-side">
+          <section class="panel section-card"><h2 class="section-title">Checkpoint support</h2><div class="suggest-box"><div class="suggest-kicker">Prototype suggestion · teacher decides</div><div class="suggested" id="limitsSuggested">Answer the guided questions to see a suggested continuum point.</div><p class="suggest-text" id="limitsRationale">The suggested point uses observed behavior and how often it appears. Notes are optional.</p><div class="select-levels hidden" id="limitsLevelPicks" aria-label="Select or change checkpoint level"></div><p class="level-help">After answering, tap a level to accept or change the suggestion.</p></div><p class="small-note">Teaching Strategies GOLD remains the checkpoint record. You make the final level decision there.</p></section>
+          <section class="panel section-card"><h2 class="section-title">Evidence to look for next</h2><div class="next-evidence" id="limitsNextEvidence"><strong>Evidence to look for next</strong>Answer the guided questions to see what to notice.</div></section>
+          <section class="parent-copy"><strong>Family-friendly strength & next step</strong><p id="limitsParentCopy">Your child is learning classroom routines. We will continue offering calm, consistent reminders.</p></section>
+        </aside></div>
+        <div class="bottom-actions"><button class="text-button" id="limitsBackToObjective">← Back to objective</button><button class="primary" id="finishLimits" disabled>Finish teacher review&nbsp; ✓</button></div>
       </section>
 
       <section class="screen panel section-card" id="pairScreen" aria-labelledby="pairTitle">
@@ -745,6 +784,140 @@
     }
     function feelingsParentLanguage(n){if(n===null)return 'We are learning what helps your child manage big feelings. We will keep offering support and noticing what works in everyday routines.';if(n==='Not Yet')return 'Your child is learning what helps them feel calm. We will continue offering comfort and support during everyday routines.';const numeric=Number(n);const lower=[...feelingsLevels].reverse().find(level=>level.n<=numeric)||feelingsLevels[0];const strengths={2:'is learning to feel calm with help from a trusted adult',4:'is beginning to seek a familiar person or comfort item when upset',6:'is practicing waiting, adjusting, or trying another plan when something feels hard',8:'is finding appropriate ways to express strong feelings',10:'is choosing strategies to help manage big feelings',12:'is beginning to anticipate challenging moments and use strategies independently'};const next=feelingsLevels.find(level=>level.n>numeric);const nextSteps={2:'accept comfort and return to play',4:'wait briefly or try another plan with support',6:'express strong feelings in safe, clear ways',8:'choose a helpful strategy when feelings grow',10:'use a strategy before a difficult moment becomes overwhelming',12:'keep using strategies in different routines'};return `Your child ${strengths[lower.n]||'is growing in managing big feelings'}. Next, we’ll encourage them to ${nextSteps[next?.n]||'keep using helpful strategies in different routines'}.`;}
 
+    // Objective 1b is a teacher-observation interview; no child-facing task or typed answer is required.
+    const limitsAnchors=[
+      {n:2,text:'Responds to changes in an adult’s tone of voice and expression.'},
+      {n:4,text:'Accepts redirection from adults.'},
+      {n:6,text:'Manages classroom rules, routines, and transitions with occasional reminders.'},
+      {n:8,text:'Applies basic rules in new but similar situations.'},
+      {n:10,text:'Understands and explains reasons for rules.'},
+      {n:12,text:'Understands safety, kindness, respect, and care for people and materials.'}
+    ];
+    const limitsBehaviors=[
+      {id:'notyet',label:'Needs substantial adult support',detail:'The child is not yet responding consistently to limits or reminders.'},
+      {id:'cues',label:'Notices or responds to adult cues',detail:'The child watches adults and responds to tone of voice or facial expression.'},
+      {id:'redirection',label:'Changes behavior after direct redirection',detail:'The child accepts an adult reminder and changes what they are doing.'},
+      {id:'routine',label:'Follows familiar routines and rules',detail:'The child manages classroom expectations and transitions, sometimes with reminders.'},
+      {id:'transfer',label:'Uses expectations in a similar new situation',detail:'The child carries a familiar rule to another activity, room, or group.'},
+      {id:'reason',label:'Explains why a rule matters',detail:'The child gives a reason for a classroom expectation.'},
+      {id:'bigIdeas',label:'Understands safety, kindness, respect, and care',detail:'The child connects expectations to caring for people and materials.'},
+      {id:'unsure',label:'I’m not sure / I need more evidence',detail:'I have not seen enough to choose a clear behavior yet.'}
+    ];
+    const limitsBranches={
+      notyet:{title:'What do you notice when an adult gives a cue or reminder?',choices:[
+        {id:'ny',label:'The child is not yet responding, even with support.',point:'Not Yet'},
+        {id:'l1',label:'The child notices adult actions and is beginning to respond.',point:1},
+        {id:'l2',label:'The child responds to changes in adult tone or expression.',point:2},
+        {id:'unsure',label:'It varies, or I need another example.',point:null}
+      ]},
+      cues:{title:'How does the child respond to an adult’s tone or expression?',choices:[
+        {id:'l1',label:'The child notices adult actions but is just beginning to respond.',point:1},
+        {id:'l2',label:'The child responds to changes in tone of voice or expression.',point:2},
+        {id:'unsure',label:'It varies, or I need another example.',point:null}
+      ]},
+      redirection:{title:'After an adult redirects the child, what usually happens?',choices:[
+        {id:'l3',label:'The child is beginning to change behavior but needs repeated cues.',point:3},
+        {id:'l4',label:'The child accepts redirection and changes what they are doing.',point:4},
+        {id:'unsure',label:'It varies, or I need another example.',point:null}
+      ]},
+      routine:{title:'How much support does the child need with familiar routines?',choices:[
+        {id:'l5',label:'The child follows familiar expectations with frequent reminders.',point:5},
+        {id:'l6',label:'The child manages familiar rules, routines, and transitions with occasional reminders.',point:6},
+        {id:'l7',label:'The child is usually independent with familiar routines; new situations still take support.',point:7},
+        {id:'unsure',label:'It varies, or I need another example.',point:null}
+      ]},
+      transfer:{title:'What happens when a familiar rule comes up in a similar new situation?',choices:[
+        {id:'l7',label:'The child is beginning to apply the rule but still needs a reminder.',point:7},
+        {id:'l8',label:'The child applies the basic rule in a new but similar situation.',point:8},
+        {id:'l9',label:'The child is beginning to use the rule across more than one similar situation.',point:9},
+        {id:'unsure',label:'It varies, or I need another example.',point:null}
+      ]},
+      reason:{title:'How does the child explain why an expectation matters?',childPrompt:'Optional child prompt: “Why can we run outside but not in the hallway?”',choices:[
+        {id:'l9',label:'The child is beginning to explain after an adult asks or gives an example.',point:9},
+        {id:'l10',label:'The child understands and explains a reason for a rule.',point:10},
+        {id:'l11',label:'The child is beginning to apply the reason to a different situation.',point:11},
+        {id:'unsure',label:'It varies, or I need another example.',point:null}
+      ]},
+      bigIdeas:{title:'How does the child show understanding of broad classroom expectations?',childPrompt:'Optional child prompt: “What does it mean to take care of our classroom?”',choices:[
+        {id:'l11',label:'The child is beginning to connect rules with safety, kindness, respect, or care.',point:11},
+        {id:'l12',label:'The child demonstrates understanding of these “big rule” ideas.',point:12},
+        {id:'l13',label:'The child applies these ideas across different situations and people.',point:13},
+        {id:'unsure',label:'It varies, or I need another example.',point:null}
+      ]},
+      unsure:{title:'What would give you the clearest next example?',choices:[
+        {id:'observeCue',label:'Watch how the child responds to an adult cue or redirection.',point:null},
+        {id:'observeRoutine',label:'Watch a familiar routine or transition.',point:null},
+        {id:'observeTransfer',label:'Watch whether the child uses a familiar rule in a new setting.',point:null}
+      ]}
+    };
+    const limitsFrequency=[
+      {id:'once',label:'One clear moment'},
+      {id:'repeated',label:'More than once in a familiar routine'},
+      {id:'varied',label:'Across routines, settings, or adults'},
+      {id:'inconsistent',label:'It varies / I need more evidence'}
+    ];
+    const limitsAnswers={behavior:null,detail:null,frequency:null,childEvidence:null};
+    let limitsStep=0,limitsReady=false,limitsSuggested=null,limitsSelected=null,limitsUserChanged=false;
+    limitsAnchors.forEach(level=>{const row=document.createElement('div');row.className='level-row';row.innerHTML='<div class="level-n">'+level.n+'</div><div><strong>Level '+level.n+'</strong><span>'+level.text+'</span></div>';document.querySelector('#limitsObjectiveScreen .level-list').append(row)});
+    const limitsLevelPicks=document.getElementById('limitsLevelPicks');
+    const limitsNY=document.createElement('button');limitsNY.type='button';limitsNY.className='level-pick';limitsNY.textContent='NY';limitsNY.setAttribute('aria-label','Select Not Yet');limitsNY.dataset.limitLevel='Not Yet';limitsLevelPicks.append(limitsNY);
+    for(let n=1;n<=13;n++){const button=document.createElement('button');button.type='button';button.className='level-pick';button.textContent=n;button.setAttribute('aria-label','Select Objective 1b checkpoint level '+n);button.dataset.limitLevel=String(n);limitsLevelPicks.append(button)}
+    limitsLevelPicks.querySelectorAll('[data-limit-level]').forEach(button=>button.addEventListener('click',()=>{limitsSelected=button.dataset.limitLevel==='Not Yet'?'Not Yet':Number(button.dataset.limitLevel);limitsUserChanged=true;renderLimitsSuggestion()}));
+    function limitsClearResult(){limitsReady=false;limitsSuggested=null;limitsSelected=null;limitsUserChanged=false;limitsLevelPicks.classList.add('hidden');document.getElementById('finishLimits').disabled=true}
+    function renderLimitsQuestion(){
+      const title=document.getElementById('limitsQuestionTitle'),help=document.getElementById('limitsQuestionHelp'),box=document.getElementById('limitsQuestionChoices'),promptBox=document.getElementById('limitsChildPromptBox');
+      document.getElementById('limitsQuestionProgress').textContent='Question '+(limitsStep+1)+' of 3';
+      let question;
+      if(limitsStep===0)question={title:'During classroom routines, what best describes the child’s response to expectations?',help:'Choose the closest behavior you have observed.',choices:limitsBehaviors};
+      else if(limitsStep===1)question=limitsBranches[limitsAnswers.behavior];
+      else question={title:'How often have you seen this response?',help:'Think about familiar routines and more than one setting or adult.',choices:limitsFrequency};
+      title.textContent=question.title;help.textContent=question.help||'Choose the closest description. The child’s spoken response is optional supporting evidence.';
+      box.innerHTML='';promptBox.classList.add('hidden');promptBox.innerHTML='';
+      question.choices.forEach(choice=>{const button=document.createElement('button');button.type='button';button.className='question-choice';button.innerHTML='<span><strong>'+choice.label+'</strong>'+(choice.detail||'')+'</span>';let selected=limitsStep===0?limitsAnswers.behavior===choice.id:limitsStep===1?limitsAnswers.detail?.id===choice.id:limitsAnswers.frequency===choice.id;button.classList.toggle('selected',!!selected);button.setAttribute('aria-pressed',String(!!selected));button.addEventListener('click',()=>{if(limitsStep===0){if(limitsAnswers.behavior!==choice.id){limitsAnswers.detail=null;limitsAnswers.frequency=null;limitsAnswers.childEvidence=null;limitsClearResult()}limitsAnswers.behavior=choice.id}else if(limitsStep===1){if(limitsAnswers.detail?.id!==choice.id){limitsAnswers.frequency=null;limitsAnswers.childEvidence=null;limitsClearResult()}limitsAnswers.detail={id:choice.id,point:choice.point,label:choice.label}}else{limitsAnswers.frequency=choice.id;limitsClearResult()}renderLimitsQuestion()});box.append(button)});
+      if(limitsStep===1&&question.childPrompt){promptBox.classList.remove('hidden');promptBox.innerHTML='<strong>Optional supporting prompt</strong><p>'+question.childPrompt+'</p><div class="question-choices"><button class="question-choice" type="button" data-child-evidence="own">Explains in their own words</button><button class="question-choice" type="button" data-child-evidence="cue">Explains after an adult cue</button><button class="question-choice" type="button" data-child-evidence="skip">Not asked / unclear</button></div>';promptBox.querySelectorAll('[data-child-evidence]').forEach(button=>{button.classList.toggle('selected',limitsAnswers.childEvidence===button.dataset.childEvidence);button.addEventListener('click',()=>{limitsAnswers.childEvidence=button.dataset.childEvidence;renderLimitsQuestion()})})}
+      const back=document.getElementById('limitsQuestionBack'),next=document.getElementById('limitsQuestionNext');back.disabled=limitsStep===0;back.classList.toggle('hidden',limitsStep===0);next.textContent=limitsStep===2?'See suggested continuum point  →':'Next question  →';next.disabled=limitsStep===0?!limitsAnswers.behavior:limitsStep===1?!limitsAnswers.detail:!limitsAnswers.frequency;
+      document.getElementById('limitsQuestionPanel').classList.remove('hidden');document.getElementById('limitsAnswerSummary').classList.add('hidden');
+    }
+    function finishLimitsQuestions(){
+      limitsReady=true;limitsSuggested=limitsAnswers.detail?.point??null;limitsSelected=limitsSuggested;limitsUserChanged=false;
+      const behavior=limitsBehaviors.find(item=>item.id===limitsAnswers.behavior)?.label||'More evidence needed';
+      const detail=limitsAnswers.detail?.label||'No clear example yet';
+      const frequency=limitsFrequency.find(item=>item.id===limitsAnswers.frequency)?.label||'Not sure';
+      const child=limitsAnswers.childEvidence&&limitsAnswers.childEvidence!=='skip'?'Optional child response: '+(limitsAnswers.childEvidence==='own'?'explained in their own words':'explained after an adult cue')+'.':'';
+      document.getElementById('limitsAnswerSummary').innerHTML='<div><strong>What the child usually does</strong>'+behavior+'</div><div><strong>What happens in more detail</strong>'+detail+'</div><div><strong>How often it is seen</strong>'+frequency+'</div>'+(child?'<div><strong>Supporting spoken evidence</strong>'+child+'</div>':'')+'<button class="secondary" id="limitsEditAnswers" type="button">← Change answers</button>';
+      document.getElementById('limitsQuestionPanel').classList.add('hidden');document.getElementById('limitsAnswerSummary').classList.remove('hidden');document.getElementById('finishLimits').disabled=false;limitsLevelPicks.classList.remove('hidden');renderLimitsSuggestion();
+      document.getElementById('limitsEditAnswers').addEventListener('click',()=>{limitsStep=0;limitsClearResult();renderLimitsQuestion()});
+    }
+    function limitsDescription(n){if(n==='Not Yet')return 'Needs substantial adult support to notice or respond to expectations.';const exact=limitsAnchors.find(level=>level.n===Number(n));if(exact)return exact.text;if(Number(n)===13)return 'Applies broad expectations across varied situations; confirm with the official continuum.';const lower=[...limitsAnchors].reverse().find(level=>level.n<Number(n));const upper=limitsAnchors.find(level=>level.n>Number(n));return 'Shows emerging parts of Level '+(upper?.n||12)+' while building on Level '+(lower?.n||2)+'.'}
+    function renderLimitsSuggestion(){
+      if(!limitsReady)return;
+      const selected=limitsSelected,desc=limitsDescription(selected),text=document.getElementById('limitsSuggested'),rationale=document.getElementById('limitsRationale');
+      if(selected===null){text.textContent='Not enough evidence yet';rationale.textContent='Your answers did not identify a clear response. Observe a routine, redirection, or a similar new situation, then run the guided check again.'}
+      else if(selected==='Not Yet'){text.textContent='Not Yet · needs substantial adult support';rationale.textContent='Based on your answers, the child is not yet responding consistently to adult limits. Confirm with observations across routines and time.'}
+      else{text.textContent='Level '+selected+' · '+desc;const confidence={once:'A preliminary suggestion from one clear moment.',repeated:'Seen more than once in a familiar routine.',varied:'Seen across routines, settings, or adults.',inconsistent:'The response varies; gather another example before settling on a checkpoint.'}[limitsAnswers.frequency];rationale.textContent='Based on your tap answers. '+confidence+' Review the evidence and confirm or change the suggested point.'}
+      document.querySelectorAll('[data-limit-level]').forEach(button=>{button.classList.toggle('selected',String(button.dataset.limitLevel)===String(selected));button.classList.toggle('system',String(button.dataset.limitLevel)===String(limitsSuggested))});
+      const number=Number(selected),next=Number.isFinite(number)?limitsAnchors.find(level=>level.n>number):null;
+      document.getElementById('limitsNextEvidence').innerHTML=selected===null?'<strong>What to observe next</strong>Notice a natural routine, redirection, or a rule used in a new situation.':selected==='Not Yet'?'<strong>Evidence to look for next</strong>Notice whether the child begins to respond to adult actions, tone, or expression.':next?'<strong>Look for evidence of Level '+next.n+'</strong>'+next.text+' Notice this across classroom routines, adults, or settings.':'<strong>Continue documenting</strong>Look for the child to apply broad expectations across different situations and over time.';
+      document.getElementById('limitsParentCopy').textContent=limitsParentLanguage(selected);
+    }
+    function limitsParentLanguage(n){
+      if(n===null)return 'We are learning how your child responds to classroom expectations. We will keep using calm, clear reminders and noticing what helps.';
+      if(n==='Not Yet')return 'Your child is learning classroom routines. We will continue offering calm, consistent reminders.';
+      const num=Number(n),lower=[...limitsAnchors].reverse().find(level=>level.n<=num)||limitsAnchors[0],next=limitsAnchors.find(level=>level.n>num);
+      const strengths={2:'is learning to respond to adult cues during classroom routines',4:'is beginning to respond when an adult redirects them',6:'is becoming independent with familiar classroom rules and routines',8:'is beginning to use familiar expectations in new but similar situations',10:'is learning why classroom expectations matter',12:'understands ideas like safety, kindness, respect, and caring for materials'};
+      const nextSteps={2:'respond to an adult reminder',4:'follow familiar rules and routines with fewer reminders',6:'use familiar expectations in new settings and situations',8:'explain why classroom expectations matter',10:'apply ideas like safety, kindness, and respect during different routines',12:'keep using these ideas across new situations and with different people'};
+      return 'Your child '+(strengths[lower.n]||'is growing in following classroom expectations')+'. Next, we’ll encourage them to '+(nextSteps[next?.n]||'keep using these ideas in different routines')+'.';
+    }
+    document.getElementById('openLimits').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1b';show('limitsObjectiveScreen')});
+    document.getElementById('openLimitsFromFeelings').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1b';show('limitsObjectiveScreen')});
+    document.getElementById('backToTravelingFromLimits').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';show('objectiveScreen')});
+    document.getElementById('backToFeelingsFromLimits').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsObjectiveScreen')});
+    document.getElementById('startLimitsCheck').addEventListener('click',()=>{limitsStep=0;limitsAnswers.behavior=null;limitsAnswers.detail=null;limitsAnswers.frequency=null;limitsAnswers.childEvidence=null;limitsClearResult();document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1b';show('limitsRecordScreen');renderLimitsQuestion()});
+    document.getElementById('limitsQuestionNext').addEventListener('click',()=>{if(limitsStep<2){limitsStep++;renderLimitsQuestion()}else finishLimitsQuestions()});
+    document.getElementById('limitsQuestionBack').addEventListener('click',()=>{if(limitsStep>0){limitsStep--;renderLimitsQuestion()}});
+    document.getElementById('limitsBackToObjective').addEventListener('click',()=>show('limitsObjectiveScreen'));
+    document.getElementById('finishLimits').addEventListener('click',()=>toast('Teacher review complete. The checkpoint is still recorded in Teaching Strategies GOLD.'));
+    document.querySelectorAll('[data-limits-evidence]').forEach(button=>button.addEventListener('click',()=>{const type=button.dataset.limitsEvidence;document.getElementById('limitsEvidenceStatus').textContent=type+' capture is a placeholder in this prototype; attach supporting evidence in your usual record.';toast(type+' capture is shown as a prototype control.')}));
     const PAIR_API='https://pvgewltlxenguxmhiszm.supabase.co/functions/v1/little-evidence-session';
     const PAIR_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
     let pairRole=null,pairSessionId=null,pairToken=null,pairPollTimer=null,controllerRating=null,lastDisplayStatus='';
