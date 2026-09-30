@@ -214,6 +214,174 @@
     .app.scenario-mode .layout{max-width:none}
     .app.scenario-mode #guidedObjectiveScreen{width:100%;min-height:100vh}
     @media(max-width:760px){.objective-library-grid,.guided-result-grid{grid-template-columns:1fr}.library-card{align-items:flex-start;flex-direction:column}.library-card .secondary{width:100%}.scenario-choices{grid-template-columns:1fr}.child-scenario{min-height:100vh}}
+    /* Child view: warm watercolor activity screens, with teacher controls kept off the display. */
+    .app.child-mode,.app.scenario-mode{
+      background:
+        radial-gradient(ellipse at 6% 10%,rgba(202,228,241,.55) 0 8%,transparent 26%),
+        radial-gradient(ellipse at 96% 16%,rgba(233,222,188,.35) 0 7%,transparent 24%),
+        radial-gradient(ellipse at 86% 94%,rgba(207,229,215,.42) 0 9%,transparent 28%),
+        #f8f7f1;
+    }
+    .app.child-mode .move-screen,.app.scenario-mode #guidedObjectiveScreen{color:#294d68}
+    .app.child-mode .move-screen{
+      position:relative;isolation:isolate;overflow:hidden;
+      background:
+        radial-gradient(ellipse at 12% 94%,rgba(220,235,222,.48) 0 12%,transparent 34%),
+        radial-gradient(ellipse at 88% 8%,rgba(216,235,245,.62) 0 14%,transparent 36%),
+        #fbfaf6;
+    }
+    .app.child-mode .move-screen:before,.app.child-mode .move-screen:after{
+      position:absolute;z-index:0;pointer-events:none;line-height:1;
+      color:#dfbd68;opacity:.52;font-size:clamp(30px,4vw,54px);
+    }
+    .app.child-mode .move-screen:before{content:"✦";right:7%;top:8%;transform:rotate(12deg)}
+    .app.child-mode .move-screen:after{content:"✿";left:6%;bottom:7%;color:#94b9a2;transform:rotate(-13deg)}
+    .app.child-mode .move-inner{position:relative;z-index:1;width:min(100%,1260px)}
+    .app.child-mode .step-label{
+      display:inline-flex;align-items:center;gap:10px;margin:0 auto 18px;
+      padding:10px 18px;border:1px solid #d8e7e8;border-radius:999px;
+      background:#fffdf7;color:#47748d;box-shadow:0 4px 14px rgba(52,87,112,.07);
+      font-size:clamp(15px,1.5vw,20px);font-weight:800;letter-spacing:.01em;text-transform:none
+    }
+    .app.child-mode .step-label:before{content:"✦";color:#d5ae4f;font-size:1.1em}
+    .app.child-mode .move-screen h1{
+      margin:0 0 10px;color:#244f73;font-family:"Andika","Trebuchet MS",sans-serif;
+      font-size:clamp(34px,4.4vw,58px);letter-spacing:-.02em
+    }
+    .app.child-mode .move-screen .direction{
+      width:fit-content;max-width:min(100%,1080px);margin:8px auto 20px;padding:10px 22px;
+      color:#244f73;font-family:"Andika","Trebuchet MS",sans-serif;
+      font-size:clamp(36px,5.3vw,72px);line-height:1.14;letter-spacing:-.025em;
+      background:#fffdf8;border:1px solid #e6e3d5;border-radius:24px;
+      box-shadow:0 8px 22px rgba(59,84,101,.08)
+    }
+    .app.child-mode .hear-direction{
+      display:inline-flex;align-items:center;gap:9px;margin:0 auto 10px;
+      border:1px solid #d4e5ed;border-radius:999px;padding:11px 18px;
+      background:#fff;color:#346e99;font-size:clamp(16px,1.6vw,20px);font-weight:800;
+      box-shadow:0 4px 12px rgba(45,89,119,.07)
+    }
+    .app.child-mode .hear-direction:hover{background:#edf7fd;transform:translateY(-1px)}
+    .app.child-mode .illustration{
+      position:relative;isolation:isolate;overflow:hidden;
+      width:min(78vw,980px);height:min(40vh,380px);min-height:210px;
+      margin:0 auto 14px;border:1px solid #dfe9e5;border-radius:34px;
+      background:
+        radial-gradient(ellipse at 13% 20%,rgba(255,255,255,.85) 0 14%,transparent 35%),
+        linear-gradient(145deg,#eef7fa 0%,#f6f8ef 100%);
+      box-shadow:0 10px 28px rgba(56,93,116,.09),inset 0 0 0 7px rgba(255,255,255,.55)
+    }
+    .app.child-mode .illustration:before,.app.child-mode .illustration:after{
+      content:"✦";position:absolute;z-index:2;pointer-events:none;color:#dfbb61;opacity:.7;font-size:28px
+    }
+    .app.child-mode .illustration:before{left:8%;top:15%;transform:rotate(-12deg)}
+    .app.child-mode .illustration:after{right:8%;top:27%;content:"✿";color:#8db49b;transform:rotate(14deg)}
+    .app.child-mode .illustration svg{max-height:100%;filter:drop-shadow(0 5px 5px rgba(49,84,105,.07))}
+    .app.child-mode .illustration svg>g{transform-box:fill-box;transform-origin:center bottom;animation:childBounce 2.8s ease-in-out infinite}
+    .app.child-mode .move-tip{
+      display:inline-block;margin:0 auto 14px;padding:8px 16px;border-radius:999px;
+      background:#eef5eb;color:#587665;font-size:clamp(16px,1.65vw,21px);font-weight:700
+    }
+    .app.child-mode .progress{display:flex;justify-content:center;gap:12px;margin-top:10px}
+    .app.child-mode .progress i{
+      width:18px;height:18px;border:2px solid #c8dce5;border-radius:50%;
+      background:#fff;box-shadow:0 2px 4px rgba(37,76,101,.08);transition:all .2s ease
+    }
+    .app.child-mode .progress i.done{border-color:#7da88d;background:#a8c6a7;transform:scale(1.12)}
+    .app.child-mode .celebration{background:radial-gradient(ellipse at 50% 5%,#e8f4fa 0 20%,transparent 52%),#fbfaf6}
+    .app.child-mode .celebration .move-inner{max-width:960px}
+    .app.child-mode .celebration .confetti span{animation:floatConfetti 2.7s ease-in-out infinite}
+    .app.child-mode .celebration .confetti span:nth-child(2n){animation-delay:.35s}
+    .app.child-mode .celebration .subtitle{max-width:800px;margin:10px auto 26px;font-size:clamp(22px,3vw,36px);line-height:1.4}
+    .app.child-mode .celebration .primary{min-width:230px;padding:17px 30px;border-radius:21px;font-size:clamp(20px,2vw,26px)}
+    .app.scenario-mode #guidedObjectiveScreen{min-height:100vh;min-height:100dvh;padding:clamp(12px,2.2vw,28px);display:flex}
+    .app.scenario-mode #guidedObjectiveChild{width:100%;display:flex}
+    .app.scenario-mode .child-scenario{
+      position:relative;isolation:isolate;overflow:hidden;flex:1;width:min(100%,1440px);
+      min-height:calc(100vh - 32px);min-height:calc(100dvh - 32px);margin:auto;
+      padding:clamp(22px,4vw,58px);border:1px solid #e2e6d9;border-radius:34px;
+      background:
+        radial-gradient(ellipse at 9% 8%,rgba(217,236,245,.78) 0 10%,transparent 31%),
+        radial-gradient(ellipse at 94% 92%,rgba(224,237,218,.68) 0 12%,transparent 34%),
+        rgba(255,255,252,.96);
+      box-shadow:0 14px 34px rgba(45,79,104,.10);
+    }
+    .app.scenario-mode .child-scenario:before,.app.scenario-mode .child-scenario:after{
+      content:"✦";position:absolute;z-index:0;pointer-events:none;color:#d6b55f;opacity:.42;font-size:clamp(34px,5vw,64px)
+    }
+    .app.scenario-mode .child-scenario:before{right:5%;top:5%;transform:rotate(12deg)}
+    .app.scenario-mode .child-scenario:after{left:5%;bottom:5%;content:"✿";color:#8db49b;transform:rotate(-12deg)}
+    .app.scenario-mode .child-scenario>*{position:relative;z-index:1}
+    .app.scenario-mode .child-scenario>.eyebrow{
+      display:inline-flex;align-self:center;align-items:center;gap:8px;margin:0 auto 20px;
+      padding:9px 16px;border:1px solid #d8e7e8;border-radius:999px;background:#fffdf8;
+      color:#557a8e;font-size:clamp(14px,1.4vw,18px);letter-spacing:.06em
+    }
+    .app.scenario-mode .child-scenario h2{
+      position:relative;z-index:1;margin:0 auto 18px;max-width:1050px;
+      color:#244f73;font-family:"Andika","Trebuchet MS",sans-serif;
+      font-size:clamp(34px,5.4vw,64px);line-height:1.12;letter-spacing:-.02em
+    }
+    .app.scenario-mode .child-scenario-prompt{
+      position:relative;z-index:1;width:fit-content;max-width:min(100%,1080px);
+      margin:0 auto 22px;padding:clamp(16px,2.5vw,28px) clamp(18px,3vw,36px);
+      border:1px solid #e5e4d9;border-radius:28px;background:#fffdf8;
+      box-shadow:0 8px 20px rgba(59,84,101,.07);
+      color:#416987;font-family:"Andika","Trebuchet MS",sans-serif;
+      font-size:clamp(23px,3.5vw,40px);line-height:1.36
+    }
+    .app.scenario-mode .scenario-choices{position:relative;z-index:1;gap:16px;max-width:1100px}
+    .app.scenario-mode .scenario-choice{
+      display:flex;align-items:center;justify-content:flex-start;gap:16px;
+      min-height:100px;padding:18px 22px;border:2px solid #dfebed;border-radius:25px;
+      background:rgba(255,255,255,.96);color:#315d7e;text-align:left;
+      font-family:"Andika","Trebuchet MS",sans-serif;font-size:clamp(19px,2.25vw,27px);
+      line-height:1.25;box-shadow:0 6px 14px rgba(56,91,113,.06);
+      transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease
+    }
+    .app.scenario-mode .scenario-choice:before{
+      content:"";flex:0 0 20px;width:20px;height:20px;border:3px solid #a9c7d4;border-radius:50%;
+      background:#f5faf9;box-shadow:inset 0 0 0 4px white
+    }
+    .app.scenario-mode .scenario-choice:nth-child(4n+1):before{border-color:#81abc3;background:#c2dce8}
+    .app.scenario-mode .scenario-choice:nth-child(4n+2):before{border-color:#93b69c;background:#ccddc5}
+    .app.scenario-mode .scenario-choice:nth-child(4n+3):before{border-color:#ddbd71;background:#f3dfaa}
+    .app.scenario-mode .scenario-choice:nth-child(4n):before{border-color:#d6a592;background:#efd2c3}
+    .app.scenario-mode .scenario-choice:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(56,91,113,.10)}
+    .app.scenario-mode .scenario-choice.selected{
+      border-color:#7ea5bc;background:#edf6f7;box-shadow:0 0 0 3px rgba(126,165,188,.14),0 8px 18px rgba(56,91,113,.08)
+    }
+    .app.scenario-mode .scenario-choice.selected:before{background:#80a9bd;box-shadow:inset 0 0 0 4px #edf6f7}
+    .app.scenario-mode .child-scenario>.small-note{
+      position:relative;z-index:1;display:inline-block;align-self:center;margin:18px auto 0!important;
+      padding:8px 15px;border-radius:999px;background:#f0f5ec;color:#647a68;
+      font-size:clamp(15px,1.7vw,20px);line-height:1.35
+    }
+    .app.scenario-mode .guided-actions{position:relative;z-index:1;max-width:1100px!important;width:100%;margin:22px auto 0!important;align-items:center}
+    .app.scenario-mode .guided-actions .primary,.app.scenario-mode .child-scenario>.primary{
+      min-height:60px;padding:15px 25px;border-radius:20px;font-size:clamp(19px,2vw,24px);
+      box-shadow:0 8px 17px rgba(35,70,100,.15)
+    }
+    .app.scenario-mode .guided-actions .text-button{padding:13px 17px;border-radius:16px;color:#587a91;font-size:18px;font-weight:800}
+    .app.scenario-mode .task-order-number{background:#5d8eb0;color:white}
+    .app.scenario-mode .child-scenario.celebration .confetti{position:relative;z-index:1;font-size:clamp(36px,5vw,58px)}
+    .app.scenario-mode .child-scenario.celebration .confetti span{animation:floatConfetti 2.7s ease-in-out infinite}
+    .app.scenario-mode .child-scenario.celebration .confetti span:nth-child(2n){animation-delay:.35s}
+    @keyframes childBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    @keyframes floatConfetti{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+    @media(max-width:760px){
+      .app.scenario-mode #guidedObjectiveScreen{padding:10px}
+      .app.scenario-mode .child-scenario{min-height:calc(100vh - 20px);min-height:calc(100dvh - 20px);padding:26px 18px;border-radius:25px}
+      .app.scenario-mode .scenario-choices{grid-template-columns:1fr;gap:11px}
+      .app.scenario-mode .scenario-choice{min-height:74px;padding:14px 16px;border-radius:20px}
+      .app.scenario-mode .child-scenario-prompt{border-radius:22px}
+      .app.child-mode .illustration{width:min(100%,900px);height:30vh;min-height:170px}
+      .app.child-mode .move-screen .direction{font-size:clamp(34px,8vw,52px);padding:10px 14px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .app.child-mode .illustration svg>g,.app.child-mode .celebration .confetti span,.app.scenario-mode .child-scenario.celebration .confetti span{animation:none}
+      .app.scenario-mode .scenario-choice{transition:none}
+    }
     .hidden { display:none !important; }
     .objective-switch { display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin:0 0 12px; }
     .objective-switch button { border:1px solid #bfd6e7;background:#fff;color:#376b91;border-radius:999px;padding:8px 13px;font-size:14px;font-weight:800;box-shadow:0 4px 14px #315f7c12; }
@@ -583,7 +751,7 @@
 
       <section class="screen panel move-screen celebration" id="completeScreen" aria-labelledby="completeTitle">
         <div class="move-inner">
-          <p class="step-label">Movement check complete</p>
+          <p class="step-label">All three moves — done!</p>
           <div class="confetti" aria-hidden="true"><span>✦</span><span>●</span><span>✿</span><span>✦</span><span>●</span></div>
           <h1 id="completeTitle">Great moving!</h1>
           <p class="subtitle">You tried every movement. Thank you for exploring with your body!</p>
@@ -716,7 +884,7 @@
       return `<svg viewBox="0 0 700 300" role="img" aria-label="Watercolor illustration of a child moving through a soft green play space"><defs><filter id="soft"><feGaussianBlur stdDeviation="7"/></filter></defs><ellipse cx="176" cy="78" rx="125" ry="45" fill="#d8ebf2" opacity=".55" filter="url(#soft)"/><ellipse cx="536" cy="78" rx="99" ry="39" fill="#e6efda" opacity=".7" filter="url(#soft)"/><circle cx="94" cy="52" r="4" fill="#e5be69"/><circle cx="607" cy="100" r="5" fill="#b9d2e0"/>${scene}</svg>`;
     }
     function show(id){document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-    function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Movement check · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
+    function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Move & explore · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
     function renderRatingSelections(){document.querySelectorAll('[data-rating]').forEach(button=>button.classList.toggle('selected',ratings[Number(button.dataset.rating)]===Number(button.dataset.value)));}
     document.getElementById('hearDirection').addEventListener('click',()=>{const p=prompts[promptIndex];if('speechSynthesis' in window){window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(p.text);utterance.rate=.88;window.speechSynthesis.speak(utterance)}else{toast('Ask a grown-up to read the direction aloud.')}});
     function start(){promptIndex=0;movementCompleted=false;document.querySelector('.app').classList.add('child-mode');renderPrompt();show('movementScreen')}
@@ -1546,7 +1714,7 @@
       if(orderMode&&selected.length)document.getElementById('taskReset').addEventListener('click',()=>{taskAnswers[taskIndex]=[];renderChildTask()});
       guidedChild.querySelectorAll('[data-child-task-choice]').forEach(button=>button.addEventListener('click',()=>{const index=Number(button.dataset.childTaskChoice);if(orderMode){const prior=Array.isArray(taskAnswers[taskIndex])?taskAnswers[taskIndex]:[];if(prior.length>=t.order.length||prior.includes(index))return;taskAnswers[taskIndex]=[...prior,index]}else taskAnswers[taskIndex]=index;renderChildTask()}));
       document.getElementById('taskBack').addEventListener('click',()=>{if(taskIndex){taskIndex--;renderChildTask()}else{document.querySelector('.app').classList.remove('scenario-mode');guidedChild.classList.add('hidden');guidedHome.classList.remove('hidden');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id}});
-      document.getElementById('taskNext').addEventListener('click',()=>{if(!complete)return;if(taskIndex<d.tasks.length-1){taskIndex++;renderChildTask()}else{const score=scoreChildTasks(d);guidedChild.innerHTML='<div class="panel child-scenario celebration"><p class="eyebrow">Little Evidence · all done</p><h2>You did it!</h2><p class="child-scenario-prompt">Thanks for trying those activities. Your teacher will talk with you next.</p><div class="confetti"><span>✦</span><span>✿</span><span>✧</span><span>✦</span></div><p class="small-note">'+d.tasks.length+' little activities finished</p><button type="button" class="primary" id="taskReturn">Continue&nbsp; →</button></div>';document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';document.getElementById('taskReturn').addEventListener('click',()=>{document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;startGuidedInterview()})}});
+      document.getElementById('taskNext').addEventListener('click',()=>{if(!complete)return;if(taskIndex<d.tasks.length-1){taskIndex++;renderChildTask()}else{const score=scoreChildTasks(d);guidedChild.innerHTML='<div class="panel child-scenario celebration"><p class="eyebrow">All done!</p><h2>You did it!</h2><p class="child-scenario-prompt">Thanks for trying those activities. Your teacher will talk with you next.</p><div class="confetti"><span>✦</span><span>✿</span><span>✧</span><span>✦</span></div><p class="small-note">'+d.tasks.length+' little activities finished</p><button type="button" class="primary" id="taskReturn">Continue&nbsp; →</button></div>';document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';document.getElementById('taskReturn').addEventListener('click',()=>{document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;startGuidedInterview()})}});
     }
     function scoreChildTasks(d){return d.tasks.reduce((total,t,i)=>total+((t.order?JSON.stringify(taskAnswers[i])===JSON.stringify(t.order):taskAnswers[i]===t.answer)?1:0),0)}
     const frequencyOptions=[
