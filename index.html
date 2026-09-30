@@ -181,6 +181,29 @@
     .text-button { border:0;background:transparent;color:#61809a;font-weight:800;padding:12px 5px; }
     .toast { position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#234e70;color:#fff;padding:12px 18px;border-radius:14px;box-shadow:var(--shadow);font-weight:700;transition:.2s;z-index:5; }
     .toast.show { opacity:1;transform:translate(-50%,0); }
+    .objective-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+    .library-card{padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+    .library-card h2{font-size:19px;color:var(--navy);margin:0 0 5px}
+    .library-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+    .library-card .secondary{white-space:nowrap}
+    .guided-shell{max-width:1100px;margin:auto}
+    .guided-progress{display:flex;align-items:center;gap:8px;margin:0 0 14px;color:#64839b;font-size:13px;font-weight:800}
+    .guided-question-card{padding:clamp(20px,3vw,34px)}
+    .guided-question-card h2{font-size:clamp(23px,3vw,34px);color:var(--navy);line-height:1.2;margin:0 0 10px}
+    .guided-options{display:grid;gap:9px;margin:18px 0}
+    .guided-actions{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .guided-result-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:16px;margin-top:16px}
+    .child-scenario{padding:clamp(24px,5vw,48px);text-align:center;min-height:70vh;display:flex;flex-direction:column;justify-content:center}
+    .child-scenario h2{font-size:clamp(32px,6vw,60px);color:var(--navy);margin-bottom:18px}
+    .child-scenario-prompt{font-size:clamp(24px,4vw,40px);line-height:1.35;color:#416987;margin:0 auto 26px;max-width:900px}
+    .scenario-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:950px;width:100%;margin:0 auto}
+    .scenario-choice{min-height:86px;border:2px solid #d7e7f1;background:#fff;border-radius:24px;padding:18px;color:#315d7e;font-size:clamp(17px,2.2vw,24px);font-weight:800}
+    .scenario-choice.selected{background:#e9f4fb;border-color:#5286ab}
+    .app.scenario-mode{max-width:none;padding:0;background:#f1f8fc}
+    .app.scenario-mode .topbar{display:none}
+    .app.scenario-mode .layout{max-width:none}
+    .app.scenario-mode #guidedObjectiveScreen{width:100%;min-height:100vh}
+    @media(max-width:760px){.objective-library-grid,.guided-result-grid{grid-template-columns:1fr}.library-card{align-items:flex-start;flex-direction:column}.library-card .secondary{width:100%}.scenario-choices{grid-template-columns:1fr}.child-scenario{min-height:100vh}}
     .hidden { display:none !important; }
     .objective-switch { display:flex;justify-content:flex-end;margin:0 0 12px; }
     .objective-switch button { border:1px solid #bfd6e7;background:#fff;color:#376b91;border-radius:999px;padding:8px 13px;font-size:14px;font-weight:800;box-shadow:0 4px 14px #315f7c12; }
@@ -245,7 +268,7 @@
 
     <main class="layout">
       <section class="screen active" id="objectiveScreen" aria-labelledby="objectiveTitle">
-        <div class="objective-switch"><button id="openFeelings">Explore Objective 1a · Manages Feelings&nbsp; →</button><button id="openLimits">Explore Objective 1b · Follows Limits&nbsp; →</button></div>
+        <div class="objective-switch"><button id="openObjectiveLibrary">All objectives&nbsp; →</button><button id="openFeelings">Explore 1a · Manages Feelings&nbsp; →</button><button id="openLimits">Explore 1b · Follows Limits&nbsp; →</button></div>
         <div class="panel objective-head compact">
           <div>
             <p class="eyebrow">Gross Motor · Objective 4</p>
@@ -281,7 +304,7 @@
       </section>
 
       <section class="screen" id="feelingsObjectiveScreen" aria-labelledby="feelingsTitle">
-        <div class="objective-switch"><button id="backToTraveling">← Objective 4 · Traveling Skills</button><button id="openLimitsFromFeelings">Explore Objective 1b · Follows Limits&nbsp; →</button></div>
+        <div class="objective-switch"><button class="openObjectiveLibrary">All objectives</button><button id="backToTraveling">← Objective 4 · Traveling Skills</button><button id="openLimitsFromFeelings">Explore 1b · Follows Limits&nbsp; →</button></div>
         <div class="panel objective-head compact">
           <div>
             <p class="eyebrow">Social-Emotional · Objective 1a</p>
@@ -388,7 +411,7 @@
       </section>
 
       <section class="screen" id="limitsObjectiveScreen" aria-labelledby="limitsTitle">
-        <div class="objective-switch"><button id="backToTravelingFromLimits">← Objective 4 · Traveling Skills</button><button id="backToFeelingsFromLimits">← Objective 1a · Manages Feelings</button></div>
+        <div class="objective-switch"><button class="openObjectiveLibrary">All objectives</button><button id="backToTravelingFromLimits">← Objective 4 · Traveling Skills</button><button id="backToFeelingsFromLimits">← Objective 1a · Manages Feelings</button></div>
         <div class="panel objective-head compact"><div><p class="eyebrow">Social-Emotional · Objective 1b</p><h1 id="limitsTitle">Follows Limits and Expectations</h1><p class="subtitle">Notices, follows, and begins to understand familiar expectations in the classroom and beyond.</p></div><div class="start-card"><h3>Ready to begin?</h3><p>Think about everyday rules, redirection, and transitions. No SmartBoard task is needed.</p><button class="primary wide" id="startLimitsCheck">Start Guided Check&nbsp; →</button></div></div>
         <details class="panel objective-reference"><summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary>
           <div class="section-grid"><section class="panel section-card"><h2 class="section-title">Developmental progression</h2><div class="level-list">
@@ -424,6 +447,18 @@
           <section class="parent-copy"><strong>Family-friendly strength & next step</strong><p id="limitsParentCopy">Your child is learning classroom routines. We will continue offering calm, consistent reminders.</p></section>
         </aside></div>
         <div class="bottom-actions"><button class="text-button" id="limitsBackToObjective">← Back to objective</button><button class="primary" id="finishLimits" disabled>Finish teacher review&nbsp; ✓</button></div>
+      </section>
+
+      
+      <section class="screen" id="objectiveLibraryScreen" aria-labelledby="libraryTitle">
+        <div class="objective-switch"><button id="libraryBackHome">← Back to Objective 4</button></div>
+        <div class="panel record-head"><div><p class="eyebrow">Early Eagle Academy · Little Evidence</p><h1 id="libraryTitle">Objective Library</h1><p>Choose one objective at a time. Teacher checks use quick taps; child activities are used only where they add useful evidence.</p></div></div>
+        <div class="objective-library-grid" id="objectiveLibraryGrid"></div>
+      </section>
+      <section class="screen" id="guidedObjectiveScreen" aria-labelledby="guidedObjectiveTitle">
+        <div id="guidedObjectiveHome"></div>
+        <div id="guidedObjectiveCheck" class="hidden"></div>
+        <div id="guidedObjectiveChild" class="hidden"></div>
       </section>
 
       <section class="screen panel section-card" id="pairScreen" aria-labelledby="pairTitle">
@@ -918,6 +953,118 @@
     document.getElementById('limitsBackToObjective').addEventListener('click',()=>show('limitsObjectiveScreen'));
     document.getElementById('finishLimits').addEventListener('click',()=>toast('Teacher review complete. The checkpoint is still recorded in Teaching Strategies GOLD.'));
     document.querySelectorAll('[data-limits-evidence]').forEach(button=>button.addEventListener('click',()=>{const type=button.dataset.limitsEvidence;document.getElementById('limitsEvidenceStatus').textContent=type+' capture is a placeholder in this prototype; attach supporting evidence in your usual record.';toast(type+' capture is shown as a prototype control.')}));
+
+    // The library groups all 10 mapped objectives. Existing prototypes remain linked to their original flows.
+    const objectiveDefinitions=[
+      {id:'1c',title:'Takes Care of Own Needs Appropriately',domain:'Social-Emotional',family:'Independence & Responsibility',summary:'Notice how the child communicates needs, manages familiar self-care, and takes responsibility for well-being.',anchors:[
+        {n:2,text:'Communicates needs to adults.'},{n:4,text:'Attempts familiar self-help tasks.'},{n:6,text:'Manages familiar needs and responsibilities.'},{n:8,text:'Takes broader responsibility for well-being.'},{n:10,text:'Practices skills intentionally to improve.'},{n:12,text:'Identifies strengths and challenges, sets goals, and takes action.'}],questions:['When a familiar need comes up, what does the child usually do?','How independently does the child manage familiar self-care or responsibilities?','Where and how often have you seen this?'],next:'Look for growing independence with familiar needs, followed by responsibility for broader well-being.'},
+      {id:'2a',title:'Forms Relationships With Adults',domain:'Social-Emotional',family:'Relationships With Adults',summary:'Notice how the child uses trusted adults for comfort, exploration, help, shared interests, and discussion.',anchors:[
+        {n:2,text:'Shows a secure attachment to one or more adults.'},{n:4,text:'Uses a trusted adult as a secure base for exploration.'},{n:6,text:'Manages separation and engages comfortably with trusted adults.'},{n:8,text:'Seeks adults for help, information, conversation, or shared interests.'},{n:10,text:'Respectfully considers an adult’s different viewpoint.'}],questions:['How does the child connect with familiar adults during the day?','What does the child do when exploring, needing help, or sharing an interest?','How consistently have you seen this with familiar adults?'],next:'Look for the child to use trusted adults as resources, share interests, and consider another viewpoint.'},
+      {id:'2b',title:'Responds to Emotional Cues',domain:'Social-Emotional',family:'Noticing Feelings',summary:'Notice whether the child reacts to others’ expressions, shows concern, and uses context to understand feelings.',anchors:[
+        {n:2,text:'Reacts to another person’s emotional expression.'},{n:4,text:'Shows concern when someone is upset.'},{n:6,text:'Identifies basic emotional reactions.'},{n:8,text:'Recognizes that another person may feel differently.'},{n:10,text:'Uses the situation to interpret how someone may feel.'},{n:12,text:'Uses context and past experiences to understand others’ feelings.'}],questions:['When someone shows a clear feeling, what does the child usually notice or do?','How does the child show understanding when another person feels differently?','How often and in what kinds of situations have you seen this?'],next:'Look for the child to use what is happening in the moment and what they know about the person to understand feelings.'},
+      {id:'2c',title:'Interacts With Peers',domain:'Social-Emotional',family:'Playing & Working With Friends',summary:'Notice how the child joins play, sustains positive interaction, cooperates, and adapts within a group.',anchors:[
+        {n:2,text:'Plays alongside peers.'},{n:4,text:'Enters a group’s play.'},{n:6,text:'Sustains positive play with two or three peers.'},{n:8,text:'Cooperates with a group of four or five.'},{n:10,text:'Works toward shared goals, follows group rules, and compromises.'},{n:12,text:'Flexibly leads and follows in group play.'}],questions:['How does the child take part when peers are playing together?','What happens as the group grows or plans something together?','How consistently and flexibly does the child participate?'],next:'Look for the child to cooperate toward shared goals and shift between leading and following.'},
+      {id:'2d',title:'Makes Friends',domain:'Social-Emotional',family:'Building Friendships',summary:'Notice whether peer connections repeat, become reciprocal, and include trust and support.',anchors:[
+        {n:2,text:'Shows a preference for a particular peer.'},{n:4,text:'Returns to play with familiar playmates.'},{n:6,text:'Shows a special friendship.'},{n:8,text:'Maintains a friendship through shared interests and some conflict repair.'},{n:10,text:'Describes personal qualities they value in a friend.'},{n:12,text:'Shows mutual trust and support, even through disagreement.'}],questions:['Does the child seek out particular peers or return to familiar playmates?','What does the child do to maintain a friendship when plans or play become difficult?','What does the child notice or value about a friend?'],next:'Look for friendship that includes mutual trust, support, and staying connected through disagreement.'},
+      {id:'3a',title:'Balances Needs and Rights of Self and Others',domain:'Social-Emotional',family:'Sharing & Cooperating',summary:'Notice how the child responds to others’ wants while sharing materials, taking turns, and contributing to group work.',anchors:[
+        {n:2,text:'Responds to what others want.'},{n:4,text:'Takes turns.'},{n:6,text:'Initiates sharing.'},{n:8,text:'Cooperates and shares ideas and materials.'},{n:10,text:'Completes cooperative projects with others.'},{n:12,text:'Accurately reflects on their role in group work.'}],questions:['How does the child handle turns, materials, or another child’s request?','How does the child balance their own idea with the group’s plan?','How consistently does the child contribute and coordinate with others?'],next:'Look for shared projects with divided responsibilities, constructive problem-solving, and reflection on each person’s contribution.'},
+      {id:'3b',title:'Solves Social Problems',domain:'Social-Emotional',family:'Solving Problems With Others',summary:'Explore a few gentle social situations, then use classroom observations to judge how the child expresses feelings, finds solutions, and considers others.',anchors:[
+        {n:2,text:'Expresses feelings when a social problem occurs.'},{n:4,text:'Seeks adult help.'},{n:6,text:'Suggests a solution.'},{n:8,text:'Negotiates and compromises.'},{n:10,text:'Works to preserve the relationship while solving a problem.'},{n:12,text:'Considers more than one person’s viewpoint.'}],questions:['When a conflict starts, what does the child usually do first?','Who suggests possible solutions, and how does the child respond if a peer disagrees?','How does the child handle a solution’s effect on the friendship and each person’s feelings?'],next:'Look for solutions that consider each person’s viewpoint and help children stay connected.' ,scenarios:[
+        {title:'One tricycle',text:'Two friends both want to ride the tricycle. What could they do?',choices:['Ask a grown-up to help','Take turns riding','Find another idea together','Tell how each friend might feel']},
+        {title:'Dramatic play',text:'Two friends want different jobs in their pretend restaurant. How could they work it out?',choices:['Ask a grown-up to choose','Take turns choosing jobs','Think of a job for each friend','Talk about what each friend wants']},
+        {title:'Block-building plan',text:'Friends have different ideas for what to build. What might help?',choices:['Ask a grown-up for help','Try one idea, then the other','Mix both ideas together','Listen to why each friend has that idea']}
+      ]},
+    ];
+    const libraryGrid=document.getElementById('objectiveLibraryGrid');
+    function openLibrary(){document.querySelector('.app').classList.remove('child-mode','scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVES';show('objectiveLibraryScreen')}
+    document.getElementById('openObjectiveLibrary').addEventListener('click',openLibrary);
+    document.querySelectorAll('.openObjectiveLibrary').forEach(button=>button.addEventListener('click',openLibrary));
+    document.getElementById('libraryBackHome').addEventListener('click',()=>show('objectiveScreen'));
+    function addLibraryCard(id,title,summary,target){
+      const card=document.createElement('article');card.className='panel library-card';
+      const copy=document.createElement('div');const h=document.createElement('h2');h.textContent=id+' · '+title;const p=document.createElement('p');p.textContent=summary;copy.append(h,p);
+      const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='Open objective →';button.addEventListener('click',()=>{if(target==='guidedObjectiveScreen')openGuidedObjective(id);else{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+id;show(target)}});
+      card.append(copy,button);libraryGrid.append(card);
+    }
+    addLibraryCard('1a','Manages Feelings','Guided teacher check · no child task','feelingsObjectiveScreen');
+    addLibraryCard('1b','Follows Limits and Expectations','Guided teacher check · no child task','limitsObjectiveScreen');
+    addLibraryCard('4','Demonstrates Traveling Skills','Three movement prompts · teacher observation','objectiveScreen');
+    objectiveDefinitions.forEach(def=>addLibraryCard(def.id,def.title,def.summary,'guidedObjectiveScreen'));
+    const guidedHome=document.getElementById('guidedObjectiveHome'),guidedCheck=document.getElementById('guidedObjectiveCheck'),guidedChild=document.getElementById('guidedObjectiveChild');
+    let activeDefinition=null,guidedQuestion=0,guidedAnswers={anchor:null,detail:null,frequency:null},guidedResult=null,scenarioIndex=0,scenarioAnswers=[];
+    function escapeHTML(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+    function openGuidedObjective(id){
+      activeDefinition=objectiveDefinitions.find(item=>item.id===id);if(!activeDefinition)return;
+      document.querySelector('.app').classList.remove('scenario-mode');
+      guidedHome.classList.remove('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.add('hidden');
+      guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;scenarioIndex=0;scenarioAnswers=[];
+      const d=activeDefinition;
+      guidedHome.innerHTML='<div class="objective-switch"><button id="guidedBackLibrary">← All objectives</button></div><div class="panel objective-head compact"><div><p class="eyebrow">'+escapeHTML(d.domain)+' · Objective '+d.id+'</p><h1>'+escapeHTML(d.title)+'</h1><p class="subtitle">'+escapeHTML(d.summary)+'</p></div><div class="start-card"><h3>Ready to begin?</h3><p>'+ (d.scenarios?'Three gentle, no-score child scenarios, then a few teacher taps.':'A short tap-only teacher check. No typing is needed.')+'</p><button class="primary wide" id="startGuidedObjective">'+(d.scenarios?'Start child scenarios':'Start guided check')+'&nbsp; →</button></div></div><details class="panel objective-reference"><summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary><div class="section-grid"><section class="panel section-card"><h2 class="section-title">Developmental progression</h2><div class="level-list">'+d.anchors.map(a=>'<div class="level-row"><div class="level-n">'+a.n+'</div><div><strong>Level '+a.n+'</strong><span>'+escapeHTML(a.text)+'</span></div></div>').join('')+'</div></section><aside class="panel section-card"><h2 class="section-title">Evidence to notice</h2><p class="small-note">'+escapeHTML(d.summary)+' Look across real routines and more than one moment. These prompts support your professional judgment; they do not replace the official GOLD continuum.</p></aside></div></details>';
+      document.getElementById('guidedBackLibrary').addEventListener('click',openLibrary);
+      document.getElementById('startGuidedObjective').addEventListener('click',()=>d.scenarios?startChildScenarios():startGuidedInterview());
+      document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;show('guidedObjectiveScreen');
+    }
+    function startGuidedInterview(){guidedHome.classList.add('hidden');guidedChild.classList.add('hidden');guidedCheck.classList.remove('hidden');guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;renderGuidedQuestion()}
+    function startChildScenarios(){guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');scenarioIndex=0;scenarioAnswers=[];renderChildScenario()}
+    function renderChildScenario(){
+      const d=activeDefinition,s=d.scenarios[scenarioIndex];guidedChild.innerHTML='<div class="panel child-scenario"><p class="eyebrow">A little thinking together · '+(scenarioIndex+1)+' of '+d.scenarios.length+'</p><h2>'+escapeHTML(s.title)+'</h2><p class="child-scenario-prompt">'+escapeHTML(s.text)+'</p><button type="button" class="secondary" id="scenarioHear">🔊 Hear it</button><div class="scenario-choices">'+s.choices.map((choice,i)=>'<button type="button" class="scenario-choice" data-scenario-choice="'+i+'">'+escapeHTML(choice)+'</button>').join('')+'</div><p class="small-note" style="margin-top:18px">There is no single right answer. The child can point, tell you, or choose an idea.</p><div class="guided-actions" style="max-width:950px;margin:20px auto 0"><button class="text-button" id="scenarioBack">'+(scenarioIndex?'← Previous':'Exit child check')+'</button><button class="primary" id="scenarioNext" disabled>'+(scenarioIndex===d.scenarios.length-1?'Continue to teacher check →':'Next story →')+'</button></div></div>';
+      document.getElementById('modeTag').textContent='CHILD VIEW · THINKING TOGETHER';document.getElementById('scenarioHear').addEventListener('click',()=>{if('speechSynthesis'in window){speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(s.text);utterance.rate=.85;speechSynthesis.speak(utterance)}});
+      guidedChild.querySelectorAll('[data-scenario-choice]').forEach(button=>button.addEventListener('click',()=>{scenarioAnswers[scenarioIndex]=Number(button.dataset.scenarioChoice);guidedChild.querySelectorAll('[data-scenario-choice]').forEach(b=>b.classList.toggle('selected',b===button));document.getElementById('scenarioNext').disabled=false}));
+      document.getElementById('scenarioNext').addEventListener('click',()=>{if(scenarioIndex<d.scenarios.length-1){scenarioIndex++;renderChildScenario()}else{guidedChild.innerHTML='<div class="panel child-scenario celebration"><p class="eyebrow">Little Evidence · all done</p><h2>Thanks for thinking it through!</h2><p class="child-scenario-prompt">You shared some helpful ideas. Now your teacher will talk about what you noticed.</p><div class="confetti"><span>✦</span><span>✿</span><span>✧</span><span>✦</span></div></div>';document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';setTimeout(()=>{document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;startGuidedInterview()},2400)}});
+      document.getElementById('scenarioBack').addEventListener('click',()=>{if(scenarioIndex){scenarioIndex--;renderChildScenario()}else{document.querySelector('.app').classList.remove('scenario-mode');guidedChild.classList.add('hidden');guidedHome.classList.remove('hidden');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id}});
+    }
+    const frequencyOptions=[
+      {id:'one',label:'One clear moment so far',detail:'Treat the suggestion as preliminary.',confidence:'One clear moment; keep gathering examples.'},
+      {id:'repeated',label:'More than once in familiar routines',detail:'A repeated pattern is beginning to show.',confidence:'Seen more than once in familiar routines.'},
+      {id:'varied',label:'Across different routines or people',detail:'The skill is appearing in varied situations.',confidence:'Seen across different routines or people.'},
+      {id:'inconsistent',label:'It varies from day to day',detail:'More evidence may help clarify the pattern.',confidence:'Responses vary; gather another example before settling on a checkpoint.'}
+    ];
+    function renderGuidedQuestion(){
+      const d=activeDefinition, isResult=guidedResult!==null;
+      if(isResult){renderGuidedResult();return}
+      const anchorChoices=[{n:0,text:'Not yet / needs substantial adult support'},...d.anchors];
+      let title,help,choices;
+      if(guidedQuestion===0){title='Which description is closest to what you have observed?';help='Choose the strongest pattern you have seen in real classroom moments.';choices=anchorChoices.map(a=>({id:String(a.n),point:a.n,label:a.n===0?'Not yet · substantial support':'Level '+a.n,detail:a.text}))}
+      else if(guidedQuestion===1){title='How does the child show this skill?';help='This follow-up helps distinguish an emerging in-between point from an established anchor.';const at=guidedAnswers.anchor??0;choices=[
+        {id:'support',delta:-1,label:'Usually needs reminders, help, or a familiar situation',detail:'The skill is emerging toward the selected description.'},
+        {id:'matches',delta:0,label:'Usually does what the description says',detail:'The selected description is a good fit.'},
+        {id:'independent',delta:1,label:'Often does a little more, with growing independence',detail:'The next description may be emerging.'}
+      ];if(at===0)choices[0].delta=0;if(at>=12)choices[2].delta=0}
+      else{title='How consistently have you seen this?';help='Think about more than one day, activity, or adult when possible.';choices=frequencyOptions.map(f=>({id:f.id,label:f.label,detail:f.detail}))}
+      guidedCheck.innerHTML='<div class="guided-shell"><div class="objective-switch"><button id="guidedBackObjective">← Back to objective</button></div><div class="panel guided-question-card"><div class="guided-progress">Question '+(guidedQuestion+1)+' of 3</div><h2>'+title+'</h2><p class="small-note">'+help+'</p><div class="guided-options">'+choices.map(c=>'<button type="button" class="question-choice '+(isChoiceSelected(c)?'selected':'')+'" data-choice="'+escapeHTML(c.id)+'"><span><strong>'+escapeHTML(c.label)+'</strong>'+escapeHTML(c.detail||'')+'</span></button>').join('')+'</div><div class="guided-actions"><button class="text-button" id="guidedQuestionBack" '+(guidedQuestion===0?'disabled':'')+'>← Back</button><button class="primary" id="guidedQuestionNext" '+(!currentGuidedAnswer()?'disabled':'')+'>'+(guidedQuestion===2?'See checkpoint support':'Next question')+'&nbsp; →</button></div></div></div>';
+      document.getElementById('guidedBackObjective').addEventListener('click',()=>{guidedCheck.classList.add('hidden');guidedHome.classList.remove('hidden');document.querySelector('.app').classList.remove('scenario-mode')});
+      guidedCheck.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.choice;if(guidedQuestion===0){guidedAnswers.anchor=Number(id);guidedAnswers.detail=null;guidedAnswers.frequency=null}else if(guidedQuestion===1){guidedAnswers.detail=id;guidedAnswers.frequency=null}else guidedAnswers.frequency=id;renderGuidedQuestion()}));
+      document.getElementById('guidedQuestionBack').addEventListener('click',()=>{if(guidedQuestion>0){guidedQuestion--;renderGuidedQuestion()}});
+      document.getElementById('guidedQuestionNext').addEventListener('click',()=>{if(guidedQuestion<2){guidedQuestion++;renderGuidedQuestion()}else{const base=guidedAnswers.anchor??0,delta=guidedAnswers.detail==='support'?-1:guidedAnswers.detail==='independent'?1:0;guidedResult={suggested:Math.max(0,Math.min(13,base+delta)),selected:Math.max(0,Math.min(13,base+delta))};renderGuidedResult()}});
+    }
+    function currentGuidedAnswer(){return guidedQuestion===0?guidedAnswers.anchor!==null:guidedQuestion===1?!!guidedAnswers.detail:!!guidedAnswers.frequency}
+    function isChoiceSelected(c){return guidedQuestion===0?String(guidedAnswers.anchor)===c.id:guidedQuestion===1?guidedAnswers.detail===c.id:guidedAnswers.frequency===c.id}
+    function renderGuidedResult(){
+      const d=activeDefinition,r=guidedResult,n=r.selected,frequency=frequencyOptions.find(f=>f.id===guidedAnswers.frequency);
+      const exact=[...d.anchors].reverse().find(a=>a.n<=n),next=d.anchors.find(a=>a.n>n);
+      const desc=n===0?'Not yet · needs substantial adult support':exact?'Level '+n+' · '+exact.text:'Level '+n+' · emerging between nearby descriptions';
+      const options=['Not Yet',...Array.from({length:13},(_,i)=>String(i+1))];
+      const strength=exact?exact.text.toLowerCase():'is showing emerging skills between nearby descriptions';
+      const nextAction=next?next.text.toLowerCase():d.next;
+      guidedCheck.innerHTML='<div class="guided-shell"><div class="objective-switch"><button id="guidedEditAnswers">← Change answers</button></div><div class="panel record-head"><div><p class="eyebrow">Objective '+d.id+' · Teacher recording</p><h1>'+escapeHTML(d.title)+'</h1><p>Your taps summarize the evidence. You make the final checkpoint decision.</p></div><span class="badge">● Guided check complete</span></div><div class="guided-result-grid"><div class="record-main"><section class="panel section-card"><h2 class="section-title">Suggested checkpoint point</h2><div class="suggest-box"><div class="suggest-kicker">Prototype suggestion · teacher decides</div><div class="suggested">'+escapeHTML(desc)+'</div><p class="suggest-text">Based on the selected developmental description and whether it appears emerging, established, or more independent. '+escapeHTML(frequency?.confidence||'')+(scenarioAnswers.length?' Child scenario choices are supporting conversation evidence, not an automatic score.':'')+'</p><div class="select-levels">'+options.map(o=>'<button type="button" class="level-pick '+((o==='Not Yet'?n===0:Number(o)===n)?'selected':'')+'" data-level="'+o+'">'+o+'</button>').join('')+'</div><p class="level-help">Tap a different level if your broader evidence supports it. Confirm the official checkpoint in Teaching Strategies GOLD.</p></div><details class="optional-note" style="margin-top:18px"><summary>Add a note (optional)</summary><textarea aria-label="Optional evidence note" placeholder="Optional note about the context or what the child did"></textarea></details></section><section class="panel section-card"><h2 class="section-title">Evidence to look for next</h2><div class="next-evidence"><strong>'+(next?'Look for evidence near Level '+next.n:'Continue documenting')+'</strong>'+escapeHTML(next?next.text:d.next)+' '+escapeHTML(d.next)+'</div></section></div><aside class="record-side"><section class="parent-copy"><strong>'+escapeHTML(d.family)+'</strong><p id="guidedFamilyCopy"></p></section><section class="panel section-card"><h2 class="section-title">Evidence captured</h2><p class="small-note">'+(scenarioAnswers.length?'The child chose ideas in three social situations. Use the responses as prompts for a conversation; they do not determine a checkpoint by themselves.':'Guided teacher answers only. No typing required.')+'</p><p class="small-note">Teacher observation remains the primary evidence for this objective. The suggested point is editable and requires your review.</p></section><button class="primary wide" id="guidedFinish">Finish teacher review ✓</button></aside></div></div>';
+      guidedCheck.querySelectorAll('[data-level]').forEach(button=>button.addEventListener('click',()=>{r.selected=button.dataset.level==='Not Yet'?0:Number(button.dataset.level);guidedCheck.querySelectorAll('[data-level]').forEach(b=>b.classList.toggle('selected',b===button));updateFamilyCopy()}));
+      document.getElementById('guidedEditAnswers').addEventListener('click',()=>{guidedQuestion=0;renderGuidedQuestion()});
+      document.getElementById('guidedFinish').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;toast('Teacher review complete. Record the confirmed checkpoint in Teaching Strategies GOLD.')});
+      updateFamilyCopy();
+      function familyStrength(id,n){
+        const copy={
+          '1c':[[2,'is learning to tell trusted adults what they need'],[4,'is beginning to try familiar self-help tasks'],[6,'is managing many familiar needs more independently'],[8,'is taking more responsibility for personal well-being'],[10,'is practicing skills to become more capable'],[12,'is noticing personal strengths and setting goals']],
+          '2a':[[2,'is building a secure connection with familiar adults'],[4,'uses trusted adults as a safe base while exploring'],[6,'is becoming comfortable separating and reconnecting'],[8,'seeks trusted adults for help, ideas, and shared interests'],[10,'can listen respectfully when an adult has a different idea']],
+          '2b':[[2,'is noticing how other people show their feelings'],[4,'is beginning to show care when someone is upset'],[6,'can recognize some basic feelings in others'],[8,'is learning that people can feel differently in the same situation'],[10,'uses what is happening to think about how someone may feel'],[12,'uses context and experience to understand other people’s feelings']],
+          '2c':[[2,'is playing alongside other children'],[4,'is beginning to join other children’s play'],[6,'is keeping positive play going with a few peers'],[8,'is cooperating with a small group'],[10,'is working with others toward a shared idea'],[12,'can take turns leading and following in a group']],
+          '2d':[[2,'is showing interest in particular playmates'],[4,'is returning to familiar friends for play'],[6,'is building a special friendship'],[8,'is keeping a friendship going through shared play'],[10,'can describe qualities they value in a friend'],[12,'is showing trust and support in friendships']],
+          '3a':[[2,'is beginning to notice what other children want'],[4,'is practicing taking turns'],[6,'is starting to share with others'],[8,'is cooperating and sharing ideas and materials'],[10,'is completing projects together with peers'],[12,'can think about their role in group work']],
+          '3b':[[2,'is beginning to express feelings when a problem happens'],[4,'is learning to ask an adult for help'],[6,'is suggesting ideas to solve problems with peers'],[8,'is practicing negotiation and compromise'],[10,'is working to solve problems while caring for friendships'],[12,'is considering more than one person’s point of view']]
+        };const list=copy[id]||[];return [...list].reverse().find(x=>x[0]<=n)?.[1]||'is building new skills with others'}
+      function familyNext(id){const copy={'1c':'try familiar self-help routines with growing independence','2a':'turn to trusted adults for help, shared interests, and thoughtful conversation','2b':'use the situation and what they know about a person to understand feelings','2c':'work toward a shared goal and flexibly take turns leading and following','2d':'show mutual trust and support, even when friends disagree','3a':'share responsibilities and reflect on how each person helped','3b':'consider how a solution affects each person and their friendship'};return copy[id]||'keep practicing this skill in everyday routines'}
+      function updateFamilyCopy(){const shown=Number(r.selected)||0;const el=document.getElementById('guidedFamilyCopy');if(el)el.textContent=shown===0?'Your child is building skills in '+d.family.toLowerCase()+'. We will keep noticing what helps.':'Your child '+familyStrength(d.id,shown)+'. Next, we’ll encourage them to '+familyNext(d.id)+'.'}
+    }
+
     const PAIR_API='https://pvgewltlxenguxmhiszm.supabase.co/functions/v1/little-evidence-session';
     const PAIR_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
     let pairRole=null,pairSessionId=null,pairToken=null,pairPollTimer=null,controllerRating=null,lastDisplayStatus='';
