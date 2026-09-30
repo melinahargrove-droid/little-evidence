@@ -520,6 +520,50 @@
     .gold-entry-level{justify-self:end;min-width:74px;padding:4px 5px;border:1px solid #c9ddea;border-radius:7px;background:#edf6fb;color:#244f70;text-align:center;font-size:10px;font-weight:900}
     .gold-entry-foot{margin:14px 0 0;color:#73899a;font-size:9px;line-height:1.4}
     @media(max-width:700px){.checkpoint-nav{padding:8px 10px;font-size:12px}.checkpoint-form-row{align-items:stretch}.checkpoint-form-row button{width:100%}.checkpoint-record-row{align-items:flex-start;flex-direction:column}.gold-entry-page{padding:25px 18px}.gold-entry-grid{grid-template-columns:1fr}.gold-entry-actions{align-items:stretch;flex-direction:column}.gold-entry-actions button{width:100%}}
+    .materials-reference{margin-top:12px}
+    .materials-reference summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;cursor:pointer;color:#315d7e}
+    .materials-reference summary::-webkit-details-marker{display:none}
+    .materials-reference summary:after{content:"＋";color:#5485a5;font-size:20px;font-weight:800}
+    .materials-reference[open] summary:after{content:"−"}
+    .materials-reference .materials-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;margin:4px 0 8px;padding:0;list-style:none}
+    .materials-reference .materials-list li{position:relative;padding:9px 11px 9px 32px;border-radius:12px;background:#f2f8fc;color:#4d6a80;font-size:14px;line-height:1.4}
+    .materials-reference .materials-list li:before{content:"✓";position:absolute;left:12px;color:#65927a;font-weight:900}
+    .materials-checklist-screen{max-width:1200px;margin:0 auto}
+    .materials-checklist-actions{display:flex;justify-content:flex-end;gap:10px;max-width:1100px;margin:14px auto}
+    .materials-checklist-pages{display:grid;gap:20px}
+    .materials-checklist-page{max-width:1100px;width:100%;margin:0 auto;padding:35px 38px;background:#fff;border:1px solid #dce8f0;border-radius:24px;box-shadow:var(--shadow)}
+    .materials-checklist-page h1{margin:16px 0 4px;color:var(--navy);font-size:30px}
+    .materials-page-meta{margin:0 0 12px;color:#71879a;font-size:12px}
+    .materials-page-note{margin:0 0 16px;padding:9px 12px;border-radius:12px;background:#f2f8fc;color:#4d6a80;font-size:11px;line-height:1.4}
+    .materials-checklist-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
+    .materials-checklist-column{display:flex;flex-direction:column;gap:8px}
+    .materials-checklist-item{padding:9px 11px;border:1px solid #e0eaf0;border-radius:11px;background:#fbfdfe;break-inside:avoid}
+    .materials-checklist-heading{display:grid;grid-template-columns:37px 1fr;gap:7px;align-items:start}
+    .materials-checklist-code{color:#3977ad;font-size:11px;font-weight:900}
+    .materials-checklist-title{color:#315d7e;font-size:12px;line-height:1.3;font-weight:800}
+    .materials-checklist-item ul{margin:5px 0 0;padding-left:43px;color:#526f84;font-size:10px;line-height:1.35}
+    .materials-checklist-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;max-width:1100px;margin:0 auto 15px}
+    @media(max-width:700px){.materials-reference .materials-list{grid-template-columns:1fr}.materials-checklist-page{padding:25px 18px}.materials-checklist-grid{grid-template-columns:1fr}.materials-checklist-actions{align-items:stretch;flex-direction:column}.materials-checklist-actions button{width:100%}.materials-checklist-toolbar{align-items:stretch;flex-direction:column}}
+    @media print{
+      body.materials-checklist-printing{background:#fff!important}
+      body.materials-checklist-printing *{visibility:hidden!important}
+      body.materials-checklist-printing #materialsChecklistScreen,body.materials-checklist-printing #materialsChecklistScreen *{visibility:visible!important}
+      body.materials-checklist-printing #materialsChecklistScreen{display:block!important;position:absolute;inset:0;width:100%;margin:0;padding:0;background:#fff}
+      body.materials-checklist-printing .materials-checklist-toolbar,body.materials-checklist-printing .materials-checklist-actions,body.materials-checklist-printing .topbar{display:none!important}
+      body.materials-checklist-printing .materials-checklist-pages{display:block}
+      body.materials-checklist-printing .materials-checklist-page{width:8.5in;height:11in;max-width:none;margin:0;padding:.42in .45in;border:0;border-radius:0;box-shadow:none;overflow:hidden;break-after:page;page-break-after:always}
+      body.materials-checklist-printing .materials-checklist-page:last-child{break-after:auto;page-break-after:auto}
+      body.materials-checklist-printing .materials-checklist-page h1{font-size:21px;margin:9px 0 3px}
+      body.materials-checklist-printing .materials-page-meta{font-size:8px;margin-bottom:8px}
+      body.materials-checklist-printing .materials-page-note{font-size:7px;padding:6px 8px;margin-bottom:9px}
+      body.materials-checklist-printing .materials-checklist-grid{gap:7px 11px}
+      body.materials-checklist-printing .materials-checklist-column{gap:5px}
+      body.materials-checklist-printing .materials-checklist-item{padding:5px 7px;border-radius:7px}
+      body.materials-checklist-printing .materials-checklist-heading{grid-template-columns:27px 1fr;gap:4px}
+      body.materials-checklist-printing .materials-checklist-code{font-size:8px}
+      body.materials-checklist-printing .materials-checklist-title{font-size:8px;line-height:1.18}
+      body.materials-checklist-printing .materials-checklist-item ul{margin-top:3px;padding-left:31px;font-size:7px;line-height:1.2}
+    }
     @media print{
       body.gold-entry-printing{background:#fff!important}
       body.gold-entry-printing *{visibility:hidden!important}
@@ -586,6 +630,7 @@
           </aside>
           </div>
         </details>
+        <details class="panel objective-reference materials-reference"><summary><span class="guide-summary-title">Materials to gather</span><span class="guide-summary-note">Optional prep list for the movement check</span></summary><ul class="materials-list"><li>3–4 cones or floor markers (needed for the sample path)</li><li>Clear, safe open space for running and changing direction</li><li>Soft stepping stones or low obstacles, if available (optional)</li></ul></details>
       </section>
 
       <section class="screen" id="feelingsObjectiveScreen" aria-labelledby="feelingsTitle">
@@ -631,6 +676,7 @@
           </section>
           </div>
         </details>
+        <details class="panel objective-reference materials-reference"><summary><span class="guide-summary-title">Materials to gather</span><span class="guide-summary-note">For everyday observation</span></summary><ul class="materials-list"><li>No special materials are required; observe real moments in classroom routines and play.</li><li>Optional: familiar emotion pictures, storybooks, or calming tools already used in class.</li></ul></details>
       </section>
 
       <section class="screen" id="feelingsGuideScreen" aria-labelledby="feelingsGuideTitle">
@@ -717,6 +763,7 @@
           <div class="section-grid"><section class="panel section-card"><h2 class="section-title">How to collect evidence</h2><p class="subtitle" style="font-size:15px">Observe regular classroom routines, transitions, adult redirection, and familiar expectations used in a new situation. Notice what the child does before and after a reminder, and whether understanding carries across adults and settings.</p></section>
             <section class="panel section-card"><h2 class="section-title">Optional child prompt</h2><p class="small-note">For higher-level understanding, ask in conversation: “Why can we run outside but not in the hallway?” or “What does it mean to take care of our classroom?” A spoken response supports your observation; it is never required.</p></section></div>
         </details>
+        <details class="panel objective-reference materials-reference"><summary><span class="guide-summary-title">Materials to gather</span><span class="guide-summary-note">For everyday observation</span></summary><ul class="materials-list"><li>No special materials are required; observe classroom rules, transitions, and routines.</li><li>Optional: the classroom visual schedule or familiar expectation pictures.</li></ul></details>
       </section>
       <section class="screen" id="limitsRecordScreen" aria-labelledby="limitsRecordTitle">
         <div class="panel record-head"><div><p class="eyebrow">Objective 1b · Teacher recording</p><h1 id="limitsRecordTitle">Follows Limits and Expectations</h1><p>Use real classroom observations. Your taps create a suggested continuum point; you make the final decision.</p></div><span class="badge"><span>●</span> Teacher observation · no child task</span></div>
@@ -736,9 +783,14 @@
 
       
       <section class="screen" id="objectiveLibraryScreen" aria-labelledby="libraryTitle">
-        <div class="objective-switch"><button id="libraryBackHome">← Back to Objective 4</button></div>
+        <div class="objective-switch"><button id="libraryBackHome">← Back to Objective 4</button><button type="button" class="secondary" id="openMaterialsChecklist">Printable materials checklist&nbsp; ↓</button></div>
         <div class="panel record-head"><div><p class="eyebrow">Early Eagle Academy · Little Evidence</p><h1 id="libraryTitle">Objective Library</h1><p>Choose one objective at a time. Teacher checks use quick taps; child activities are used only where they add useful evidence.</p></div></div>
         <div class="objective-library-grid" id="objectiveLibraryGrid"></div>
+      </section>
+      <section class="screen materials-checklist-screen" id="materialsChecklistScreen" aria-labelledby="materialsChecklistTitle-1">
+        <div class="materials-checklist-toolbar"><button type="button" class="text-button" id="backFromMaterialsChecklist">← Back to objectives</button><span class="badge">Teacher prep · grouped by GOLD objective</span></div>
+        <div class="materials-checklist-actions"><button type="button" class="primary" id="printMaterialsChecklist">Print / Save as PDF&nbsp; ↓</button></div>
+        <div class="materials-checklist-pages" id="materialsChecklistPages" aria-live="polite"></div>
       </section>
       <section class="screen" id="guidedObjectiveScreen" aria-label="Guided objective assessment">
         <div id="guidedObjectiveHome"></div>
@@ -1887,11 +1939,78 @@
       {"id":"37","title":"Demonstrates Progress in Listening to and Understanding English","domain":"English Language Acquisition","family":"Understanding English","draft":true,"summary":"Draft guide · Observe the child’s developing understanding of spoken English across familiar routines, meaningful interactions, and appropriate supports. Consider exposure and the child’s full language repertoire.","anchors":[{"n":2,"text":"Notices familiar English words, sounds, or routines."},{"n":4,"text":"Responds to familiar English words when supported by context, gestures, or routine."},{"n":6,"text":"Shows understanding of common words or simple directions in familiar situations."},{"n":8,"text":"Understands more spoken English across familiar classroom activities."},{"n":10,"text":"Follows and responds to increasingly varied spoken English in context."},{"n":12,"text":"Understands and responds to English across a range of interactions and learning situations."}],"questions":["In which familiar routines or interactions does the child show understanding of spoken English?","What supports help the child understand, such as gestures, objects, repetition, or a familiar routine?","As English exposure grows, what changes are you noticing across different people and settings? Use the child’s home language knowledge and opportunity to hear English as context."],"next":"Provide meaningful English interactions with visual and contextual support; document exposure and understanding across settings without treating accent or home-language use as a deficit."},
       {"id":"38","title":"Demonstrates Progress in Speaking English","domain":"English Language Acquisition","family":"Communicating in English","draft":true,"summary":"Draft guide · Observe the child’s developing use of spoken English to communicate in meaningful interactions. Consider exposure, comfort, context, and the child’s full language repertoire.","anchors":[{"n":2,"text":"Communicates with gestures, sounds, or familiar words while hearing English."},{"n":4,"text":"Uses a few familiar English words or phrases in meaningful routines."},{"n":6,"text":"Uses English words and short phrases to express needs or ideas."},{"n":8,"text":"Combines English words in a wider range of familiar interactions."},{"n":10,"text":"Uses increasingly varied English to share ideas, ask questions, or participate."},{"n":12,"text":"Uses English flexibly across interactions while continuing to develop language."}],"questions":["When does the child choose to communicate using spoken English, words, phrases, or sentences?","What purposes does the child use English for, such as sharing an idea, asking, or joining play?","How do opportunity, comfort, audience, and familiarity affect the child’s English use? Consider communication in the home language as an important part of the child’s language repertoire."],"next":"Create welcoming, low-pressure opportunities to hear and use English in play and conversation; notice growth over time and across contexts without judging accent."}
     ];
+    const objectiveMaterialsById={
+      '1a':['No special materials are required; observe authentic classroom moments.','Optional: familiar emotion pictures, storybooks, or calming tools already used in class.'],
+      '1b':['No special materials are required; observe everyday expectations, transitions, and routines.','Optional: classroom visual schedule or familiar expectation pictures.'],
+      '1c':['Everyday self-care materials already used in class, such as coats, backpacks, tissues, or snack items.'],
+      '2b':['No special materials are required.','Optional: feelings pictures or storybooks showing emotions.'],
+      '3b':['No special materials are required for classroom observation.','Optional: puppets or picture scenarios for discussing possible solutions.'],
+      '4':['3–4 cones or floor markers (needed for the sample movement path).','Clear, safe open space for running and changing direction.','Soft stepping stones or low obstacles, if available (optional).'],
+      '5':['Floor spots, a taped line, or a low stable balance beam.','Soft mat and clear, supervised space.'],
+      '6':['Soft balls in a few sizes and beanbags.','Hoop or laundry basket for a target, plus cones to mark distance.'],
+      '7a':['Play dough, interlocking blocks, and child-safe manipulatives.','Large beads or pegs, simple puzzles, and child-safe tongs as available.'],
+      '7b':['Large crayons or markers and paper or a clipboard.','Chalk or a vertical drawing surface, if useful.'],
+      '8a':['SmartBoard or tablet for the in-app touch check; no extra physical materials are needed.'],
+      '8b':['SmartBoard or tablet for the in-app direction check; no extra physical materials are needed.'],
+      '16a':['Letter cards, name cards, and familiar print in the classroom.'],
+      '16b':['Letter-sound picture cards, alphabet cards, and familiar objects whose names begin with target sounds.'],
+      '20a':['Countable classroom objects such as blocks, counters, toy animals, or snacks.','Number cards or a number line, if useful.'],
+      '20b':['Small groups of counters or familiar objects arranged in different amounts.'],
+      '20c':['Numeral cards and matching sets of counters or classroom objects.'],
+      '20d':['Base-ten blocks, bundled craft sticks, or other tens-and-ones materials.'],
+      '21b':['Solid shape blocks, shape cards, puzzles, or familiar objects with different shapes.'],
+      '24':['Safe materials to explore, such as magnets, ramps, water tools, or nature items, chosen for the question.','Optional: child-safe magnifier and drawing paper.'],
+      '28':['Familiar classroom tools used safely for meaningful tasks, such as scoops, tongs, child-safe tools, or a tablet.'],
+      '37':['Familiar objects, photos, picture books, gestures, and visual routine cues.','Consider the child’s home language and experience as context.'],
+      '38':['Familiar play materials, picture books, photos, gestures, and visual supports.','Observe meaningful communication without pressuring the child to speak.']
+    };
+    const materialsByDomain={
+      'Social-Emotional':['No special materials are required; observe authentic classroom interactions, play, and familiar routines.'],
+      'Physical':['Clear, supervised space and safe movement materials already available in the classroom.'],
+      'Language':['Familiar books, pictures, toys, and everyday objects that support meaningful conversation.'],
+      'Cognitive':['Open-ended classroom materials such as blocks, puzzles, books, and familiar objects.'],
+      'Literacy':['Familiar books, classroom print, alphabet materials, paper, and writing tools.'],
+      'Mathematics':['Countable objects, blocks or counters, numeral and shape cards, and simple measuring tools.'],
+      'Science':['Safe, interesting materials or nature items connected to the child’s question or observation.'],
+      'Science & Technology':['Safe classroom tools, natural objects, and materials the child can explore or compare.'],
+      'Social Studies':['Community books, photos, maps, and familiar dramatic-play materials.'],
+      'The Arts':['Open-ended art materials, music or movement props, and space for creative exploration.'],
+      'English Language Acquisition':['Familiar objects, picture books, photos, gestures, and visual supports; consider home-language experience.']
+    };
+    function materialsForObjective(id,definition){
+      if(objectiveMaterialsById[String(id)])return objectiveMaterialsById[String(id)];
+      if(definition&&definition.tasks)return ['SmartBoard or tablet for the in-app touch activity; no extra physical materials are needed.'];
+      return materialsByDomain[definition&&definition.domain]||['No special materials required; use familiar classroom routines and materials.'];
+    }
+    function materialsDetailsMarkup(id,definition){
+      const entry=definition||{id:String(id)};
+      return '<details class="panel objective-reference materials-reference"><summary><span class="guide-summary-title">Materials to gather</span><span class="guide-summary-note">Optional prep list</span></summary><ul class="materials-list">'+materialsForObjective(id,entry).map(item=>'<li>'+escapeHTML(item)+'</li>').join('')+'</ul></details>';
+    }
+    function materialsChecklistDefinitions(){
+      const definitions=new Map([['1a',{id:'1a',title:'Manages Feelings',domain:'Social-Emotional'}],['1b',{id:'1b',title:'Follows Limits and Expectations',domain:'Social-Emotional'}],['4',{id:'4',title:'Demonstrates Traveling Skills',domain:'Physical'}]]);
+      objectiveDefinitions.forEach(definition=>definitions.set(String(definition.id),definition));
+      return [...definitions.values()].sort(objectiveIdCompare);
+    }
+    function renderMaterialsChecklist(){
+      const entries=materialsChecklistDefinitions(),pageSize=20,pages=[];
+      for(let offset=0;offset<entries.length;offset+=pageSize){
+        const pageEntries=entries.slice(offset,offset+pageSize),split=Math.ceil(pageEntries.length/2);
+        const pageNumber=Math.floor(offset/pageSize)+1,totalPages=Math.ceil(entries.length/pageSize);
+        const itemMarkup=definition=>'<article class="materials-checklist-item"><div class="materials-checklist-heading"><span class="materials-checklist-code">'+escapeHTML(definition.id)+'</span><strong class="materials-checklist-title">'+escapeHTML(definition.title)+'</strong></div><ul>'+materialsForObjective(definition.id,definition).map(item=>'<li>'+escapeHTML(item)+'</li>').join('')+'</ul></article>';
+        const columns=[pageEntries.slice(0,split),pageEntries.slice(split)];
+        pages.push('<article class="materials-checklist-page" aria-label="Materials checklist page '+pageNumber+' of '+totalPages+'"><div class="gold-entry-brand"><span>✦</span> Early Eagle Academy · Little Evidence</div><h1 id="materialsChecklistTitle-'+pageNumber+'">'+(pageNumber===1?'Objective materials checklist':'Materials checklist · continued')+'</h1><p class="materials-page-meta">Teacher prep · GOLD objectives '+escapeHTML(pageEntries[0].id)+'–'+escapeHTML(pageEntries[pageEntries.length-1].id)+' · Page '+pageNumber+' of '+totalPages+'</p><p class="materials-page-note">Gather only what is useful for the activity you plan to use. Observation-based objectives often need no special setup; optional items are labeled.</p><div class="materials-checklist-grid">'+columns.map(column=>'<div class="materials-checklist-column">'+column.map(itemMarkup).join('')+'</div>').join('')+'</div></article>');
+      }
+      document.getElementById('materialsChecklistPages').innerHTML=pages.join('');
+      document.getElementById('modeTag').textContent='TEACHER PREP · MATERIALS';show('materialsChecklistScreen');
+    }
     const libraryGrid=document.getElementById('objectiveLibraryGrid');
     function openLibrary(){document.querySelector('.app').classList.remove('child-mode','scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVES';show('objectiveLibraryScreen')}
     document.getElementById('openObjectiveLibrary').addEventListener('click',openLibrary);
     document.querySelectorAll('.openObjectiveLibrary').forEach(button=>button.addEventListener('click',openLibrary));
     document.getElementById('libraryBackHome').addEventListener('click',()=>show('objectiveScreen'));
+    document.getElementById('openMaterialsChecklist').addEventListener('click',renderMaterialsChecklist);
+    document.getElementById('backFromMaterialsChecklist').addEventListener('click',openLibrary);
+    document.getElementById('printMaterialsChecklist').addEventListener('click',()=>{document.body.classList.add('materials-checklist-printing');window.print();setTimeout(()=>document.body.classList.remove('materials-checklist-printing'),1200)});
     function addLibraryCard(id,title,summary,target){
       const card=document.createElement('article');card.className='panel library-card';
       const copy=document.createElement('div');const h=document.createElement('h2');h.textContent=id+' · '+title;const p=document.createElement('p');p.textContent=summary;copy.append(h,p);
@@ -1912,7 +2031,7 @@
       guidedHome.classList.remove('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.add('hidden');
       guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;guidedSavedRecord=null;evidenceRecordIds.guided=null;scenarioIndex=0;scenarioAnswers=[];taskIndex=0;taskAnswers=[];taskSequence=[];
       const d=activeDefinition;
-      guidedHome.innerHTML='<div class="objective-switch"><button id="guidedBackLibrary">← All objectives</button></div><div class="panel objective-head compact"><div><p class="eyebrow">'+escapeHTML(d.domain)+' · Objective '+d.id+'</p><h1>'+escapeHTML(d.title)+'</h1><p class="subtitle">'+escapeHTML(d.summary)+'</p></div><div class="start-card"><h3>Ready to begin?</h3><p>'+ (d.scenarios?'Three gentle, no-score child scenarios, then a few teacher taps.':d.tasks?'A few simple touch activities for your child, followed by quick teacher questions.':'A short tap-only teacher check. No typing is needed.')+'</p><button class="primary wide" id="startGuidedObjective">'+(d.scenarios?'Start child scenarios':d.tasks?'Start child check':'Start guided check')+'&nbsp; →</button></div></div><details class="panel objective-reference"><summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary><div class="section-grid"><section class="panel section-card"><h2 class="section-title">'+(d.draft?'Working progression cues':'Developmental progression')+'</h2><div class="level-list">'+d.anchors.map(a=>'<div class="level-row"><div class="level-n">'+a.n+'</div><div><strong>Level '+a.n+'</strong><span>'+escapeHTML(a.text)+'</span></div></div>').join('')+'</div></section><aside class="panel section-card"><h2 class="section-title">Evidence to notice</h2><p class="small-note">'+escapeHTML(d.summary)+' Look across real routines and more than one moment. '+(d.draft?'These are working summaries, not confirmed GOLD wording. Verify the progression in your account before using a suggested level. ':'')+'These prompts support your professional judgment; they do not replace the official GOLD continuum.</p></aside></div></details>';
+      guidedHome.innerHTML='<div class="objective-switch"><button id="guidedBackLibrary">← All objectives</button></div><div class="panel objective-head compact"><div><p class="eyebrow">'+escapeHTML(d.domain)+' · Objective '+d.id+'</p><h1>'+escapeHTML(d.title)+'</h1><p class="subtitle">'+escapeHTML(d.summary)+'</p></div><div class="start-card"><h3>Ready to begin?</h3><p>'+ (d.scenarios?'Three gentle, no-score child scenarios, then a few teacher taps.':d.tasks?'A few simple touch activities for your child, followed by quick teacher questions.':'A short tap-only teacher check. No typing is needed.')+'</p><button class="primary wide" id="startGuidedObjective">'+(d.scenarios?'Start child scenarios':d.tasks?'Start child check':'Start guided check')+'&nbsp; →</button></div></div><details class="panel objective-reference"><summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary><div class="section-grid"><section class="panel section-card"><h2 class="section-title">'+(d.draft?'Working progression cues':'Developmental progression')+'</h2><div class="level-list">'+d.anchors.map(a=>'<div class="level-row"><div class="level-n">'+a.n+'</div><div><strong>Level '+a.n+'</strong><span>'+escapeHTML(a.text)+'</span></div></div>').join('')+'</div></section><aside class="panel section-card"><h2 class="section-title">Evidence to notice</h2><p class="small-note">'+escapeHTML(d.summary)+' Look across real routines and more than one moment. '+(d.draft?'These are working summaries, not confirmed GOLD wording. Verify the progression in your account before using a suggested level. ':'')+'These prompts support your professional judgment; they do not replace the official GOLD continuum.</p></aside></div></details>'+materialsDetailsMarkup(d.id,d);
       const savedPanel=document.createElement('section');savedPanel.className='panel section-card hidden';savedPanel.id='guidedSavedRecordNotice';guidedHome.append(savedPanel);
       document.getElementById('guidedBackLibrary').addEventListener('click',openLibrary);
       document.getElementById('startGuidedObjective').addEventListener('click',()=>d.scenarios?startChildScenarios():d.tasks?startChildTasks():startGuidedInterview());
