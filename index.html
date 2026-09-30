@@ -790,6 +790,27 @@
       if(el){el.textContent=message;el.style.color=isError?'#a14e46':''}
     }
     async function initializeCheckpointWorkspace(){
+      // Wire the workspace immediately; the authentication SDK loads asynchronously.
+      document.getElementById('sendCheckpointLink').addEventListener('click',sendCheckpointSignIn);
+      document.getElementById('checkpointSignOut').addEventListener('click',async()=>{
+        const client=await leDbReady;if(!client)return;
+        const {error}=await client.auth.signOut();
+        if(error)toast('Could not sign out yet. Try again.');
+        else{leUser=null;activeCheckpoint=null;renderCheckpointAuth();checkpointStatus('Signed out.')}
+      });
+      document.getElementById('addCheckpointChild').addEventListener('click',addCheckpointChild);
+      document.getElementById('openCheckpoint').addEventListener('click',openOrCreateCheckpoint);
+      document.getElementById('checkpointChildSelect').addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML=''});
+      document.getElementById('checkpointBack').addEventListener('click',()=>show(returnScreenAfterWorkspace||'objectiveLibraryScreen'));
+      document.getElementById('checkpointReturnAssessment').addEventListener('click',()=>show(returnScreenAfterWorkspace||'guidedObjectiveScreen'));
+      document.getElementById('openCheckpoints').addEventListener('click',()=>{returnScreenAfterWorkspace=activeScreenId();void openCheckpointWorkspace()});
+      document.getElementById('sharedPhotoInput').addEventListener('change',handleEvidenceFileChosen);
+      document.getElementById('sharedVideoInput').addEventListener('change',handleEvidenceFileChosen);
+      document.addEventListener('click',handleEvidenceButtonClick);
+      document.getElementById('checkpointSchoolYear').value=schoolYearDefault();
+      wireLegacyEvidenceButtons();
+      renderCheckpointAuth();
+
       const client=await leDbReady;
       if(!client){
         const message=document.getElementById('checkpointAuthMessage');
@@ -807,23 +828,6 @@
           if(leUser)await loadCheckpointChildren();
         },0);
       });
-      document.getElementById('sendCheckpointLink').addEventListener('click',sendCheckpointSignIn);
-      document.getElementById('checkpointSignOut').addEventListener('click',async()=>{
-        const {error}=await client.auth.signOut();
-        if(error)toast('Could not sign out yet. Try again.');
-        else{leUser=null;activeCheckpoint=null;renderCheckpointAuth();checkpointStatus('Signed out.')}
-      });
-      document.getElementById('addCheckpointChild').addEventListener('click',addCheckpointChild);
-      document.getElementById('openCheckpoint').addEventListener('click',openOrCreateCheckpoint);
-      document.getElementById('checkpointChildSelect').addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML=''});
-      document.getElementById('checkpointBack').addEventListener('click',()=>show(returnScreenAfterWorkspace||'objectiveLibraryScreen'));
-      document.getElementById('checkpointReturnAssessment').addEventListener('click',()=>show(returnScreenAfterWorkspace||'guidedObjectiveScreen'));
-      document.getElementById('openCheckpoints').addEventListener('click',()=>{returnScreenAfterWorkspace=activeScreenId();openCheckpointWorkspace()});
-      document.getElementById('sharedPhotoInput').addEventListener('change',handleEvidenceFileChosen);
-      document.getElementById('sharedVideoInput').addEventListener('change',handleEvidenceFileChosen);
-      document.addEventListener('click',handleEvidenceButtonClick);
-      document.getElementById('checkpointSchoolYear').value=schoolYearDefault();
-      renderCheckpointAuth();
       if(leUser)await loadCheckpointChildren();
     }
     async function sendCheckpointSignIn(){
@@ -1631,7 +1635,6 @@
       document.getElementById('recordBadge').innerHTML='<span>●</span> Teacher review · movement check';
       document.getElementById('modeTag').textContent='TEACHER IPAD · RECORDING';show('recordScreen');renderSuggestion();void hydrateMovementObjectiveRecord();
     });
-    wireLegacyEvidenceButtons();
     void initializeCheckpointWorkspace();
     beginController();
     renderSuggestion();
