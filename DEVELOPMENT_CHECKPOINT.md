@@ -29,4 +29,13 @@
 - Inline and activity JavaScript syntax passed.
 - Catalog validation passed: 33 new/updated objective routes, 81 prompts (64 observed, 17 keyed touch).
 - Serialization checks passed: observation status retained, skipped and observed items never score, unanswered touch items excluded.
-- Live browser checks: pending deployment verification.
+- Published activity build: 1c1726e8d2688be68556aa55a43747c1dba24526.
+- Live browser traversal passed for all 33 new/updated routes and all 81 prompts, including preparation, skip, completion, and return to the child menu.
+- Pattern activity tested through teacher review: one correct touch response, one skipped response, and one presented hands-on prompt produced 1/1 touch matches, one skipped, and an unmarked teacher observation.
+- Teacher observation selection worked; no child checkpoint data was saved during tests.
+- Ordered ribbon input enabled Next only after a complete sequence; reset cleared the order and disabled Next.
+- Visual checks covered pattern and graph picture choices. Graph/prompt art width was increased after inspection for SmartBoard readability.
+- Persistence payload verified locally; authenticated save/reload was not exercised with real student records.
+
+## Next unfinished work
+Verify existing draft progression anchors for 18–23 against the uploaded PDFs before treating their teacher checkpoint suggestions as source-verified. Child-facing pages are implemented; completing an activity is supporting evidence only.
