@@ -48,5 +48,5 @@ Verify existing draft progression anchors for 18–23 against the uploaded PDFs 
 - Native counting dots, shapes, patterns, lengths, and deterministic spatial compositions remain exact.
 - Existing choice labels are preserved for saved evidence compatibility; prompts, response order/answer keys, teacher notes, and observed modes are unchanged.
 - Transparent WebP assets are at most 640px; images use contained sizing to avoid cropping and fit smaller screens. Prompt subjects documented beside assets.
-- Checks: all scripts parse; 33 catalog routes retain identical task semantics. Asset-reference and live UI checks follow publication.
-- Deployment still used the existing GitHub Pages workflow; no environment or permission changes.
+- Checks: all scripts parse; 33 catalog routes retain identical task semantics. All 32 task image references resolve locally, plus six social/movement illustrations. Live browser verification confirmed new fruit images and 4/2/3 votes, selectable choices, listening action pictures, puppy spatial compositions, and the feelings page. The movement entry still uses its existing iPad pairing setup; no paired session or child record was saved.
+- Published commit `8bf3a13e9640264f81e94731f61df29bc684c971`; deployment `36771954493` completed its deploy job successfully, and the new art was verified on the live page. The previously waiting spacing deployment was superseded. No environment or permission changes.
