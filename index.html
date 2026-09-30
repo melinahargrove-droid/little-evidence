@@ -215,7 +215,7 @@
     .app.scenario-mode #guidedObjectiveScreen{width:100%;min-height:100vh}
     @media(max-width:760px){.objective-library-grid,.guided-result-grid{grid-template-columns:1fr}.library-card{align-items:flex-start;flex-direction:column}.library-card .secondary{width:100%}.scenario-choices{grid-template-columns:1fr}.child-scenario{min-height:100vh}}
     .hidden { display:none !important; }
-    .objective-switch { display:flex;justify-content:flex-end;margin:0 0 12px; }
+    .objective-switch { display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin:0 0 12px; }
     .objective-switch button { border:1px solid #bfd6e7;background:#fff;color:#376b91;border-radius:999px;padding:8px 13px;font-size:14px;font-weight:800;box-shadow:0 4px 14px #315f7c12; }
     .objective-switch button:hover { background:#f0f8fd; }
     .objective-head.compact { padding:clamp(18px,2.2vw,28px);gap:22px; }
@@ -465,7 +465,7 @@
         <div class="panel record-head"><div><p class="eyebrow">Early Eagle Academy · Little Evidence</p><h1 id="libraryTitle">Objective Library</h1><p>Choose one objective at a time. Teacher checks use quick taps; child activities are used only where they add useful evidence.</p></div></div>
         <div class="objective-library-grid" id="objectiveLibraryGrid"></div>
       </section>
-      <section class="screen" id="guidedObjectiveScreen" aria-labelledby="guidedObjectiveTitle">
+      <section class="screen" id="guidedObjectiveScreen" aria-label="Guided objective assessment">
         <div id="guidedObjectiveHome"></div>
         <div id="guidedObjectiveCheck" class="hidden"></div>
         <div id="guidedObjectiveChild" class="hidden"></div>
