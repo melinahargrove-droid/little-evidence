@@ -39,3 +39,14 @@
 
 ## Next unfinished work
 Verify existing draft progression anchors for 18–23 against the uploaded PDFs before treating their teacher checkpoint suggestions as source-verified. Child-facing pages are implemented; completing an activity is supporting evidence only.
+
+
+## Simple picture refresh — 2026-09-30
+
+- Replaced object emoji, abstract fruit drawings, generic people, routine props, and movement scenes with 38 original classroom illustrations in `assets/illustrations/`.
+- Same fruit assets appear in graph row labels and answer choices. Votes remain exactly 4 apples, 2 bananas, and 3 grapes.
+- Native counting dots, shapes, patterns, lengths, and deterministic spatial compositions remain exact.
+- Existing choice labels are preserved for saved evidence compatibility; prompts, response order/answer keys, teacher notes, and observed modes are unchanged.
+- Transparent WebP assets are at most 640px; images use contained sizing to avoid cropping and fit smaller screens. Prompt subjects documented beside assets.
+- Checks: all scripts parse; 33 catalog routes retain identical task semantics. Asset-reference and live UI checks follow publication.
+- Deployment still used the existing GitHub Pages workflow; no environment or permission changes.

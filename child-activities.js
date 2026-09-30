@@ -9,37 +9,46 @@ window.LEChildActivities=(()=>{
   }
   function dots(n,color=colors[0]){return svg(Array.from({length:n},(_,i)=>shape('circle',100+(i%5)*75,60+Math.floor(i/5)*80,23,color)).join(''),`${n} counters`)}
   function pattern(items,question=false){const count=items.length+(question?1:0),gap=Math.min(76,440/count),start=250-(count-1)*gap/2;return svg(items.map((item,i)=>shape(item,start+i*gap,110,25,item==='circle'?colors[0]:colors[1])).join('')+(question?`<text x="${start+items.length*gap}" y="125" font-size="60" text-anchor="middle" fill="#31536c">?</text>`:''),'A repeating pattern')}
+  const image=(name,label=name)=>`<img class="activity-art" src="./assets/illustrations/${name}.webp" alt="${escape(label)}" decoding="async" draggable="false">`;
+  const imageInSvg=(name,x,y,width,height)=>`<image href="./assets/illustrations/${name}.webp" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet"/>`;
   function prop(type){
-    const shapes={book:'<path d="M70 50q90-30 180 0 90-30 180 0v130q-90-30-180 0-90-30-180 0z" fill="#fffaf0" stroke="#719bb8" stroke-width="6"/><path d="M250 50v130" stroke="#719bb8" stroke-width="4"/><path d="M100 90h100m-100 30h100m100-30h100m-100 30h100" stroke="#d6b86d" stroke-width="8"/>',
-      pencil:'<rect x="110" y="30" width="250" height="170" rx="10" fill="#fff" stroke="#97b68c" stroke-width="5"/><path d="m195 158 98-98 23 23-98 98-35 10z" fill="#dfb85d" stroke="#536e81" stroke-width="4"/><path d="m195 158 23 23-35 10z" fill="#f1d1b3"/>',
-      blocks:shape('square',180,145,40,colors[0])+shape('square',270,145,40,colors[1])+shape('triangle',225,60,40,colors[2]),
-      ball:'<circle cx="250" cy="115" r="75" fill="#d9b859" stroke="#536e81" stroke-width="5"/><path d="M175 115h150M250 40q-50 75 0 150m0-150q50 75 0 150" fill="none" stroke="#536e81" stroke-width="4"/>',
-      balance:'<path d="M70 205h360" stroke="#97b68c" stroke-width="8" stroke-dasharray="18 10"/><circle cx="250" cy="45" r="24" fill="#ecc5a4" stroke="#536e81" stroke-width="4"/><path d="M250 70v70m0-55-95 20m95-20 95 20m-95 35-30 60m30-60 58 14 22-35" stroke="#719bb8" stroke-width="15" fill="none" stroke-linecap="round"/>',
-      memory:shape('circle',110,110,40,colors[0])+shape('triangle',250,110,40,colors[1])+shape('square',390,110,40,colors[2]),
-      hidden:'<rect x="100" y="30" width="300" height="170" rx="25" fill="#edf4f8" stroke="#719bb8" stroke-width="4"/><text x="250" y="150" text-anchor="middle" font-size="110" fill="#719bb8">?</text>',
-      morning:'<circle cx="250" cy="100" r="55" fill="#dfbd60"/><path d="M100 175h300" stroke="#97b68c" stroke-width="8"/>',
-      night:'<path d="M275 30a80 80 0 1 0 75 115 75 75 0 0 1-75-115" fill="#dfbd60"/><circle cx="130" cy="50" r="6" fill="#719bb8"/><circle cx="370" cy="50" r="6" fill="#719bb8"/>',
-      meal:'<ellipse cx="250" cy="120" rx="105" ry="65" fill="#f9faf6" stroke="#719bb8" stroke-width="8"/><circle cx="230" cy="112" r="28" fill="#97b68c"/><circle cx="280" cy="135" r="24" fill="#d69b70"/><path d="M100 50v140m-15-140v55h30V50m285 0v140" stroke="#536e81" stroke-width="7" fill="none"/>',
-      wash:'<path d="M145 65h200v35H145z" fill="#719bb8"/><path d="M320 100v35" stroke="#719bb8" stroke-width="15"/><path d="M320 150q-25 30 0 40 25-10 0-40" fill="#acd5e5"/><path d="M130 160h130q35 0 35 20H150" fill="#ecc5a4" stroke="#536e81" stroke-width="4"/>',
-      outside:'<path d="M50 200h400" stroke="#97b68c" stroke-width="8"/><path d="M165 200V80" stroke="#a48060" stroke-width="14"/><circle cx="165" cy="65" r="50" fill="#97b68c"/><circle cx="350" cy="60" r="30" fill="#dfbd60"/>'};
-    return svg(shapes[type]||shapes.blocks,type);
+    if(type==='memory')return svg(shape('circle',110,110,40,colors[0])+shape('triangle',250,110,40,colors[1])+shape('square',390,110,40,colors[2]),'Circle, triangle, and square');
+    if(type==='hidden')return '<div class="activity-hidden" role="img" aria-label="Picture hidden">?</div>';
+    const names={morning:'sun',night:'moon'};
+    return image(names[type]||type,{book:'An open picture book',pencil:'A pencil and blank paper',blocks:'Toy building blocks',ball:'A soccer ball',balance:'A child balancing on one leg',wash:'A child washing hands',meal:'A child eating lunch',outside:'Children playing outside',morning:'The sun',night:'The moon'}[type]||type);
   }
-  function face(feeling,event){const mouth=feeling==='sad'?'<path d="M220 125q30-25 60 0"/>':feeling==='worried'?'<path d="M225 126h50"/>':'<path d="M220 110q30 35 60 0"/>';return svg(`<circle cx="250" cy="85" r="65" fill="#edc2a0" stroke="#536e81" stroke-width="4"/><path d="M190 62q10-75 90-35l30 35q-60-35-120 0" fill="#77584c"/><g stroke="#536e81" stroke-width="4" fill="none"><circle cx="225" cy="80" r="3"/><circle cx="275" cy="80" r="3"/>${mouth}</g><path d="M175 225v-40q75-70 150 0v40" fill="#97b68c"/><text x="250" y="220" font-size="20" text-anchor="middle" fill="#173b66">${escape(event)}</text>`,`${feeling} child: ${event}`)}
+  function face(feeling,event){return image('feeling-'+feeling,event)}
   const O=(prompt,visual,note,extra={})=>({prompt,visual,mode:'observed',note,...extra});
   const C=(prompt,choices,answer,visual)=>({prompt,choices,answer,visual});
   const V=(label,visual)=>({label,visual});
   const iconChoice=(label,type)=>V(label,prop(type));
-  function position(where){const ball={under:[250,180],on:[250,57],beside:[390,140],inside:[250,120],above:[250,30]}[where];return svg(`<path d="M160 80h180v70H160z" fill="#eee3cf" stroke="#536e81" stroke-width="5"/>`+shape('circle',...ball,22,colors[1]),`Ball ${where} the box`)}
-  function ribbon(n){return svg(`<path d="M45 80h${n*85}v65H45z" fill="#719bb8" stroke="#31536c" stroke-width="3"/>`,'Ribbon')}
-  function fruit(kind,x=250,y=110,k=1){
-    const body=kind==='Apples'?'<path d="M0-25C-60-65-75 30-25 50Q0 65 25 50C75 30 60-65 0-25" fill="#cd8170"/><path d="M0-20v-30" stroke="#76604c" stroke-width="9"/><ellipse cx="18" cy="-44" rx="22" ry="10" fill="#94b68c"/>':kind==='Bananas'?'<path d="M-55-40Q-35 80 65 5Q-30 120-55-40" fill="#dfbd60" stroke="#9c8245" stroke-width="4"/>':'<g fill="#9c8bb8" stroke="#71618a" stroke-width="2"><circle cx="-22" cy="-18" r="22"/><circle cx="22" cy="-18" r="22"/><circle cx="0" cy="16" r="22"/><circle cx="0" cy="48" r="18"/></g><path d="M0-40q5-25 25-18" fill="none" stroke="#94b68c" stroke-width="7"/>';
-    return `<g transform="translate(${x} ${y}) scale(${k})">${body}</g>`;
+  function position(where){
+    const [x,y]={under:[250,188],on:[250,56],beside:[395,158],inside:[250,116],above:[250,28]}[where];
+    const box='<path d="M160 85h180v70H160z" fill="#d3a870" stroke="#71502f" stroke-width="4"/><path d="m160 85 22-16h136l22 16" fill="#edc991" stroke="#71502f" stroke-width="4"/><path d="M240 85v70h20V85" fill="#e8c38d"/>';
+    const front=where==='inside'?'<path d="M160 124h180v31H160z" fill="#d3a870" stroke="#71502f" stroke-width="4"/>':'';
+    return svg(box+imageInSvg('ball',x-25,y-25,50,50)+front,`Ball ${where} the box`);
   }
-  const fruitChoice=name=>V(name,svg(fruit(name),name));
-  const graph=svg('<text x="100" y="28" font-size="23" fill="#31536c">Our favorite fruit</text>'+[['Apples',4],['Bananas',2],['Grapes',3]].map(([label,n],row)=>fruit(label,50,65+row*60,.37)+Array.from({length:n},(_,i)=>shape('circle',145+i*65,67+row*60,19,colors[row])).join('')).join(''),'Picture graph: apples four votes, bananas two, grapes three. Each circle is one vote.');
+  function ribbon(n){return svg(`<path d="M45 80h${n*85}v65H45z" fill="#719bb8" stroke="#31536c" stroke-width="3"/>`,'Ribbon')}
+  const fruitNames={Apples:'apple',Bananas:'banana',Grapes:'grapes'};
+  const fruitChoice=name=>V(name,image(fruitNames[name],name));
+  const graph='<div class="fruit-graph" role="img" aria-label="Picture graph: apples four votes, bananas two, grapes three. Each circle is one vote."><div class="fruit-graph-title">Our favorite fruit</div>'+[['Apples',4],['Bananas',2],['Grapes',3]].map(([label,n])=>'<div class="fruit-graph-row">'+image(fruitNames[label],label)+'<div class="fruit-votes">'+Array.from({length:n},()=>'<span class="fruit-vote" aria-hidden="true"></span>').join('')+'</div></div>').join('')+'<div class="fruit-graph-key">Each dot is one vote.</div></div>';
+  function pictureChoice(choice){
+    if(typeof choice==='object')return choice.visual;
+    const text=String(choice);
+    const objects={'🥤 Cup':'cup','🐱 Cat':'cat','🚌 Bus':'bus','🧒🧼 Washing hands':'wash','🧒📚 Reading':'reading','🧒⚽ Kicking a ball':'kicking','🍎 Apple':'apple','⚽ Ball':'ball','📘 Book':'book','🧦 Sock':'sock','🚗 Car':'car','🐭 Mouse':'mouse','☀️ Sun':'sun','🐟 Fish':'fish','🐢 Turtle':'turtle','🐝 Bee':'bee','🦋 Butterfly':'butterfly','🌙 Moon':'moon','🐟':'fish','🍃':'leaf'};
+    if(objects[text])return image(objects[text],text.replace(/^[^A-Za-z]+/u,'')||objects[text]);
+    if(text.startsWith('🐶 '))return puppyPosition(text.includes('under')?'under':text.includes('beside')?'beside':'on');
+    const shapes={'🔴 Red circle':['circle','#e54039'],'🟦 Blue square':['square','#2675cc'],'🔵 Blue square':['square','#2675cc'],'⭐ Yellow star':['star','#f2c333'],'🔺 Red triangle':['triangle','#e54039'],'🟢 Green circle':['circle','#36a55a'],'🔺 Triangle':['triangle','#e54039'],'🟠 Circle':['circle','#ee973d'],'🟦 Square':['square','#2675cc']};
+    if(shapes[text]){const[kind,color]=shapes[text];return svg(kind==='star'?'<path d="m250 30 24 50 56 8-40 39 9 56-49-26-49 26 9-56-40-39 56-8z" fill="'+color+'" stroke="#725f24" stroke-width="3"/>':shape(kind,250,110,65,color),text.replace(/^[^A-Za-z]+/u,''));}
+    return escape(text);
+  }
+  function puppyPosition(where){
+    const [x,y]=where==='under'?[178,136]:where==='on'?[178,4]:[345,136];
+    return svg(imageInSvg('table',90,70,240,155)+imageInSvg('puppy',x,y,88,88),'Puppy '+where+' a table');
+  }
   const catalog={
     '2b':{materials:['No materials needed. Read the prompt aloud and listen to the child’s own ideas.'],tasks:[O('This child’s tower fell down. How might they feel? What do you notice?',face('sad','The tower fell.'),'Record the child’s words and the facial or situation cues they mention. A picture response supports, but does not replace, observation with real peers.'),O('A new child is watching the game. What might they be thinking? What could you do?',face('worried','A new game.'),'Notice whether the child considers another person’s feelings and offers support.'),O('Your friend smiles after finishing a puzzle. How might they feel? What tells you that?',face('happy','I finished!'),'Accept different plausible interpretations supported by an explanation.')]},
-    '5':{materials:['Clear floor space and a flat taped line. Adult stays nearby. Adapt or skip for mobility needs.'],tasks:[O('Stand like a tall tree. Show me how you keep your balance.',prop('balance'),'Observe the child’s comfortable base of support, steadiness, and adjustments. No timed or automatic rating.'),O('Walk along the line in a way that feels safe for you.',prop('balance'),'Observe balance while traveling. Use a flat floor line; do not add elevated equipment.')]},
+    '5':{materials:['Clear floor space and a flat taped line. Adult stays nearby. Adapt or skip for mobility needs.'],tasks:[O('Stand like a tall tree. Show me how you keep your balance.',prop('balance'),'Observe the child’s comfortable base of support, steadiness, and adjustments. No timed or automatic rating.'),O('Walk along the line in a way that feels safe for you.',image('walking','A child walking along a flat line'),'Observe balance while traveling. Use a flat floor line; do not add elevated equipment.')]},
     '6':{materials:['A soft ball, a clear space, and an adult partner. Use a comfortable distance.'],tasks:[O('Roll the ball to your partner.',prop('ball'),'Observe release, direction, and coordinated body movement.'),O('Try tossing the soft ball to your partner.',prop('ball'),'Observe throwing and receiving with a soft ball at a comfortable distance. Adapt the task to the child.'),O('Try kicking the ball toward your partner.',prop('ball'),'Observe approach, contact, direction, and balance; skip if this is not an appropriate movement for the child.')]},
     '7a':{materials:['Large connecting blocks or large pegs. Choose safe materials appropriate for the child.'],tasks:[O('Put these pieces together. Make something you like.',prop('blocks'),'Observe grasp, hand use, wrist movements, precision, and how the child fits pieces together.'),O('Can you take your creation apart and build a new one?',prop('blocks'),'Observe controlled release and manipulation. Use a familiar tool if that gives better evidence.')]},
     '7b':{materials:['Paper and a familiar crayon, marker, or pencil.'],tasks:[O('Draw something you like. Tell me about your picture.',prop('pencil'),'Observe grasp, hand position, arm/finger movement, pressure, and control using a real tool. Touching a screen does not measure pencil grasp.'),O('Add a few more details to your picture.',prop('pencil'),'Watch how the child moves and controls the tool; keep the drawing as supporting evidence.')]},
@@ -72,5 +81,5 @@ window.LEChildActivities=(()=>{
     '22c':{materials:['Counters and paper to make a simple graph after reading the picture graph.'],tasks:[C('Each circle is one vote. Which fruit has the most votes?',[fruitChoice("Apples"),fruitChoice("Bananas"),fruitChoice("Grapes")],0,graph),C('Which fruit has the fewest votes?',[fruitChoice("Grapes"),fruitChoice("Apples"),fruitChoice("Bananas")],2,graph),O('Make a graph to show a few friends’ choices. Tell me what it shows.',prop('blocks'),'Let the child organize and represent real data; observe comparing categories and explaining the display. Read choice labels aloud if needed.')]},
     '23':{materials:['Two colors or types of blocks for copying and creating a pattern.'],tasks:[C('What comes next? Tap the shape.',[V('Square',svg(shape('square'))),V('Circle',svg(shape('circle'))),V('Triangle',svg(shape('triangle')))],1,pattern(['circle','square','circle','square'],true)),C('What comes next in this pattern?',[V('Triangle',svg(shape('triangle',250,110,60,colors[1]))),V('Circle',svg(shape('circle')))],0,pattern(['circle','triangle','triangle','circle','triangle'],true)),O('Copy a pattern with your blocks. Then make a pattern of your own.',pattern(['circle','square','circle','square']),'Distinguish copying, extending, and independently creating. Invite the child to explain the repeating part.')]}
   };
-  return {catalog,escape,label:choice=>typeof choice==='object'?choice.label:String(choice),choice:choice=>typeof choice==='object'?choice.visual:escape(choice)};
+  return {catalog,escape,image,label:choice=>typeof choice==='object'?choice.label:String(choice),choice:pictureChoice};
 })();

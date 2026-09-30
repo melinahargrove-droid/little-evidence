@@ -609,6 +609,23 @@
     .activity-observation select{display:block;width:100%;padding:12px;border:1px solid #b8cddd;border-radius:10px;background:#fff;color:var(--navy);margin-top:8px;font-size:16px}
     @media(max-width:650px){.app.scenario-mode .activity-page .scenario-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.activity-page .scenario-choice{padding:12px}.activity-picture svg{max-height:170px}.activity-page .scenario-choice svg{max-height:115px}.activity-prep .guided-actions{flex-wrap:wrap}.activity-page{padding:18px 12px}}
 
+
+    /* Recognizable classroom pictures; exact math diagrams remain native. */
+    .activity-art{display:block;width:100%;height:100%;object-fit:contain;margin:auto;}
+    .activity-picture>.activity-art{height:230px;max-width:540px}
+    .activity-page .scenario-choice>.activity-art{height:145px;max-width:230px;pointer-events:none}
+    .app.scenario-mode .scenario-illustration>.activity-art{height:230px;max-width:450px}
+    .app.child-mode .illustration>.activity-art{height:100%;max-width:720px;filter:none}
+    .activity-hidden{font-size:110px;color:#557991;padding:20px;font-weight:700}
+    .fruit-graph{max-width:460px;margin:auto;padding:4px 14px;color:#173b66}
+    .fruit-graph-title{font-size:22px;font-weight:700;margin-bottom:4px}
+    .fruit-graph-row{display:flex;align-items:center;gap:24px;height:60px}
+    .fruit-graph-row>.activity-art{width:58px;height:54px;margin:0;flex:none}
+    .fruit-votes{display:flex;align-items:center;gap:20px}
+    .fruit-vote{width:29px;height:29px;border-radius:50%;background:#578daf;border:2px solid #31536c}
+    .fruit-graph-key{font-size:14px;margin-top:5px}
+    @media(max-height:960px){.activity-picture>.activity-art{height:205px}.activity-page .scenario-choice>.activity-art{height:125px}}
+    @media(max-width:650px){.activity-picture>.activity-art{height:175px}.activity-page .scenario-choice>.activity-art{height:110px}.fruit-graph{padding:0}.fruit-graph-row{gap:14px}.fruit-votes{gap:12px}.fruit-vote{width:25px;height:25px}}
   </style>
 </head>
 <body>
@@ -1065,14 +1082,7 @@
       const button=document.createElement('button');button.className='level-pick';button.textContent=n;button.setAttribute('aria-label',`Select checkpoint level ${n}`);button.dataset.level=n;
       button.addEventListener('click',()=>{selectedLevel=n;userChangedLevel=true;renderSuggestion()});levelPicks.append(button);
     }
-    function art(kind){
-      const kid=`<g stroke="#536d82" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><circle cx="328" cy="78" r="28" fill="#e9b48f"/><path d="M304 73c2-30 50-38 58-3-15-8-28-10-42-2" fill="#765a50" stroke-width="2"/><path d="M311 112q18-16 36 0l12 69h-61z" fill="#78a5c5"/><path d="m322 177-8 61M347 177l21 53M312 135l-44 33M349 136l40 29" fill="none"/><path d="M307 241h20M364 231h22"/></g>`;
-      let scene='';
-      if(kind==='run') scene=`<ellipse cx="350" cy="250" rx="260" ry="21" fill="#dbe9e2"/><path d="M79 249h470" stroke="#acc8b7" stroke-width="5" stroke-dasharray="12 12"/><path d="M500 92v155" stroke="#d8a84d" stroke-width="6"/><path d="M474 92h54l-10 38h-34z" fill="#69a1c4"/><circle cx="140" cy="205" r="30" fill="#e8c46f" opacity=".75"/>${kid}<path d="M390 193q65-37 110-10" fill="none" stroke="#9bb8cb" stroke-width="4" stroke-dasharray="7 9"/>`;
-      if(kind==='path') scene=`<ellipse cx="350" cy="249" rx="265" ry="22" fill="#dcebe2"/><path d="M82 218c90 5 103-90 206-64s82 105 185 38" fill="none" stroke="#a8cbb2" stroke-width="6" stroke-dasharray="11 12"/><ellipse cx="157" cy="191" rx="30" ry="19" fill="#96c1a6"/><ellipse cx="280" cy="166" rx="30" ry="19" fill="#9db8d1"/><ellipse cx="390" cy="191" rx="30" ry="19" fill="#e8c46f"/><ellipse cx="492" cy="181" rx="30" ry="19" fill="#a7c9b2"/>${kid}`;
-      if(kind==='gallop') scene=`<ellipse cx="350" cy="249" rx="265" ry="22" fill="#dcebe2"/><path d="M100 225h495" stroke="#adc7b8" stroke-width="5"/><path d="M514 133v91" stroke="#dfaa56" stroke-width="6"/><path d="M489 132h51l-8 34h-36z" fill="#e6be69"/><path d="M132 115q8-18 19 0t19 0" fill="none" stroke="#91b6cc" stroke-width="5"/>${kid}<path d="M385 174q48-32 91-11" fill="none" stroke="#a4bfce" stroke-width="4" stroke-dasharray="6 9"/>`;
-      return `<svg viewBox="0 0 700 300" role="img" aria-label="Watercolor illustration of a child moving through a soft green play space"><defs><filter id="soft"><feGaussianBlur stdDeviation="7"/></filter></defs><ellipse cx="176" cy="78" rx="125" ry="45" fill="#d8ebf2" opacity=".55" filter="url(#soft)"/><ellipse cx="536" cy="78" rx="99" ry="39" fill="#e6efda" opacity=".7" filter="url(#soft)"/><circle cx="94" cy="52" r="4" fill="#e5be69"/><circle cx="607" cy="100" r="5" fill="#b9d2e0"/>${scene}</svg>`;
-    }
+    function art(kind){return LEChildActivities.image({run:'running',path:'path',gallop:'galloping'}[kind],{run:'A child running toward a blue cone',path:'A child moving around stepping stones',gallop:'A child galloping toward a finish flag'}[kind]);}
     function show(id){document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
     function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Move & explore · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
     function renderRatingSelections(){document.querySelectorAll('[data-rating]').forEach(button=>button.classList.toggle('selected',ratings[Number(button.dataset.rating)]===Number(button.dataset.value)));}
@@ -2306,23 +2316,7 @@
     }
     function startGuidedInterview(){document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+activeDefinition.id;guidedHome.classList.add('hidden');guidedChild.classList.add('hidden');guidedCheck.classList.remove('hidden');guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;renderGuidedQuestion()}
     function startChildScenarios(){guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');scenarioIndex=0;scenarioAnswers=[];renderChildScenario()}
-    function scenarioIllustration(s){
-      const common=(shirt,hair,x)=>'<g transform="translate('+x+' 0)" stroke="#61778a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="52" cy="72" r="27" fill="#edc09e"/><path d="M27 68q4-33 30-29 22 3 23 29-17-12-34-11-11 0-19 11" fill="'+hair+'" stroke-width="2"/><circle cx="44" cy="75" r="2.8" fill="#36526a" stroke="none"/><circle cx="61" cy="75" r="2.8" fill="#36526a" stroke="none"/><path d="M46 87q7 7 14 0" fill="none" stroke-width="2.5"/><path d="M28 108q24-22 48 0l10 47H18z" fill="'+shirt+'"/><path d="m27 119-24 18m70-18 25 18m-66 14-8 25m46-25 9 25M24 176h-8m65 0h-8" fill="none" stroke-width="6"/></g>';
-      let center='';
-      let aria='A soft watercolor picture of two friends exploring together.';
-      if(s.title==='One tricycle'){
-        aria='Two friends and a tricycle.';
-        center='<g stroke="#67859a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="188" cy="157" r="22" fill="#fff"/><circle cx="265" cy="157" r="22" fill="#fff"/><path d="m188 157 26-45 26 45h-52l25-32h32l20 32m-46-45h-16m48 0 10-18h15m-69 63h18"/></g><path d="M206 108h28v11h-28z" fill="#e8bf63" stroke="#67859a" stroke-width="3"/>';
-      }else if(s.title==='Dramatic play'){
-        aria='Two friends pretending to run a little restaurant.';
-        center='<path d="M176 132h105l-10 15h-84z" fill="#e4bd68" stroke="#74899a" stroke-width="3"/><path d="M188 148v34m80-34v34" stroke="#74899a" stroke-width="5" stroke-linecap="round"/><ellipse cx="229" cy="126" rx="29" ry="8" fill="#fffdf8" stroke="#91acb1" stroke-width="3"/><circle cx="229" cy="125" r="6" fill="#d89276"/><path d="M218 122q10-12 21 0" fill="#9bbd92"/>';
-      }else{
-        aria='Two friends planning a block building together.';
-        center='<g stroke="#8a8b7b" stroke-width="3"><rect x="184" y="133" width="37" height="32" rx="4" fill="#dfaa83"/><rect x="223" y="133" width="37" height="32" rx="4" fill="#84abc0"/><rect x="203" y="98" width="39" height="33" rx="4" fill="#e6c56f"/><rect x="222" y="65" width="38" height="31" rx="4" fill="#a4bea2"/></g>';
-      }
-      const sparkle='<g class="scene-spark" fill="#dfbd68"><path d="m198 43 4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><path d="m294 69 3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></g>';
-      return '<svg viewBox="0 0 350 210" role="img" aria-label="'+aria+'" xmlns="http://www.w3.org/2000/svg"><ellipse cx="174" cy="185" rx="145" ry="13" fill="#cfdfd1"/><circle cx="55" cy="45" r="24" fill="#fff" opacity=".75"/><circle cx="302" cy="48" r="31" fill="#fff" opacity=".58"/>'+sparkle+center+common("#79a8c0","#755b50",20)+common("#9ebc99","#695750",224)+'</svg>';
-    }
+    function scenarioIllustration(s){return LEChildActivities.image({'One tricycle':'tricycle','Dramatic play':'restaurant','Block-building plan':'building'}[s.title],s.title);}
     function renderChildScenario(){
       const d=activeDefinition,s=d.scenarios[scenarioIndex];guidedChild.innerHTML='<div class="panel child-scenario"><p class="eyebrow">A little thinking together · '+(scenarioIndex+1)+' of '+d.scenarios.length+'</p><h2>'+escapeHTML(s.title)+'</h2><div class="child-story-row"><div class="scenario-illustration">'+scenarioIllustration(s)+'</div><p class="child-scenario-prompt">'+escapeHTML(s.text)+'</p></div><button type="button" class="secondary" id="scenarioHear">🔊 Hear it</button><div class="scenario-choices">'+s.choices.map((choice,i)=>'<button type="button" class="scenario-choice" data-scenario-choice="'+i+'">'+escapeHTML(choice)+'</button>').join('')+'</div><p class="small-note" style="margin-top:18px">There is no single right answer. The child can point, tell you, or choose an idea.</p><div class="guided-actions" style="max-width:950px;margin:20px auto 0"><button class="text-button" id="scenarioBack">'+(scenarioIndex?'← Previous':'Exit child check')+'</button><button class="primary" id="scenarioNext" disabled>'+(scenarioIndex===d.scenarios.length-1?'Continue to teacher check →':'Next story →')+'</button></div></div>';
       document.getElementById('modeTag').textContent='CHILD VIEW · THINKING TOGETHER';document.getElementById('scenarioHear').addEventListener('click',()=>{if('speechSynthesis'in window){speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(s.text);utterance.rate=.85;speechSynthesis.speak(utterance)}});
