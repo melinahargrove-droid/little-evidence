@@ -504,7 +504,40 @@
       body.family-report-printing .family-domain-card ul,body.family-report-printing .family-practice-card p{font-size:9px;line-height:1.32}
       body.family-report-printing .family-report-note{bottom:.28in;left:.55in;right:.55in;font-size:8px}
     }
-    @media(max-width:700px){.checkpoint-nav{padding:8px 10px;font-size:12px}.checkpoint-form-row{align-items:stretch}.checkpoint-form-row button{width:100%}.checkpoint-record-row{align-items:flex-start;flex-direction:column}}
+    .gold-entry-screen{max-width:1040px;margin:0 auto}
+    .gold-entry-actions{display:flex;justify-content:flex-end;gap:10px;max-width:900px;margin:14px auto}
+    .gold-entry-page{max-width:900px;margin:0 auto;padding:38px 42px;background:#fff;border:1px solid #dce8f0;border-radius:24px;box-shadow:var(--shadow)}
+    .gold-entry-brand{display:flex;align-items:center;gap:9px;color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+    .gold-entry-brand span{display:grid;place-items:center;width:30px;height:30px;border-radius:11px;background:#e5f1f8;font-size:18px}
+    .gold-entry-page h1{margin:18px 0 4px;font-size:29px;color:var(--navy)}
+    .gold-entry-meta{margin:0 0 13px;color:#71879a;font-size:13px}
+    .gold-entry-instructions{margin:0 0 18px;padding:10px 13px;border-radius:12px;background:#f2f8fc;color:#4d6a80;font-size:12px;line-height:1.4}
+    .gold-entry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .gold-entry-column{display:flex;flex-direction:column;gap:5px}
+    .gold-entry-row{display:grid;grid-template-columns:34px minmax(0,1fr) 82px;gap:7px;align-items:center;min-height:31px;padding:5px 7px;border:1px solid #e0eaf0;border-radius:9px;background:#fbfdfe}
+    .gold-entry-code{font-size:10px;font-weight:900;color:#3977ad}
+    .gold-entry-title{font-size:11px;line-height:1.23;color:#405e76}
+    .gold-entry-level{justify-self:end;min-width:74px;padding:4px 5px;border:1px solid #c9ddea;border-radius:7px;background:#edf6fb;color:#244f70;text-align:center;font-size:10px;font-weight:900}
+    .gold-entry-foot{margin:14px 0 0;color:#73899a;font-size:9px;line-height:1.4}
+    @media(max-width:700px){.checkpoint-nav{padding:8px 10px;font-size:12px}.checkpoint-form-row{align-items:stretch}.checkpoint-form-row button{width:100%}.checkpoint-record-row{align-items:flex-start;flex-direction:column}.gold-entry-page{padding:25px 18px}.gold-entry-grid{grid-template-columns:1fr}.gold-entry-actions{align-items:stretch;flex-direction:column}.gold-entry-actions button{width:100%}}
+    @media print{
+      body.gold-entry-printing{background:#fff!important}
+      body.gold-entry-printing *{visibility:hidden!important}
+      body.gold-entry-printing #goldEntrySheetScreen,body.gold-entry-printing #goldEntrySheetScreen *{visibility:visible!important}
+      body.gold-entry-printing #goldEntrySheetScreen{display:block!important;position:absolute;inset:0;width:100%;margin:0;padding:0;background:#fff}
+      body.gold-entry-printing .gold-entry-toolbar,body.gold-entry-printing .gold-entry-actions,body.gold-entry-printing .topbar{display:none!important}
+      body.gold-entry-printing .gold-entry-page{width:8.5in;height:11in;max-width:none;margin:0;padding:.42in .46in;border:0;border-radius:0;box-shadow:none;overflow:hidden;break-after:avoid;page-break-after:avoid}
+      body.gold-entry-printing .gold-entry-page h1{font-size:21px;margin:10px 0 3px}
+      body.gold-entry-printing .gold-entry-meta{font-size:9px;margin-bottom:9px}
+      body.gold-entry-printing .gold-entry-instructions{font-size:8px;margin-bottom:10px;padding:7px 9px}
+      body.gold-entry-printing .gold-entry-grid{gap:10px}
+      body.gold-entry-printing .gold-entry-column{gap:3px}
+      body.gold-entry-printing .gold-entry-row{grid-template-columns:28px minmax(0,1fr) 68px;gap:5px;min-height:23px;padding:3px 5px;border-radius:6px}
+      body.gold-entry-printing .gold-entry-code,body.gold-entry-printing .gold-entry-level{font-size:8px}
+      body.gold-entry-printing .gold-entry-level{min-width:62px;padding:3px}
+      body.gold-entry-printing .gold-entry-title{font-size:8px;line-height:1.18}
+      body.gold-entry-printing .gold-entry-foot{font-size:7px;margin-top:8px}
+    }
   </style>
 </head>
 <body>
@@ -750,6 +783,8 @@
               <div id="activeCheckpointLabel" class="small-note">Choose a child and checkpoint to see saved assessments.</div>
               <div id="checkpointSavedRecords" class="checkpoint-record-list"></div>
               <button type="button" class="primary wide" id="createParentReport" disabled style="margin-top:16px">Create 2-page family report&nbsp; →</button>
+              <button type="button" class="secondary wide" id="createGoldEntrySheet" disabled style="margin-top:10px">Print GOLD entry sheet&nbsp; ↓</button>
+              <p class="small-note">One page for this child and checkpoint, with objectives in GOLD order.</p>
             </section>
           </div>
         </div>
@@ -759,6 +794,11 @@
         <div class="family-report-toolbar"><button type="button" class="text-button" id="backToCheckpointReport">← Back to checkpoint</button><span class="badge">Family-friendly · GOLD numbers hidden</span></div>
         <div class="family-report-pages" id="parentReportPages" aria-live="polite"></div>
         <div class="family-report-actions"><button type="button" class="secondary" id="closeParentReport">Back to checkpoint</button><button type="button" class="primary" id="printParentReport">Print / Save as PDF&nbsp; ↓</button></div>
+      </section>
+      <section class="screen gold-entry-screen" id="goldEntrySheetScreen" aria-labelledby="goldEntrySheetTitle">
+        <div class="family-report-toolbar gold-entry-toolbar"><button type="button" class="text-button" id="backFromGoldEntrySheet">← Back to checkpoint</button><span class="badge">Teacher copy · GOLD checkpoint levels</span></div>
+        <div class="gold-entry-actions"><button type="button" class="primary" id="printGoldEntrySheet">Print / Save as PDF&nbsp; ↓</button></div>
+        <div id="goldEntrySheetContent" aria-live="polite"></div>
       </section>
 
       <section class="screen panel section-card" id="pairScreen" aria-labelledby="pairTitle">
@@ -1034,8 +1074,11 @@
       });
       document.getElementById('addCheckpointChild').addEventListener('click',addCheckpointChild);
       document.getElementById('openCheckpoint').addEventListener('click',openOrCreateCheckpoint);
-      document.getElementById('checkpointChildSelect').addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true});
+      document.getElementById('checkpointChildSelect').addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true});
       document.getElementById('createParentReport').addEventListener('click',openParentReport);
+      document.getElementById('createGoldEntrySheet').addEventListener('click',openGoldEntrySheet);
+      document.getElementById('backFromGoldEntrySheet').addEventListener('click',()=>show('checkpointScreen'));
+      document.getElementById('printGoldEntrySheet').addEventListener('click',()=>{document.body.classList.add('gold-entry-printing');window.print();setTimeout(()=>document.body.classList.remove('gold-entry-printing'),1200)});
       document.getElementById('backToCheckpointReport').addEventListener('click',()=>show('checkpointScreen'));
       document.getElementById('closeParentReport').addEventListener('click',()=>show('checkpointScreen'));
       document.getElementById('printParentReport').addEventListener('click',()=>{document.body.classList.add('family-report-printing');window.print();setTimeout(()=>document.body.classList.remove('family-report-printing'),1200)});
@@ -1102,11 +1145,17 @@
       if(!leUser)return;
       const select=document.getElementById('checkpointChildSelect');
       checkpointStatus('Loading children…');
-      const {data,error}=await leDb.from('little_evidence_children').select('id,display_name').is('archived_at',null).order('display_name');
+      const {data,error}=await leDb.from('little_evidence_children').select('id,display_name').is('archived_at',null);
       if(error){checkpointStatus('Could not load children: '+error.message,true);return}
-      select.innerHTML='<option value="">Choose a child</option>'+(data||[]).map(child=>'<option value="'+escapeHTML(child.id)+'">'+escapeHTML(child.display_name)+'</option>').join('');
+      const children=[...(data||[])].sort((a,b)=>checkpointFirstName(a.display_name).localeCompare(checkpointFirstName(b.display_name),'en',{sensitivity:'base'})||String(a.display_name).localeCompare(String(b.display_name),'en',{sensitivity:'base'}));
+      select.innerHTML='<option value="">Choose a child</option>'+children.map(child=>'<option value="'+escapeHTML(child.id)+'">'+escapeHTML(child.display_name)+'</option>').join('');
       if(selectChildId)select.value=selectChildId;
       checkpointStatus((data||[]).length?'Choose a child and checkpoint season.':'Add your first child to begin.');
+    }
+    function checkpointFirstName(name){
+      const display=String(name||'').trim();
+      const firstPart=display.includes(',')?display.split(',').slice(1).join(',').trim():display;
+      return firstPart.split(/\s+/)[0]||'';
     }
     async function addCheckpointChild(){
       if(!leUser)return;
@@ -1153,6 +1202,7 @@
       (data||[]).forEach(record=>{const context=contexts[record.objective_id];if(context)evidenceRecordIds[context]=record.id});
       const grid=document.getElementById('checkpointSavedRecords');
       document.getElementById('createParentReport').disabled=!data?.length;
+      document.getElementById('createGoldEntrySheet').disabled=!data?.length;
       if(!data?.length){grid.innerHTML='<p class="small-note">No objectives saved yet. Save an assessment and it will appear here.</p>';return}
       grid.innerHTML=data.map(record=>{
         const def=(typeof objectiveDefinitions!=='undefined'?objectiveDefinitions:[]).find(item=>item.id===record.objective_id);
@@ -1160,6 +1210,40 @@
         const level=record.final_level===null?'Not selected':record.final_level===0?'Not Yet':'Level '+record.final_level;
         return '<div class="checkpoint-record-row"><span><strong>'+escapeHTML(record.objective_id+' · '+title)+'</strong><br><span class="small-note">'+escapeHTML(level)+'</span></span><span class="small-note">Saved '+new Date(record.updated_at).toLocaleDateString()+'</span></div>'
       }).join('')
+    }
+    function objectiveIdCompare(a,b){
+      const left=String(a.id).match(/^(\d+)([a-z]*)$/i)||[,Number.MAX_SAFE_INTEGER,String(a.id)];
+      const right=String(b.id).match(/^(\d+)([a-z]*)$/i)||[,Number.MAX_SAFE_INTEGER,String(b.id)];
+      return Number(left[1])-Number(right[1])||String(left[2]).localeCompare(String(right[2]),'en',{sensitivity:'base'});
+    }
+    async function openGoldEntrySheet(){
+      if(!activeCheckpoint||!leUser){toast('Open a child checkpoint first.');return}
+      const button=document.getElementById('createGoldEntrySheet');button.disabled=true;button.textContent='Preparing sheet…';
+      try{
+        const {data,error}=await leDb.from('little_evidence_objective_records').select('objective_id,final_level').eq('checkpoint_id',activeCheckpoint.id);
+        if(error)throw error;
+        const records=new Map((data||[]).map(record=>[String(record.objective_id),record]));
+        const definitions=new Map(objectiveDefinitions.map(definition=>[String(definition.id),definition]));
+        if(!definitions.has('4'))definitions.set('4',parentObjectiveDefinition('4'));
+        records.forEach((_record,id)=>{if(!definitions.has(id))definitions.set(id,parentObjectiveDefinition(id))});
+        const ordered=[...definitions.values()].sort(objectiveIdCompare);
+        const split=Math.ceil(ordered.length/2);
+        const child=escapeHTML(activeCheckpointChildName||'Child');
+        const season=String(activeCheckpoint.season||'').replace(/^./,letter=>letter.toUpperCase());
+        const caption=escapeHTML((season+' '+(activeCheckpoint.school_year||'')).trim());
+        const columns=[ordered.slice(0,split),ordered.slice(split)];
+        const rowMarkup=definition=>{
+          const id=String(definition.id),record=records.get(id);
+          const final=record?.final_level;
+          const level=final===null||final===undefined?'—':Number(final)===0?'Not Yet':'Level '+escapeHTML(final);
+          const title=id==='4'?'Demonstrates Traveling Skills':definition.title||definition.family||('Objective '+id);
+          return '<div class="gold-entry-row"><span class="gold-entry-code">'+escapeHTML(id)+'</span><span class="gold-entry-title">'+escapeHTML(title)+'</span><span class="gold-entry-level">'+level+'</span></div>';
+        };
+        const columnsMarkup=columns.map(column=>'<div class="gold-entry-column">'+column.map(rowMarkup).join('')+'</div>').join('');
+        document.getElementById('goldEntrySheetContent').innerHTML='<article class="gold-entry-page" aria-label="One-page Teaching Strategies GOLD checkpoint entry sheet"><div class="gold-entry-brand"><span>✦</span> Early Eagle Academy · Little Evidence</div><h1 id="goldEntrySheetTitle">GOLD checkpoint entry sheet</h1><p class="gold-entry-meta"><strong>Child:</strong> '+child+' &nbsp; · &nbsp; <strong>Checkpoint:</strong> '+caption+'</p><p class="gold-entry-instructions">Enter the final level shown for each objective in Teaching Strategies GOLD. “Not Yet” is shown explicitly. A dash means no final level has been selected in Little Evidence.</p><div class="gold-entry-grid">'+columnsMarkup+'</div><p class="gold-entry-foot">Teacher reference for manual checkpoint entry. Review blank objectives and confirm each rating in Teaching Strategies GOLD, the official checkpoint record.</p></article>';
+        document.getElementById('modeTag').textContent='GOLD CHECKPOINT ENTRY · 1 PAGE';show('goldEntrySheetScreen');
+      }catch(error){toast('Could not prepare the entry sheet: '+(error.message||'Try again.'))}
+      finally{button.disabled=false;button.textContent='Print GOLD entry sheet  ↓'}
     }
     const familyDomainOrder=['Social-Emotional','Physical','Language','Cognitive','Literacy','Mathematics','Science','Science & Technology','Social Studies','The Arts','English Language Acquisition'];
     const familyDomainNames={'Social-Emotional':'Social & Emotional Growth','Physical':'Physical Development','Language':'Language & Communication','Cognitive':'Thinking & Learning','Literacy':'Early Literacy','Mathematics':'Math','Science':'Science & Discovery','Science & Technology':'Science & Technology','Social Studies':'Community & People','The Arts':'Creative Arts','English Language Acquisition':'Learning English'};
