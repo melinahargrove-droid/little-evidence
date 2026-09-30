@@ -322,9 +322,26 @@
       color:#244f73;font-family:"Andika","Trebuchet MS",sans-serif;
       font-size:clamp(34px,5.4vw,64px);line-height:1.12;letter-spacing:-.02em
     }
+    .app.scenario-mode .child-story-row{
+      position:relative;z-index:1;display:grid;grid-template-columns:minmax(220px,.74fr) minmax(0,1.4fr);
+      gap:22px;max-width:1100px;width:100%;margin:0 auto 20px;align-items:stretch
+    }
+    .app.scenario-mode .scenario-illustration{
+      display:grid;place-items:center;min-height:205px;padding:8px;overflow:hidden;
+      border:1px solid #dfe8df;border-radius:27px;
+      background:radial-gradient(ellipse at 20% 20%,rgba(255,255,255,.9) 0 16%,transparent 38%),linear-gradient(145deg,#edf6f8,#f4f6e9);
+      box-shadow:inset 0 0 0 5px rgba(255,255,255,.55)
+    }
+    .app.scenario-mode .scenario-illustration svg{display:block;width:100%;height:auto;max-height:230px}
+    .app.scenario-mode .scenario-illustration .scene-spark{animation:floatConfetti 3.4s ease-in-out infinite;transform-origin:center}
+    .app.scenario-mode #scenarioHear,.app.scenario-mode #taskHear{
+      align-self:center;width:auto;min-width:160px;margin:0 auto 14px;padding:11px 22px;
+      border:1px solid #d4e5ed;border-radius:999px;background:#f1f7f8;color:#346e99;
+      font-size:clamp(16px,1.7vw,21px);font-weight:800;box-shadow:0 4px 12px rgba(45,89,119,.06)
+    }
     .app.scenario-mode .child-scenario-prompt{
-      position:relative;z-index:1;width:fit-content;max-width:min(100%,1080px);
-      margin:0 auto 22px;padding:clamp(16px,2.5vw,28px) clamp(18px,3vw,36px);
+      position:relative;z-index:1;width:auto;max-width:none;display:flex;align-items:center;
+      margin:0;padding:clamp(16px,2.5vw,28px) clamp(18px,3vw,36px);
       border:1px solid #e5e4d9;border-radius:28px;background:#fffdf8;
       box-shadow:0 8px 20px rgba(59,84,101,.07);
       color:#416987;font-family:"Andika","Trebuchet MS",sans-serif;
@@ -375,6 +392,10 @@
       .app.scenario-mode .scenario-choices{grid-template-columns:1fr;gap:11px}
       .app.scenario-mode .scenario-choice{min-height:74px;padding:14px 16px;border-radius:20px}
       .app.scenario-mode .child-scenario-prompt{border-radius:22px}
+      .app.scenario-mode .child-story-row{grid-template-columns:1fr;gap:12px}
+      .app.scenario-mode .scenario-illustration{min-height:170px;max-height:205px}
+      .app.scenario-mode .scenario-illustration svg{max-height:185px}
+      .app.scenario-mode .child-story-row .child-scenario-prompt{min-height:120px}
       .app.child-mode .illustration{width:min(100%,900px);height:30vh;min-height:170px}
       .app.child-mode .move-screen .direction{font-size:clamp(34px,8vw,52px);padding:10px 14px}
     }
@@ -1696,8 +1717,25 @@
     }
     function startGuidedInterview(){guidedHome.classList.add('hidden');guidedChild.classList.add('hidden');guidedCheck.classList.remove('hidden');guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;renderGuidedQuestion()}
     function startChildScenarios(){guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');scenarioIndex=0;scenarioAnswers=[];renderChildScenario()}
+    function scenarioIllustration(s){
+      const common=(shirt,hair,x)=>'<g transform="translate('+x+' 0)" stroke="#61778a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="52" cy="72" r="27" fill="#edc09e"/><path d="M27 68q4-33 30-29 22 3 23 29-17-12-34-11-11 0-19 11" fill="'+hair+'" stroke-width="2"/><circle cx="44" cy="75" r="2.8" fill="#36526a" stroke="none"/><circle cx="61" cy="75" r="2.8" fill="#36526a" stroke="none"/><path d="M46 87q7 7 14 0" fill="none" stroke-width="2.5"/><path d="M28 108q24-22 48 0l10 47H18z" fill="'+shirt+'"/><path d="m27 119-24 18m70-18 25 18m-66 14-8 25m46-25 9 25M24 176h-8m65 0h-8" fill="none" stroke-width="6"/></g>';
+      let center='';
+      let aria='A soft watercolor picture of two friends exploring together.';
+      if(s.title==='One tricycle'){
+        aria='Two friends and a tricycle.';
+        center='<g stroke="#67859a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="188" cy="157" r="22" fill="#fff"/><circle cx="265" cy="157" r="22" fill="#fff"/><path d="m188 157 26-45 26 45h-52l25-32h32l20 32m-46-45h-16m48 0 10-18h15m-69 63h18"/></g><path d="M206 108h28v11h-28z" fill="#e8bf63" stroke="#67859a" stroke-width="3"/>';
+      }else if(s.title==='Dramatic play'){
+        aria='Two friends pretending to run a little restaurant.';
+        center='<path d="M176 132h105l-10 15h-84z" fill="#e4bd68" stroke="#74899a" stroke-width="3"/><path d="M188 148v34m80-34v34" stroke="#74899a" stroke-width="5" stroke-linecap="round"/><ellipse cx="229" cy="126" rx="29" ry="8" fill="#fffdf8" stroke="#91acb1" stroke-width="3"/><circle cx="229" cy="125" r="6" fill="#d89276"/><path d="M218 122q10-12 21 0" fill="#9bbd92"/>';
+      }else{
+        aria='Two friends planning a block building together.';
+        center='<g stroke="#8a8b7b" stroke-width="3"><rect x="184" y="133" width="37" height="32" rx="4" fill="#dfaa83"/><rect x="223" y="133" width="37" height="32" rx="4" fill="#84abc0"/><rect x="203" y="98" width="39" height="33" rx="4" fill="#e6c56f"/><rect x="222" y="65" width="38" height="31" rx="4" fill="#a4bea2"/></g>';
+      }
+      const sparkle='<g class="scene-spark" fill="#dfbd68"><path d="m198 43 4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><path d="m294 69 3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></g>';
+      return '<svg viewBox="0 0 350 210" role="img" aria-label="'+aria+'" xmlns="http://www.w3.org/2000/svg"><ellipse cx="174" cy="185" rx="145" ry="13" fill="#cfdfd1"/><circle cx="55" cy="45" r="24" fill="#fff" opacity=".75"/><circle cx="302" cy="48" r="31" fill="#fff" opacity=".58"/>'+sparkle+center+common("#79a8c0","#755b50",20)+common("#9ebc99","#695750",224)+'</svg>';
+    }
     function renderChildScenario(){
-      const d=activeDefinition,s=d.scenarios[scenarioIndex];guidedChild.innerHTML='<div class="panel child-scenario"><p class="eyebrow">A little thinking together · '+(scenarioIndex+1)+' of '+d.scenarios.length+'</p><h2>'+escapeHTML(s.title)+'</h2><p class="child-scenario-prompt">'+escapeHTML(s.text)+'</p><button type="button" class="secondary" id="scenarioHear">🔊 Hear it</button><div class="scenario-choices">'+s.choices.map((choice,i)=>'<button type="button" class="scenario-choice" data-scenario-choice="'+i+'">'+escapeHTML(choice)+'</button>').join('')+'</div><p class="small-note" style="margin-top:18px">There is no single right answer. The child can point, tell you, or choose an idea.</p><div class="guided-actions" style="max-width:950px;margin:20px auto 0"><button class="text-button" id="scenarioBack">'+(scenarioIndex?'← Previous':'Exit child check')+'</button><button class="primary" id="scenarioNext" disabled>'+(scenarioIndex===d.scenarios.length-1?'Continue to teacher check →':'Next story →')+'</button></div></div>';
+      const d=activeDefinition,s=d.scenarios[scenarioIndex];guidedChild.innerHTML='<div class="panel child-scenario"><p class="eyebrow">A little thinking together · '+(scenarioIndex+1)+' of '+d.scenarios.length+'</p><h2>'+escapeHTML(s.title)+'</h2><div class="child-story-row"><div class="scenario-illustration">'+scenarioIllustration(s)+'</div><p class="child-scenario-prompt">'+escapeHTML(s.text)+'</p></div><button type="button" class="secondary" id="scenarioHear">🔊 Hear it</button><div class="scenario-choices">'+s.choices.map((choice,i)=>'<button type="button" class="scenario-choice" data-scenario-choice="'+i+'">'+escapeHTML(choice)+'</button>').join('')+'</div><p class="small-note" style="margin-top:18px">There is no single right answer. The child can point, tell you, or choose an idea.</p><div class="guided-actions" style="max-width:950px;margin:20px auto 0"><button class="text-button" id="scenarioBack">'+(scenarioIndex?'← Previous':'Exit child check')+'</button><button class="primary" id="scenarioNext" disabled>'+(scenarioIndex===d.scenarios.length-1?'Continue to teacher check →':'Next story →')+'</button></div></div>';
       document.getElementById('modeTag').textContent='CHILD VIEW · THINKING TOGETHER';document.getElementById('scenarioHear').addEventListener('click',()=>{if('speechSynthesis'in window){speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(s.text);utterance.rate=.85;speechSynthesis.speak(utterance)}});
       guidedChild.querySelectorAll('[data-scenario-choice]').forEach(button=>button.addEventListener('click',()=>{scenarioAnswers[scenarioIndex]=Number(button.dataset.scenarioChoice);guidedChild.querySelectorAll('[data-scenario-choice]').forEach(b=>b.classList.toggle('selected',b===button));document.getElementById('scenarioNext').disabled=false}));
       document.getElementById('scenarioNext').addEventListener('click',()=>{if(scenarioIndex<d.scenarios.length-1){scenarioIndex++;renderChildScenario()}else{guidedChild.innerHTML='<div class="panel child-scenario celebration"><p class="eyebrow">Little Evidence · all done</p><h2>Thanks for thinking it through!</h2><p class="child-scenario-prompt">You shared some helpful ideas. Now your teacher will talk about what you noticed.</p><div class="confetti"><span>✦</span><span>✿</span><span>✧</span><span>✦</span></div></div>';document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';setTimeout(()=>{document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;startGuidedInterview()},2400)}});
