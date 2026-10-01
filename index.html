@@ -651,8 +651,8 @@
           </div>
           <div class="start-card">
             <h3>Ready to begin?</h3>
-            <p>Three playful prompts on the SmartBoard, followed by your observation.</p>
-            <button class="primary wide" id="startCheck">Start Movement Check&nbsp; →</button>
+            <p>Use a phone or iPad to advance the SmartBoard movement prompts. Or choose teacher observations to record movements you lead yourself.</p>
+            <button class="primary wide" id="startCheck">Start paired movement check&nbsp; →</button><button type="button" class="secondary wide" id="movementTeacherOnly">Use teacher observations</button>
           </div>
         </div>
         <details class="panel objective-reference">
@@ -878,7 +878,7 @@
               <label class="field-label" for="checkpointSeason" style="margin-top:14px">Checkpoint</label>
               <select id="checkpointSeason"><option value="fall">Fall</option><option value="winter">Winter</option><option value="spring">Spring</option></select>
               <button type="button" class="primary wide" id="openCheckpoint">Open or create checkpoint&nbsp; →</button>
-              <p class="small-note" id="checkpointWorkspaceMessage" role="status"></p>
+              <p class="small-note" id="checkpointWorkspaceMessage" role="status"></p><button type="button" class="secondary wide" id="checkpointActivities">Choose an activity →</button>
             </section>
             <section class="panel section-card">
               <h2 class="section-title">Saved objectives</h2>
@@ -1039,7 +1039,7 @@
     const LE_SUPABASE_URL='https://pvgewltlxenguxmhiszm.supabase.co';
     const LE_SUPABASE_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
     const LE_EVIDENCE_BUCKET='little-evidence-private';
-    let leDb=null,leUser=null,activeCheckpoint=null,activeCheckpointChildName='',returnScreenAfterWorkspace='objectiveLibraryScreen';
+    let leDb=null,leUser=null,activeCheckpoint=null,activeCheckpointChildName='',returnScreenAfterWorkspace='objectiveLibraryScreen',assessmentCheckpointId=null,assessmentDirty=false;
     let evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null},pendingEvidenceUpload=null,voiceRecorder=null,voiceStream=null,voiceButton=null,voiceContext=null;
     const leDbReady=import('https://esm.sh/@supabase/supabase-js@2.117.1').then(({createClient})=>{
       leDb=createClient(LE_SUPABASE_URL,LE_SUPABASE_PUBLIC_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -1085,12 +1085,13 @@
       button.addEventListener('click',()=>{selectedLevel=n;userChangedLevel=true;renderSuggestion()});levelPicks.append(button);
     }
     function art(kind){return LEChildActivities.image({run:'running',path:'path',gallop:'galloping'}[kind],{run:'A child running toward a blue cone',path:'A child moving around stepping stones',gallop:'A child galloping toward a finish flag'}[kind]);}
-    function show(id){document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+    function show(id){if('speechSynthesis'in window)speechSynthesis.cancel();updateCheckpointContext();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
     function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Move & explore · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
     function renderRatingSelections(){document.querySelectorAll('[data-rating]').forEach(button=>button.classList.toggle('selected',ratings[Number(button.dataset.rating)]===Number(button.dataset.value)));}
     document.getElementById('hearDirection').addEventListener('click',()=>{const p=prompts[promptIndex];if('speechSynthesis' in window){window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(p.text);utterance.rate=.88;window.speechSynthesis.speak(utterance)}else{toast('Ask a grown-up to read the direction aloud.')}});
     function start(){promptIndex=0;movementCompleted=false;document.querySelector('.app').classList.add('child-mode');renderPrompt();show('movementScreen')}
     document.getElementById('startCheck').addEventListener('click',startPairedSession);
+    document.getElementById('movementTeacherOnly').addEventListener('click',openRecording);
     function openRecording(){document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';document.getElementById('recordBadge').innerHTML=movementCompleted?'<span>●</span> Movement Check · 3 prompts completed':'<span>●</span> Teacher review · movement check not run';show('recordScreen');renderSuggestion();void hydrateMovementObjectiveRecord()}
     document.getElementById('toRecording').addEventListener('click',()=>{
       if(pairRole==='display'){
@@ -1168,11 +1169,12 @@
         const client=await leDbReady;if(!client)return;
         const {error}=await client.auth.signOut();
         if(error)toast('Could not sign out yet. Try again.');
-        else{leUser=null;activeCheckpoint=null;renderCheckpointAuth();checkpointStatus('Signed out.')}
+        else{leUser=null;activeCheckpoint=null;activeCheckpointChildName='';resetAssessmentForChild();renderCheckpointAuth();checkpointStatus('Signed out.')}
       });
       document.getElementById('addCheckpointChild').addEventListener('click',addCheckpointChild);
+      document.getElementById('checkpointActivities').addEventListener('click',()=>{if(!activeCheckpoint){checkpointStatus('Open a child checkpoint first.',true);return}openLibrary()});
       document.getElementById('openCheckpoint').addEventListener('click',openOrCreateCheckpoint);
-      document.getElementById('checkpointChildSelect').addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true});
+      ['checkpointChildSelect','checkpointSchoolYear','checkpointSeason'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true;updateCheckpointContext()}));
       document.getElementById('createParentReport').addEventListener('click',openParentReport);
       document.getElementById('createGoldEntrySheet').addEventListener('click',openGoldEntrySheet);
       document.getElementById('backFromGoldEntrySheet').addEventListener('click',()=>show('checkpointScreen'));
@@ -1199,15 +1201,15 @@
       const {data:{session}}=await client.auth.getSession();
       leUser=session?.user||null;
       renderCheckpointAuth();
-      client.auth.onAuthStateChange((_event,session)=>{
-        setTimeout(async()=>{
-          leUser=session?.user||null;
-          activeCheckpoint=null;activeCheckpointChildName='';
-          renderCheckpointAuth();
-          if(leUser)await loadCheckpointChildren();
-        },0);
-      });
+      client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>{void handleCheckpointAuthSession(session)},0)});
       if(leUser)await loadCheckpointChildren();
+    }
+    async function handleCheckpointAuthSession(session){
+      const nextUser=session?.user||null,changed=(leUser?.id||null)!==(nextUser?.id||null);
+      leUser=nextUser;
+      if(changed){activeCheckpoint=null;activeCheckpointChildName='';resetAssessmentForChild();}
+      renderCheckpointAuth();
+      if(leUser&&changed)await loadCheckpointChildren();
     }
     async function sendCheckpointSignIn(){
       const message=document.getElementById('checkpointAuthMessage');
@@ -1242,12 +1244,13 @@
     async function loadCheckpointChildren(selectChildId=''){
       if(!leUser)return;
       const select=document.getElementById('checkpointChildSelect');
+      const keepChildId=selectChildId||activeCheckpoint?.child_id||select.value;
       checkpointStatus('Loading children…');
       const {data,error}=await leDb.from('little_evidence_children').select('id,display_name').is('archived_at',null);
       if(error){checkpointStatus('Could not load children: '+error.message,true);return}
       const children=[...(data||[])].sort((a,b)=>checkpointFirstName(a.display_name).localeCompare(checkpointFirstName(b.display_name),'en',{sensitivity:'base'})||String(a.display_name).localeCompare(String(b.display_name),'en',{sensitivity:'base'}));
       select.innerHTML='<option value="">Choose a child</option>'+children.map(child=>'<option value="'+escapeHTML(child.id)+'">'+escapeHTML(child.display_name)+'</option>').join('');
-      if(selectChildId)select.value=selectChildId;
+      if(keepChildId)select.value=keepChildId;
       checkpointStatus((data||[]).length?'Choose a child and checkpoint season.':'Add your first child to begin.');
     }
     function checkpointFirstName(name){
@@ -1284,15 +1287,39 @@
           data=created.data;
         }
         evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null};
-        if(activeCheckpoint&&activeCheckpoint.id!==data.id){Object.keys(childEvidenceByObjective).forEach(key=>delete childEvidenceByObjective[key]);}
+        if(assessmentCheckpointId&&assessmentCheckpointId!==data.id){if(assessmentDirty&&!window.confirm('There is unsaved work for the previous checkpoint. Switch and discard that unfinished work?'))return;resetAssessmentForChild();}
+        assessmentCheckpointId=data.id;
         activeCheckpoint=data;
         activeCheckpointChildName=document.getElementById('checkpointChildSelect').selectedOptions[0]?.textContent||'Child';
         document.getElementById('activeCheckpointLabel').textContent=activeCheckpointChildName+' · '+season[0].toUpperCase()+season.slice(1)+' '+schoolYear;
         checkpointStatus('Checkpoint ready. Save each objective after you finish its teacher review.');
         await refreshCheckpointRecords();
+        updateCheckpointContext();
       }catch(error){checkpointStatus('Could not open this checkpoint: '+error.message,true)}
       finally{button.disabled=false}
     }
+    function updateCheckpointContext(){
+      let label=document.getElementById('checkpointContext');
+      if(!label){label=document.createElement('span');label.id='checkpointContext';label.className='small-note';document.getElementById('openCheckpoints').insertAdjacentElement('afterend',label);}
+      label.textContent=activeCheckpoint?activeCheckpointCaption():'Practice mode · no child checkpoint selected';
+    }
+    function resetAssessmentForChild(){
+      Object.keys(childEvidenceByObjective).forEach(key=>delete childEvidenceByObjective[key]);
+      taskAnswers=[];scenarioAnswers=[];taskSequence=[];taskIndex=0;scenarioIndex=0;
+      guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;guidedSavedRecord=null;activeDefinition=null;
+      ratings.fill(null);observedAnchors.clear();suggestedAnchor=null;selectedLevel=null;consistency=null;userChangedLevel=false;emergingNext=false;movementCompleted=false;
+      Object.keys(feelingsAnswers).forEach(key=>feelingsAnswers[key]=null);feelingsStep=0;feelingsUserChanged=false;clearFeelingsResult();
+      Object.keys(limitsAnswers).forEach(key=>limitsAnswers[key]=null);limitsStep=0;limitsUserChanged=false;limitsClearResult();
+      evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null};assessmentCheckpointId=null;assessmentDirty=false;
+      ['notes','feelingsNotes','limitsNotes','guidedTeacherNotes'].forEach(id=>{const node=document.getElementById(id);if(node)node.value=''});
+      returnScreenAfterWorkspace='objectiveLibraryScreen';
+      document.getElementById('checkpointReturnAssessment').classList.add('hidden');
+      document.querySelector('.app').classList.remove('child-mode','scenario-mode');
+      updateCheckpointContext();
+    }
+    window.addEventListener('beforeunload',event=>{if(assessmentDirty){event.preventDefault();event.returnValue='';}});
+    document.addEventListener('click',event=>{if(event.target.closest('[data-child-task-choice],[data-scenario-choice],[data-choice],[data-rating],[data-flevel],[data-limit-level],[data-level],#taskNext,#taskSkip'))assessmentDirty=true;});
+    document.addEventListener('input',event=>{if(event.target.matches('textarea,[data-task-observation]'))assessmentDirty=true;});
     function isIncludedObjective(id){
       const number=Number.parseInt(String(id),10);
       return number>=1&&number<=23;
@@ -1435,12 +1462,18 @@
         toast(!leUser?'This review is not saved. You can continue without saving.':'Choose a child and checkpoint to save this review.');
         return null;
       }
+      const normalize=value=>value==='Not Yet'?0:value===null||value===undefined?null:Number(value);
+      payload={...payload,final_level:normalize(payload.final_level),suggested_level:normalize(payload.suggested_level)};
+      if(payload.final_level===null||!Number.isInteger(payload.final_level)||payload.final_level<0||payload.final_level>19){setSaveStatus(context,'Choose a checkpoint level before saving.',true);return null;}
+      const savingCheckpointId=activeCheckpoint.id,savingCaption=activeCheckpointCaption();
       const now=new Date().toISOString();
       const row={owner_id:leUser.id,checkpoint_id:activeCheckpoint.id,objective_id:payload.objective_id,suggested_level:payload.suggested_level??null,final_level:payload.final_level??null,teacher_answers:payload.teacher_answers||{},child_responses:payload.child_responses||{},teacher_notes:payload.teacher_notes||null,updated_at:now};
       const {data,error}=await leDb.from('little_evidence_objective_records').upsert(row,{onConflict:'checkpoint_id,objective_id'}).select('id').single();
       if(error){setSaveStatus(context,'Could not save this assessment: '+error.message,true);toast('Save failed. Check your connection and try again.');return null}
+      if(activeCheckpoint?.id!==savingCheckpointId)return data.id;
+      assessmentDirty=false;
       evidenceRecordIds[context]=data.id;
-      setSaveStatus(context,'Saved for '+activeCheckpointCaption()+'. Add any supporting media below.');
+      setSaveStatus(context,'Saved for '+savingCaption+'. Add any supporting media below.');
       setEvidenceStatus(context,'Assessment saved. You can attach private evidence now.');
       await refreshCheckpointRecords();
       await loadEvidenceItems(context);
@@ -1464,7 +1497,9 @@
     }
     async function hydrateMovementObjectiveRecord(){
       if(!activeCheckpoint||!leUser)return;
+      const loadingCheckpointId=activeCheckpoint.id;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','4').maybeSingle();
+      if(activeCheckpoint?.id!==loadingCheckpointId)return;
       if(error){setSaveStatus('movement','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.movement=data.id;suggestedAnchor=data.suggested_level;selectedLevel=data.final_level;
@@ -1485,7 +1520,9 @@
     }
     async function hydrateFeelingsObjectiveRecord(){
       if(!leUser||!activeCheckpoint)return;
+      const loadingCheckpointId=activeCheckpoint.id;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','1a').maybeSingle();
+      if(activeCheckpoint?.id!==loadingCheckpointId)return;
       if(error){setSaveStatus('feelings','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.feelings=data.id;
@@ -1502,7 +1539,9 @@
     }
     async function hydrateLimitsObjectiveRecord(){
       if(!leUser||!activeCheckpoint)return;
+      const loadingCheckpointId=activeCheckpoint.id;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','1b').maybeSingle();
+      if(activeCheckpoint?.id!==loadingCheckpointId)return;
       if(error){setSaveStatus('limits','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.limits=data.id;
@@ -1525,7 +1564,9 @@
     }
     async function hydrateGuidedObjectiveRecord(d){
       if(!leUser||!activeCheckpoint||!d)return;
+      const loadingCheckpointId=activeCheckpoint.id;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id',d.id).maybeSingle();
+      if(activeCheckpoint?.id!==loadingCheckpointId||activeDefinition?.id!==d.id)return;
       if(error){setSaveStatus('guided','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       guidedSavedRecord=data;evidenceRecordIds.guided=data.id;
@@ -2322,12 +2363,12 @@
       document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;show('guidedObjectiveScreen');void hydrateGuidedObjectiveRecord(d);
     }
     function startGuidedInterview(){document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+activeDefinition.id;guidedHome.classList.add('hidden');guidedChild.classList.add('hidden');guidedCheck.classList.remove('hidden');guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;renderGuidedQuestion()}
-    function startChildScenarios(){guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');scenarioIndex=0;scenarioAnswers=[];renderChildScenario()}
+    function startChildScenarios(){childTapReadyAt=0;guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');scenarioIndex=0;scenarioAnswers=[];renderChildScenario()}
     function scenarioIllustration(s){return LEChildActivities.image({'One tricycle':'tricycle','Dramatic play':'restaurant','Block-building plan':'building'}[s.title],s.title);}
     function renderChildScenario(){
       const d=activeDefinition,s=d.scenarios[scenarioIndex];guidedChild.innerHTML='<div class="panel child-scenario"><p class="eyebrow">A little thinking together · '+(scenarioIndex+1)+' of '+d.scenarios.length+'</p><h2>'+escapeHTML(s.title)+'</h2><div class="child-story-row"><div class="scenario-illustration">'+scenarioIllustration(s)+'</div><p class="child-scenario-prompt">'+escapeHTML(s.text)+'</p></div><button type="button" class="secondary" id="scenarioHear">🔊 Hear it</button><div class="scenario-choices">'+s.choices.map((choice,i)=>'<button type="button" class="scenario-choice" data-scenario-choice="'+i+'">'+escapeHTML(choice)+'</button>').join('')+'</div><p class="small-note" style="margin-top:18px">There is no single right answer. The child can point, tell you, or choose an idea.</p><div class="guided-actions" style="max-width:950px;margin:20px auto 0"><button class="text-button" id="scenarioBack">'+(scenarioIndex?'← Previous':'Exit child check')+'</button><button class="primary" id="scenarioNext" hidden disabled>'+(scenarioIndex===d.scenarios.length-1?'Continue to teacher check →':'Next story →')+'</button></div></div>';
       document.getElementById('modeTag').textContent='CHILD VIEW · THINKING TOGETHER';document.getElementById('scenarioHear').addEventListener('click',()=>{if('speechSynthesis'in window){speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(s.text);utterance.rate=.85;speechSynthesis.speak(utterance)}});
-      guidedChild.querySelectorAll('[data-scenario-choice]').forEach(button=>button.addEventListener('click',()=>{scenarioAnswers[scenarioIndex]=Number(button.dataset.scenarioChoice);guidedChild.querySelectorAll('[data-scenario-choice]').forEach(b=>b.classList.toggle('selected',b===button));document.getElementById('scenarioNext').disabled=false;document.getElementById('scenarioNext').click()}));
+      guidedChild.querySelectorAll('[data-scenario-choice]').forEach(button=>button.addEventListener('click',()=>{if(Date.now()<childTapReadyAt)return;childTapReadyAt=Date.now()+350;if('speechSynthesis'in window)speechSynthesis.cancel();scenarioAnswers[scenarioIndex]=Number(button.dataset.scenarioChoice);guidedChild.querySelectorAll('[data-scenario-choice]').forEach(b=>b.classList.toggle('selected',b===button));document.getElementById('scenarioNext').disabled=false;document.getElementById('scenarioNext').click()}));
       document.getElementById('scenarioNext').addEventListener('click',()=>{if(scenarioIndex<d.scenarios.length-1){scenarioIndex++;renderChildScenario()}else{
         childEvidenceByObjective[d.id]={mode:'child_scenarios',answers:[...scenarioAnswers]};
         if(childActivityOnly){
@@ -2351,7 +2392,8 @@
       document.getElementById('activityPrepBack').onclick=()=>childActivityOnly?openChildActivityLibrary():openGuidedObjective(d.id);
       document.getElementById('activityTeacherOnly').onclick=()=>{taskAnswers=[];startGuidedInterview()};
     }
-    function startChildTasks(){guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');taskIndex=0;taskAnswers=[];taskSequence=[];renderChildTask()}
+    let childTapReadyAt=0;
+    function startChildTasks(){childTapReadyAt=0;guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');taskIndex=0;taskAnswers=[];taskSequence=[];renderChildTask()}
     function renderChildTask(){
       const d=activeDefinition,t=d.tasks[taskIndex],answer=taskAnswers[taskIndex],observed=t.mode==='observed',orderMode=Array.isArray(t.order),selected=orderMode?(Array.isArray(answer)?answer:[]):answer;
       const complete=observed||answer==='__skipped__'||(orderMode?Array.isArray(answer)&&answer.length===t.order.length:Number.isInteger(answer)&&answer>=0);
@@ -2360,8 +2402,8 @@
       document.getElementById('modeTag').textContent='CHILD VIEW · LET’S TRY';
       document.getElementById('taskHear').onclick=()=>{if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.prompt);u.rate=.85;speechSynthesis.speak(u)}};
       if(orderMode&&selected.length)document.getElementById('taskReset').onclick=()=>{taskAnswers[taskIndex]=[];renderChildTask()};
-      guidedChild.querySelectorAll('[data-child-task-choice]').forEach(button=>button.onclick=()=>{const index=Number(button.dataset.childTaskChoice);if(orderMode){const prior=Array.isArray(taskAnswers[taskIndex])?taskAnswers[taskIndex]:[];if(prior.length>=t.order.length||prior.includes(index))return;taskAnswers[taskIndex]=[...prior,index]}else taskAnswers[taskIndex]=index;if(!orderMode||taskAnswers[taskIndex].length===t.order.length){advanceChildTask()}else{renderChildTask()}});
-      document.getElementById('taskBack').onclick=()=>{if('speechSynthesis'in window)speechSynthesis.cancel();if(taskIndex){taskIndex--;renderChildTask()}else if(childActivityOnly){openChildActivityLibrary()}else{document.querySelector('.app').classList.remove('scenario-mode');guidedChild.classList.add('hidden');guidedHome.classList.remove('hidden');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id}};
+      guidedChild.querySelectorAll('[data-child-task-choice]').forEach(button=>button.onclick=()=>{if(Date.now()<childTapReadyAt)return;childTapReadyAt=Date.now()+350;const index=Number(button.dataset.childTaskChoice);if(orderMode){const prior=Array.isArray(taskAnswers[taskIndex])?taskAnswers[taskIndex]:[];if(prior.length>=t.order.length||prior.includes(index))return;taskAnswers[taskIndex]=[...prior,index]}else taskAnswers[taskIndex]=index;if(!orderMode||taskAnswers[taskIndex].length===t.order.length){advanceChildTask()}else{renderChildTask()}});
+      document.getElementById('taskBack').onclick=()=>{if('speechSynthesis'in window)speechSynthesis.cancel();if(taskIndex){taskIndex--;if(Array.isArray(d.tasks[taskIndex].order))taskAnswers[taskIndex]=[];renderChildTask()}else if(childActivityOnly){openChildActivityLibrary()}else{document.querySelector('.app').classList.remove('scenario-mode');guidedChild.classList.add('hidden');guidedHome.classList.remove('hidden');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id}};
       document.getElementById('taskSkip').onclick=()=>{taskAnswers[taskIndex]='__skipped__';advanceChildTask()};
       document.getElementById('taskNext').onclick=()=>{if(!complete)return;if(observed)taskAnswers[taskIndex]={presented:true,observation:answer?.observation||null};advanceChildTask()};
     }
@@ -2370,9 +2412,10 @@
       const d=activeDefinition;
       if(taskIndex<d.tasks.length-1){taskIndex++;renderChildTask();return}
       childEvidenceByObjective[d.id]={mode:'touch',answers:JSON.parse(JSON.stringify(taskAnswers)),score:scoreChildTasks(d)};
-      guidedChild.innerHTML='<div class="panel child-scenario celebration"><p class="eyebrow">All done!</p><h2>Thank you for trying!</h2><p class="child-scenario-prompt">You shared your ideas. Now it’s time for something new.</p><div class="confetti"><span>✦</span><span>✿</span><span>✧</span><span>✦</span></div><button type="button" class="primary" id="taskReturn">'+(childActivityOnly?'Teacher: next activity →':'Teacher: continue to review →')+'</button></div>';
+      guidedChild.innerHTML='<div class="panel child-scenario celebration"><p class="eyebrow">All done!</p><h2>Thank you for trying!</h2><p class="child-scenario-prompt">You shared your ideas. Now it’s time for something new.</p><div class="confetti"><span>✦</span><span>✿</span><span>✧</span><span>✦</span></div><button type="button" class="primary" id="taskReturn">'+(childActivityOnly?'Teacher: next activity →':'Teacher: continue to review →')+'</button>'+(childActivityOnly?'<button type="button" class="secondary" id="taskReview">Teacher: review and save →</button>':'')+'</div>';
       document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';
       document.getElementById('taskReturn').onclick=()=>childActivityOnly?openChildActivityLibrary():startGuidedInterview();
+      if(childActivityOnly)document.getElementById('taskReview').onclick=startGuidedInterview;
     }
     function scoreChildTasks(d){return selectedTaskResponses(d).filter(task=>task.matched===true).length}
     function taskEvidenceSummary(d){
@@ -2486,7 +2529,7 @@
       const button=document.getElementById('startCheck');button.disabled=true;button.textContent='Starting secure session…';
       try{
         const created=await pairApi({action:'create'});
-        pairRole='display';pairSessionId=created.id;pairToken=created.display_token;promptIndex=0;movementCompleted=false;
+        pairRole='display';pairSessionId=created.id;pairToken=created.display_token;lastDisplayStatus='';promptIndex=0;movementCompleted=false;
         const teacherUrl=new URL(location.href);if(childActivityOnly||activeScreenId()==='childActivitiesScreen')teacherUrl.searchParams.set('childActivities','1');teacherUrl.hash=`controller=${created.id}.${created.teacher_token}`;
         const link=teacherUrl.toString();document.getElementById('pairLinkText').textContent=link;
         document.getElementById('pairStatus').textContent=`Temporary pairing expires at ${new Date(created.expires_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}.`;
@@ -2496,7 +2539,7 @@
         show('pairScreen');
         clearTimeout(pairPollTimer);pollDisplay();
       }catch(error){toast(error.message)}
-      finally{button.disabled=false;button.innerHTML='Start Movement Check&nbsp; →'}
+      finally{button.disabled=false;button.innerHTML='Start paired movement check&nbsp; →'}
     }
     document.getElementById('copyPairLink').addEventListener('click',async()=>{
       try{await navigator.clipboard.writeText(document.getElementById('pairLinkText').textContent);toast('iPad link copied.')}
@@ -2504,7 +2547,10 @@
     });
     document.getElementById('cancelPairing').addEventListener('click',()=>{clearTimeout(pairPollTimer);pairRole=null;pairSessionId=null;pairToken=null;show('objectiveScreen')});
     function pollDisplay(){
+      if(pairRole!=='display'||!pairSessionId)return;
+      const pollingId=pairSessionId;
       pairApi({action:'state',id:pairSessionId,role:'display',token:pairToken}).then(({state})=>{
+        if(pairRole!=='display'||pairSessionId!==pollingId)return;
         if(state.status==='active'){
           document.querySelector('.app').classList.add('child-mode');document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';
           if(lastDisplayStatus!=='active'||promptIndex!==state.prompt_index){promptIndex=state.prompt_index;renderPrompt();show('movementScreen')}
@@ -2514,11 +2560,11 @@
           movementCompleted=true;document.getElementById('modeTag').textContent='CHILD VIEW · ALL DONE';document.querySelector('.app').classList.add('child-mode');if(lastDisplayStatus!=='complete')show('completeScreen');
         }
         lastDisplayStatus=state.status;
-      }).catch(error=>{document.getElementById('pairStatus').textContent=`Reconnecting… ${error.message}`}).finally(()=>{pairPollTimer=setTimeout(pollDisplay,1800)});
+      }).catch(error=>{document.getElementById('pairStatus').textContent=`Reconnecting… ${error.message}`}).finally(()=>{if(pairRole==='display'&&pairSessionId===pollingId)pairPollTimer=setTimeout(pollDisplay,1800)});
     }
     function setupControllerRatings(){
       const box=document.getElementById('controllerRatings');
-      ratingNames.forEach((name,index)=>{const button=document.createElement('button');button.type='button';button.className='controller-rating';button.textContent=name;button.addEventListener('click',()=>{controllerRating=index;document.querySelectorAll('.controller-rating').forEach((item,i)=>item.classList.toggle('selected',i===index));document.getElementById('controllerAdvance').disabled=!document.getElementById('controllerWait').dataset.childDone});box.append(button)});
+      ratingNames.forEach((name,index)=>{const button=document.createElement('button');button.type='button';button.className='controller-rating';button.textContent=name;button.addEventListener('click',()=>{controllerRating=index;document.querySelectorAll('.controller-rating').forEach((item,i)=>item.classList.toggle('selected',i===index));document.getElementById('controllerAdvance').disabled=false});box.append(button)});
     }
     function showControllerState(state){
       document.getElementById('controllerConnection').textContent='● Connected to the SmartBoard';

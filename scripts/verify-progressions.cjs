@@ -36,6 +36,7 @@ Object.assign(context,{document:{getElementById:el,querySelector:()=>el('app')},
  await context.saveGuidedObjectiveRecord(observed);assert.equal(row.final_level,19);assert.equal(row.child_responses.tasks[0].matched,null);assert.equal(row.child_responses.tasks[0].observation,'supported');
  context.renderParentReport([{objective_id:'22c',final_level:4,updated_at:'2026-10-01',child_responses:{}},{objective_id:'19b',final_level:18,updated_at:'2026-10-01',child_responses:{}}]);
  assert.match(el('parentReportPages').innerHTML,/makes and reads simple graphs/);assert.match(el('parentReportPages').innerHTML,/Next goal/);assert.match(el('parentReportPages').innerHTML,/plans, writes, and revises/);
+ await context.persistObjectiveRecord('feelings',{objective_id:'1a',suggested_level:'Not Yet',final_level:'Not Yet'});assert.equal(row.final_level,0);assert.equal(row.suggested_level,0);
  context.leUser=null;row=null;await context.saveGuidedObjectiveRecord(d);assert.equal(row,null);assert.match(el('status').textContent,/Not saved/);
  console.log('PASS: 20 source ranges; anchor and in-between suggestions; touch/skipped/observed evidence; save and resume with synthetic storage; report strengths and next steps; signed-out save guard.');
 })().catch(e=>{console.error(e);process.exitCode=1});
