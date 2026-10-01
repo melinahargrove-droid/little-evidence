@@ -107,3 +107,10 @@ Verify existing draft progression anchors for 18–23 against the uploaded PDFs 
 - Live baseline cloud-browser navigation reproduced redundant start/prep and answer/Next stops.
 - Live anonymous service smoke test confirmed objective 4 configuration and same-session switch to 20a on the display role. No child, owner, checkpoint, or rating information was transmitted in that smoke test.
 - Local Chromium cannot create required sockets in this runtime. Synthetic DOM tests verify application behavior but do not verify rendered layout or real iPad input. Authenticated save/reopen, actual cross-device behavior, microphone/file picker, and interrupted-device recovery still require classroom-device validation.
+
+### Published release status
+- Assessment continuity PR #2 is merged at `9154f4565062b290b0e5e3fd5ec86aaa749545cf` and live at https://melinahargrove-droid.github.io/little-evidence/.
+- Exact-head CI `36888205946`, main CI `36888328115`, and Pages deployment `36888328441` all succeeded. The published `index.html`, `activity-remote.js`, and `assessment-continuation.js` exactly matched the tested source.
+- Post-deployment cloud-browser checks passed for the persistent objective banner, consolidated prep, one-tap teacher questions, editable final review, signed-out save guard, new movement pairing, iPad child-selection gate, and return to the same pairing.
+- Real-device acceptance remains pending: authenticated child selection, save/reopen, automatic next objective on an actual paired iPad/SmartBoard, media capture, and interrupted-device recovery have not been accepted as complete. Use a synthetic learner and sample media; do not treat synthetic DOM tests as real-device acceptance.
+- Next bounded engineering verification: exercise refresh/reopen and network-reconnect recovery in the synthetic paired-flow harness before proposing any further behavior change. This is separate from pending classroom-device acceptance.
