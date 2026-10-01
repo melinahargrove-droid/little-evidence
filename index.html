@@ -1035,6 +1035,7 @@
   <script src="./vendor/qrcode-generator.js"></script>
   <script src="./child-activities.js"></script>
   <script src="./verified-progressions.js"></script>
+  <script src="./activity-remote.js"></script>
   <script>
     const LE_SUPABASE_URL='https://pvgewltlxenguxmhiszm.supabase.co';
     const LE_SUPABASE_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
@@ -2331,7 +2332,7 @@
       const card=document.createElement('article');card.className='panel library-card';
       const copy=document.createElement('div');const h=document.createElement('h2');h.textContent=family||title;const p=document.createElement('p');p.textContent=kind==='observed'?'Look, talk, make, or move together. Your teacher observes.':kind==='movement'?'Move, try, and explore together.':kind==='scenarios'?'Look at a picture and share an idea.':'Listen, look, and tap your answer.';copy.append(h,p);
       const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=kind==='movement'?'Start movement activity →':'Start child activity →';
-      button.addEventListener('click',()=>{if(kind==='movement'){childActivityOnly=true;startPairedSession();return}openGuidedObjective(id);childActivityOnly=true;if(kind==='scenarios')startChildScenarios();else prepareChildTasks()});
+      button.addEventListener('click',()=>{if(kind==='movement'){childActivityOnly=true;startPairedSession();return}openGuidedObjective(id);childActivityOnly=true;if(kind!=='scenarios')prepareChildTasks()});
       card.append(copy,button);childActivityGrid.append(card);
     }
     addLibraryCard('1a','Manages Feelings','Guided teacher check · no child task','feelingsObjectiveScreen');
@@ -2357,6 +2358,7 @@
       guidedHome.innerHTML='<div class="objective-switch"><button id="guidedBackLibrary">← All objectives</button></div><div class="panel objective-head compact"><div><p class="eyebrow">'+escapeHTML(d.domain)+' · Objective '+d.id+'</p><h1>'+escapeHTML(d.title)+'</h1><p class="subtitle">'+escapeHTML(d.summary)+'</p></div><div class="start-card"><h3>Ready to begin?</h3><p>'+ (d.scenarios?'Three gentle, no-score child scenarios, then a few teacher taps.':d.tasks?'Short activities to look, talk, make, or tap, followed by teacher review.':'A short tap-only teacher check. No typing is needed.')+'</p><button class="primary wide" id="startGuidedObjective">'+(d.scenarios?'Start child scenarios':d.tasks?'Start child check':'Start guided check')+'&nbsp; →</button></div></div><details class="panel objective-reference"><summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary><div class="section-grid"><section class="panel section-card"><h2 class="section-title">'+(d.draft?'Working progression cues':'Developmental progression')+'</h2><div class="level-list">'+d.anchors.map(a=>'<div class="level-row"><div class="level-n">'+a.n+'</div><div><strong>Level '+a.n+'</strong><span>'+escapeHTML(a.text)+'</span>'+(a.examples&&a.examples.length?'<p class="small-note"><strong>Examples:</strong> '+a.examples.map(x=>escapeHTML(x)).join('; ')+'</p>':'')+'</div></div>').join('')+'</div></section><aside class="panel section-card"><h2 class="section-title">Evidence to notice</h2><p class="small-note">'+escapeHTML(d.summary)+' Look across real routines and more than one moment. '+(d.draft?'These are working summaries, not confirmed GOLD wording. Verify the progression in your account before using a suggested level. ':'')+'These prompts support your professional judgment; they do not replace the official GOLD continuum.</p></aside></div></details>'+materialsDetailsMarkup(d.id,d);
       const savedPanel=document.createElement('section');savedPanel.className='panel section-card hidden';savedPanel.id='guidedSavedRecordNotice';guidedHome.append(savedPanel);
       document.getElementById('guidedBackLibrary').addEventListener('click',openLibrary);
+      if(d.tasks||d.scenarios)LEActivityRemote.button(guidedHome.querySelector('.start-card'),d.id);
       const startGuidedButton=document.getElementById('startGuidedObjective');
       if(priorChildEvidence){startGuidedButton.textContent='Continue to teacher review →';startGuidedButton.parentElement.querySelector('p').textContent='The child activity is complete for this visit. Continue with the teacher questions.'}
       startGuidedButton.addEventListener('click',()=>priorChildEvidence?startGuidedInterview():d.scenarios?startChildScenarios():d.tasks?prepareChildTasks():startGuidedInterview());
@@ -2383,11 +2385,11 @@
     }
     function prepareChildTasks(){
       const d=activeDefinition;
-      if(!d.activityVersion){startChildTasks();return}
       guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');
       document.querySelector('.app').classList.remove('scenario-mode');
       document.getElementById('modeTag').textContent='TEACHER PREP · OBJECTIVE '+d.id;
       guidedChild.innerHTML='<section class="panel activity-prep"><p class="eyebrow">A quick setup · Objective '+d.id+'</p><h1>'+escapeHTML(d.family||d.title)+'</h1>'+(d.advanced?'<p class="activity-prep-note">Optional extension: use this only when the child is ready for this skill. Skipping does not mean “Not Yet.”</p>':'')+'<h2>Before inviting your child</h2><ul>'+materialsForObjective(d.id,d).map(item=>'<li>'+escapeHTML(item)+'</li>').join('')+'</ul><p>Read directions aloud or use Hear it. Children can tap answers themselves. Touch answers advance automatically. For talking, writing, or movement, watch and listen, then use Teacher: next; you can record observations afterward.</p><details><summary>Teacher prompts to notice</summary>'+d.tasks.filter(t=>t.note).map(t=>'<p><strong>'+escapeHTML(t.prompt)+'</strong><br>'+escapeHTML(t.note)+'</p>').join('')+'</details><div class="guided-actions"><button type="button" class="text-button" id="activityPrepBack">← Back</button><button type="button" class="primary" id="activityBegin">Ready for child →</button><button type="button" class="secondary" id="activityTeacherOnly">Use teacher observations</button></div></section>';
+      LEActivityRemote.button(guidedChild.querySelector('.guided-actions'),d.id);
       document.getElementById('activityBegin').onclick=startChildTasks;
       document.getElementById('activityPrepBack').onclick=()=>childActivityOnly?openChildActivityLibrary():openGuidedObjective(d.id);
       document.getElementById('activityTeacherOnly').onclick=()=>{taskAnswers=[];startGuidedInterview()};
@@ -2408,6 +2410,7 @@
       document.getElementById('taskNext').onclick=()=>{if(!complete)return;if(observed)taskAnswers[taskIndex]={presented:true,observation:answer?.observation||null};advanceChildTask()};
     }
     function advanceChildTask(){
+      if(LEActivityRemote.isDisplay()){LEActivityRemote.answer();return}
       if('speechSynthesis'in window)speechSynthesis.cancel();
       const d=activeDefinition;
       if(taskIndex<d.tasks.length-1){taskIndex++;renderChildTask();return}
@@ -2612,6 +2615,7 @@
     void initializeCheckpointWorkspace();
     beginController();
     renderSuggestion();
+    LEActivityRemote.init();
   </script>
 </body>
 </html>
