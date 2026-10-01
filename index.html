@@ -1053,7 +1053,7 @@
     const LE_SUPABASE_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
     const LE_EVIDENCE_BUCKET='little-evidence-private';
     let leDb=null,leUser=null,activeCheckpoint=null,activeCheckpointChildName='',returnScreenAfterWorkspace='objectiveLibraryScreen',assessmentCheckpointId=null,assessmentDirty=false;
-    let evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null},pendingEvidenceUpload=null,voiceRecorder=null,voiceStream=null,voiceButton=null,voiceContext=null;
+    let evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null},pendingEvidenceUpload=null,voiceRecorder=null,voiceStream=null,voiceButton=null,voiceContext=null,voiceCapture=null,evidenceCaptureRevision=0;
     const leDbReady=import('https://esm.sh/@supabase/supabase-js@2.117.1').then(({createClient})=>{
       leDb=createClient(LE_SUPABASE_URL,LE_SUPABASE_PUBLIC_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
       return leDb;
@@ -1098,7 +1098,7 @@
       button.addEventListener('click',()=>{selectedLevel=n;userChangedLevel=true;renderSuggestion()});levelPicks.append(button);
     }
     function art(kind){return LEChildActivities.image({run:'running',path:'path',gallop:'galloping'}[kind],{run:'A child running toward a blue cone',path:'A child moving around stepping stones',gallop:'A child galloping toward a finish flag'}[kind]);}
-    function show(id){if('speechSynthesis'in window)speechSynthesis.cancel();updateCheckpointContext();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+    function show(id){cancelEvidenceCapture();if('speechSynthesis'in window)speechSynthesis.cancel();updateCheckpointContext();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
     function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Move & explore · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
     function renderRatingSelections(){document.querySelectorAll('[data-rating]').forEach(button=>button.classList.toggle('selected',ratings[Number(button.dataset.rating)]===Number(button.dataset.value)));}
     document.getElementById('hearDirection').addEventListener('click',()=>{const p=prompts[promptIndex];if('speechSynthesis' in window){window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(p.text);utterance.rate=.88;window.speechSynthesis.speak(utterance)}else{toast('Ask a grown-up to read the direction aloud.')}});
@@ -1252,7 +1252,8 @@
       renderCheckpointAuth();
       show('checkpointScreen');
       if(!leUser){document.getElementById('checkpointEmail').focus();return}
-      await loadCheckpointChildren()
+      await loadCheckpointChildren();
+      await refreshCheckpointRecords()
     }
     async function loadCheckpointChildren(selectChildId=''){
       if(!leUser)return;
@@ -1317,6 +1318,7 @@
       label.textContent=activeCheckpoint?activeCheckpointCaption():'Practice mode · no child checkpoint selected';
     }
     function resetAssessmentForChild(){
+      cancelEvidenceCapture();
       Object.keys(childEvidenceByObjective).forEach(key=>delete childEvidenceByObjective[key]);
       taskAnswers=[];scenarioAnswers=[];taskSequence=[];taskIndex=0;scenarioIndex=0;
       guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;guidedSavedRecord=null;activeDefinition=null;
@@ -1324,6 +1326,8 @@
       Object.keys(feelingsAnswers).forEach(key=>feelingsAnswers[key]=null);feelingsStep=0;feelingsUserChanged=false;clearFeelingsResult();
       Object.keys(limitsAnswers).forEach(key=>limitsAnswers[key]=null);limitsStep=0;limitsUserChanged=false;limitsClearResult();
       evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null};assessmentCheckpointId=null;assessmentDirty=false;
+      ['guidedEvidenceList','movementEvidenceList','feelingsEvidenceList','limitsEvidenceList'].forEach(id=>{const node=document.getElementById(id);if(node)node.innerHTML=''});
+      ['guided','movement','feelings','limits'].forEach(context=>setEvidenceStatus(context,'Save this assessment first, then attach evidence.'));
       ['notes','feelingsNotes','limitsNotes','guidedTeacherNotes'].forEach(id=>{const node=document.getElementById(id);if(node)node.value=''});
       returnScreenAfterWorkspace='objectiveLibraryScreen';
       document.getElementById('checkpointReturnAssessment').classList.add('hidden');
@@ -1339,7 +1343,9 @@
     }
     async function refreshCheckpointRecords(){
       if(!activeCheckpoint||!leUser)return;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('id,objective_id,suggested_level,final_level,updated_at').eq('checkpoint_id',activeCheckpoint.id).order('objective_id');
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision)return;
       if(error){checkpointStatus('Could not load saved assessments: '+error.message,true);return}
       const includedRecords=(data||[]).filter(record=>isIncludedObjective(record.objective_id));
       const contexts={'4':'movement','1a':'feelings','1b':'limits'};
@@ -1478,12 +1484,12 @@
       const normalize=value=>value==='Not Yet'?0:value===null||value===undefined?null:Number(value);
       payload={...payload,final_level:normalize(payload.final_level),suggested_level:normalize(payload.suggested_level)};
       if(payload.final_level===null||!Number.isInteger(payload.final_level)||payload.final_level<0||payload.final_level>19){setSaveStatus(context,'Choose a checkpoint level before saving.',true);return null;}
-      const savingCheckpointId=activeCheckpoint.id,savingCaption=activeCheckpointCaption();
+      const savingCheckpointId=activeCheckpoint.id,savingOwnerId=leUser.id,savingRevision=evidenceCaptureRevision,savingCaption=activeCheckpointCaption();
       const now=new Date().toISOString();
       const row={owner_id:leUser.id,checkpoint_id:activeCheckpoint.id,objective_id:payload.objective_id,suggested_level:payload.suggested_level??null,final_level:payload.final_level??null,teacher_answers:payload.teacher_answers||{},child_responses:payload.child_responses||{},teacher_notes:payload.teacher_notes||null,updated_at:now};
       const {data,error}=await leDb.from('little_evidence_objective_records').upsert(row,{onConflict:'checkpoint_id,objective_id'}).select('id').single();
+      if(activeCheckpoint?.id!==savingCheckpointId||leUser?.id!==savingOwnerId||evidenceCaptureRevision!==savingRevision)return data?.id||null;
       if(error){setSaveStatus(context,'Could not save this assessment: '+error.message,true);toast('Save failed. Check your connection and try again.');return null}
-      if(activeCheckpoint?.id!==savingCheckpointId)return data.id;
       assessmentDirty=false;
       evidenceRecordIds[context]=data.id;
       setSaveStatus(context,'Saved for '+savingCaption+'. Add any supporting media below.');
@@ -1510,9 +1516,9 @@
     }
     async function hydrateMovementObjectiveRecord(){
       if(!activeCheckpoint||!leUser)return;
-      const loadingCheckpointId=activeCheckpoint.id;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','4').maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision)return;
       if(error){setSaveStatus('movement','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.movement=data.id;suggestedAnchor=data.suggested_level;selectedLevel=data.final_level;
@@ -1533,9 +1539,9 @@
     }
     async function hydrateFeelingsObjectiveRecord(){
       if(!leUser||!activeCheckpoint)return;
-      const loadingCheckpointId=activeCheckpoint.id;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','1a').maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision)return;
       if(error){setSaveStatus('feelings','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.feelings=data.id;
@@ -1552,9 +1558,9 @@
     }
     async function hydrateLimitsObjectiveRecord(){
       if(!leUser||!activeCheckpoint)return;
-      const loadingCheckpointId=activeCheckpoint.id;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','1b').maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision)return;
       if(error){setSaveStatus('limits','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.limits=data.id;
@@ -1577,9 +1583,9 @@
     }
     async function hydrateGuidedObjectiveRecord(d){
       if(!leUser||!activeCheckpoint||!d)return;
-      const loadingCheckpointId=activeCheckpoint.id;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id',d.id).maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId||activeDefinition?.id!==d.id)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision||activeDefinition?.id!==d.id)return;
       if(error){setSaveStatus('guided','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       guidedSavedRecord=data;evidenceRecordIds.guided=data.id;
@@ -1620,18 +1626,38 @@
       setEvidenceStatus('guided','Saved objective found. You can add or review private evidence.');
       void loadEvidenceItems('guided')
     }
+    function evidenceTarget(context){
+      const recordId=evidenceRecordIds[context];
+      return leUser&&activeCheckpoint&&recordId?{context,recordId,ownerId:leUser.id,checkpointId:activeCheckpoint.id,revision:evidenceCaptureRevision}:null;
+    }
+    function evidenceTargetIsCurrent(target){
+      return !!target&&target.revision===evidenceCaptureRevision&&leUser?.id===target.ownerId&&activeCheckpoint?.id===target.checkpointId&&evidenceRecordIds[target.context]===target.recordId;
+    }
+    function cancelEvidenceCapture(){
+      evidenceCaptureRevision++;pendingEvidenceUpload=null;
+      const capture=voiceCapture;
+      if(capture){
+        capture.cancelled=true;
+        capture.stream?.getTracks().forEach(track=>track.stop());
+        if(capture.recorder?.state==='recording')capture.recorder.stop();
+        capture.button.textContent='＋ Voice note';
+      }
+      voiceCapture=null;voiceRecorder=null;voiceStream=null;voiceButton=null;voiceContext=null;
+    }
     async function loadEvidenceItems(context){
-      const recordId=evidenceRecordIds[context];if(!recordId||!leUser)return;
+      const target=evidenceTarget(context);if(!target)return;
       const listIds={guided:'guidedEvidenceList',movement:'movementEvidenceList',feelings:'feelingsEvidenceList',limits:'limitsEvidenceList'};
       const list=document.getElementById(listIds[context]);if(!list)return;
-      const {data,error}=await leDb.from('little_evidence_evidence_items').select('id,kind,file_name,storage_path,created_at').eq('record_id',recordId).order('created_at');
+      const current=()=>evidenceTargetIsCurrent(target)&&document.getElementById(listIds[context])===list;
+      const {data,error}=await leDb.from('little_evidence_evidence_items').select('id,kind,file_name,storage_path,created_at').eq('record_id',target.recordId).order('created_at');
+      if(!current())return;
       if(error){setEvidenceStatus(context,'Could not load attached evidence.',true);return}
       if(!data?.length){list.innerHTML='';return}
       const links=await Promise.all(data.map(async item=>{
         const {data:signed,error:signedError}=await leDb.storage.from(LE_EVIDENCE_BUCKET).createSignedUrl(item.storage_path,3600);
         return signedError?'<span class="small-note">'+escapeHTML(item.file_name||item.kind+' evidence')+' (preview unavailable)</span>':'<a href="'+escapeHTML(signed.signedUrl)+'" target="_blank" rel="noopener">'+escapeHTML(item.kind+' · '+(item.file_name||'View evidence'))+'</a>'
       }));
-      list.innerHTML=links.join('')
+      if(current())list.innerHTML=links.join('')
     }
     function handleEvidenceButtonClick(event){
       const button=event.target.closest('[data-capture-evidence],[data-evidence],[data-feelings-evidence],[data-limits-evidence]');
@@ -1639,56 +1665,72 @@
       let value=button.dataset.captureEvidence||button.dataset.evidence||button.dataset.feelingsEvidence||button.dataset.limitsEvidence||'';
       const kind=value.toLowerCase().includes('photo')?'photo':value.toLowerCase().includes('video')?'video':'voice';
       const context=button.dataset.evidenceContext||(button.hasAttribute('data-feelings-evidence')?'feelings':button.hasAttribute('data-limits-evidence')?'limits':'movement');
-      const recordId=evidenceRecordIds[context];
-      if(!leUser||!recordId){setEvidenceStatus(context,'Save this assessment first, then attach evidence.',true);return}
+      const target=evidenceTarget(context);
+      if(!target){setEvidenceStatus(context,'Save this assessment first, then attach evidence.',true);return}
       if(kind==='voice'){void toggleVoiceRecording(button,context);return}
-      pendingEvidenceUpload={kind,context};
+      pendingEvidenceUpload={kind,context,target};
       const input=document.getElementById(kind==='photo'?'sharedPhotoInput':'sharedVideoInput');
       input.value='';input.click()
     }
     async function handleEvidenceFileChosen(event){
-      const file=event.target.files?.[0];if(!file||!pendingEvidenceUpload)return;
       const pending=pendingEvidenceUpload;pendingEvidenceUpload=null;
-      await uploadEvidenceFile(pending.context,pending.kind,file)
+      const file=event.target.files?.[0];
+      if(!file||!pending||!evidenceTargetIsCurrent(pending.target))return;
+      await uploadEvidenceFile(pending.context,pending.kind,file,pending.target)
     }
-    async function uploadEvidenceFile(context,kind,file){
-      const recordId=evidenceRecordIds[context];if(!leUser||!recordId)return;
-      if(file.size>50*1024*1024){setEvidenceStatus(context,'This file is larger than 50 MB. Choose a shorter or smaller file.',true);return}
+    async function uploadEvidenceFile(context,kind,file,target=evidenceTarget(context)){
+      if(!evidenceTargetIsCurrent(target))return;
+      const status=(message,error)=>{if(evidenceTargetIsCurrent(target))setEvidenceStatus(context,message,error)};
+      if(file.size>50*1024*1024){status('This file is larger than 50 MB. Choose a shorter or smaller file.',true);return}
       const allowed=new Set(['image/jpeg','image/png','image/webp','image/heic','video/mp4','video/quicktime','video/webm','audio/webm','audio/ogg','audio/mp4','audio/mpeg','audio/wav']);
       const contentType=(file.type||'application/octet-stream').split(';')[0];
-      if(!allowed.has(contentType)){setEvidenceStatus(context,'This file type is not supported. Try a JPG/PNG photo, MP4/MOV video, or WebM/M4A voice note.',true);return}
-      setEvidenceStatus(context,'Uploading privately…');
+      if(!allowed.has(contentType)){status('This file type is not supported. Try a JPG/PNG photo, MP4/MOV video, or WebM/M4A voice note.',true);return}
+      status('Uploading privately…');
       const extension=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8)||'bin';
-      const path=leUser.id+'/'+activeCheckpoint.id+'/'+recordId+'/'+crypto.randomUUID()+'.'+extension;
+      const path=target.ownerId+'/'+target.checkpointId+'/'+target.recordId+'/'+crypto.randomUUID()+'.'+extension;
       const {error:uploadError}=await leDb.storage.from(LE_EVIDENCE_BUCKET).upload(path,file,{contentType,upsert:false});
-      if(uploadError){setEvidenceStatus(context,'Upload failed: '+uploadError.message,true);return}
-      const {error:metaError}=await leDb.from('little_evidence_evidence_items').insert({owner_id:leUser.id,record_id:recordId,kind,storage_path:path,file_name:file.name,content_type:contentType}).select('id').single();
+      if(uploadError){status('Upload failed: '+uploadError.message,true);return}
+      const {error:metaError}=await leDb.from('little_evidence_evidence_items').insert({owner_id:target.ownerId,record_id:target.recordId,kind,storage_path:path,file_name:file.name,content_type:contentType}).select('id').single();
       if(metaError){
         await leDb.storage.from(LE_EVIDENCE_BUCKET).remove([path]);
-        setEvidenceStatus(context,'File uploaded, but its record could not be saved: '+metaError.message,true);return
+        status('File uploaded, but its record could not be saved: '+metaError.message,true);return
       }
-      setEvidenceStatus(context,'Evidence saved privately to this objective.');
-      await loadEvidenceItems(context)
+      status('Evidence saved privately to this objective.');
+      if(evidenceTargetIsCurrent(target))await loadEvidenceItems(context)
     }
     async function toggleVoiceRecording(button,context){
-      if(voiceRecorder?.state==='recording'&&voiceContext===context){voiceRecorder.stop();button.textContent='＋ Voice note';return}
+      if(voiceCapture){
+        if(voiceCapture.button===button&&voiceCapture.recorder?.state==='recording'){voiceCapture.recorder.stop();button.textContent='＋ Voice note';return}
+        // Do not start a second recorder while permission or upload is pending.
+        setEvidenceStatus(context,'Finish the current voice note before starting another.');return
+      }
+      const target=evidenceTarget(context);if(!target)return;
       if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined'){setEvidenceStatus(context,'Voice recording is not available in this browser.');return}
+      const capture={target,button,cancelled:false,stream:null,recorder:null};voiceCapture=capture;
       try{
-        voiceStream=await navigator.mediaDevices.getUserMedia({audio:true});
+        const stream=await navigator.mediaDevices.getUserMedia({audio:true});capture.stream=stream;
+        if(capture.cancelled||!evidenceTargetIsCurrent(target)){stream.getTracks().forEach(track=>track.stop());if(voiceCapture===capture)voiceCapture=null;return}
         const mimeTypes=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'].filter(type=>MediaRecorder.isTypeSupported(type));
         const options=mimeTypes.length?{mimeType:mimeTypes[0]}:{};
-        voiceRecorder=new MediaRecorder(voiceStream,options);voiceContext=context;voiceButton=button;const chunks=[];
-        voiceRecorder.ondataavailable=event=>{if(event.data?.size)chunks.push(event.data)};
-        voiceRecorder.onstop=async()=>{
-          voiceStream?.getTracks().forEach(track=>track.stop());
-          const type=voiceRecorder.mimeType||'audio/webm',extension=type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm';
-          const file=new File([new Blob(chunks,{type})],'voice-note-'+Date.now()+'.'+extension,{type});
-          if(file.size)await uploadEvidenceFile(context,'voice',file);
-          if(voiceButton)voiceButton.textContent='＋ Voice note';
-          voiceRecorder=null;voiceStream=null;voiceButton=null;voiceContext=null
+        const recorder=new MediaRecorder(stream,options);capture.recorder=recorder;
+        voiceRecorder=recorder;voiceStream=stream;voiceContext=context;voiceButton=button;const chunks=[];
+        recorder.ondataavailable=event=>{if(event.data?.size)chunks.push(event.data)};
+        recorder.onstop=async()=>{
+          stream.getTracks().forEach(track=>track.stop());
+          try{
+            const type=recorder.mimeType||'audio/webm',extension=type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm';
+            const file=new File([new Blob(chunks,{type})],'voice-note-'+Date.now()+'.'+extension,{type});
+            if(!capture.cancelled&&file.size&&evidenceTargetIsCurrent(target))await uploadEvidenceFile(context,'voice',file,target);
+          }finally{
+            if(voiceCapture===capture){button.textContent='＋ Voice note';voiceCapture=null;voiceRecorder=null;voiceStream=null;voiceButton=null;voiceContext=null}
+          }
         };
-        voiceRecorder.start();button.textContent='Stop recording'
-      }catch(error){setEvidenceStatus(context,'Microphone was not started. Check the browser’s microphone permission and try again.',true);voiceStream?.getTracks().forEach(track=>track.stop())}
+        recorder.start();button.textContent='Stop recording'
+      }catch(error){
+        if(!capture.cancelled&&evidenceTargetIsCurrent(target))setEvidenceStatus(context,'Microphone was not started. Check the browser’s microphone permission and try again.',true);
+        capture.stream?.getTracks().forEach(track=>track.stop());
+        if(voiceCapture===capture){voiceCapture=null;voiceRecorder=null;voiceStream=null;voiceButton=null;voiceContext=null}
+      }
     }
     function wireLegacyEvidenceButtons(){
       document.querySelectorAll('[data-evidence]').forEach(button=>button.dataset.evidenceContext='movement');
@@ -2453,6 +2495,7 @@
       {id:'inconsistent',label:'It varies from day to day',detail:'More evidence may help clarify the pattern.',confidence:'Responses vary; gather another example before settling on a checkpoint.'}
     ];
     function renderGuidedQuestion(){
+      cancelEvidenceCapture();
       const d=activeDefinition, isResult=guidedResult!==null;
       if(isResult){renderGuidedResult();return}
       const anchorChoices=[{n:0,text:'The first described skill is not yet demonstrated'},...d.anchors];
