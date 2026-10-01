@@ -31,7 +31,7 @@ window.LEChildActivities=(()=>{
   function ribbon(n){return svg(`<path d="M45 80h${n*85}v65H45z" fill="#719bb8" stroke="#31536c" stroke-width="3"/>`,'Ribbon')}
   const fruitNames={Apples:'apple',Bananas:'banana',Grapes:'grapes'};
   const fruitChoice=name=>V(name,image(fruitNames[name],name));
-  const graph='<div class="fruit-graph" role="img" aria-label="Picture graph: apples four votes, bananas two, grapes three. Each circle is one vote."><div class="fruit-graph-title">Our favorite fruit</div>'+[['Apples',4],['Bananas',2],['Grapes',3]].map(([label,n])=>'<div class="fruit-graph-row">'+image(fruitNames[label],label)+'<div class="fruit-votes">'+Array.from({length:n},()=>'<span class="fruit-vote" aria-hidden="true"></span>').join('')+'</div></div>').join('')+'<div class="fruit-graph-key">Each dot is one vote.</div></div>';
+  const graph='<div class="fruit-graph" role="img" aria-label="Picture graph: apples four votes, bananas two, grapes three. Each circle is one vote."><div class="fruit-graph-title">Our favorite fruit</div><div class="fruit-graph-columns">'+[['Apples',4],['Bananas',2],['Grapes',3]].map(([label,n])=>'<div class="fruit-graph-column"><div class="fruit-votes">'+Array.from({length:n},()=>'<span class="fruit-vote" aria-hidden="true"></span>').join('')+'</div>'+image(fruitNames[label],label)+'</div>').join('')+'</div><div class="fruit-graph-key">Each dot is one vote.</div></div>';
   function pictureChoice(choice){
     if(typeof choice==='object')return choice.visual;
     const text=String(choice);
