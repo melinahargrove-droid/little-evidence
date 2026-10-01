@@ -615,7 +615,18 @@
     .activity-picture>.activity-art{height:230px;max-width:540px}
     .activity-page .scenario-choice>.activity-art{height:145px;max-width:230px;pointer-events:none}
     .app.scenario-mode .scenario-illustration>.activity-art{height:230px;max-width:450px}
-    .app.child-mode .illustration>.activity-art{height:100%;max-width:720px;filter:none}
+    /* Bound raster art to the frame instead of its intrinsic grid-track size. */
+    .illustration>.activity-art,.app.child-mode .illustration>.activity-art{position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:100%;padding:10px;box-sizing:border-box;object-fit:contain;object-position:center;filter:none}
+    .illustration{position:relative}
+    @media(max-height:800px) and (min-width:701px){
+      .app.child-mode .move-screen{padding:14px 24px}
+      .app.child-mode .step-label{margin-bottom:8px;padding:6px 14px}
+      .app.child-mode .move-screen h1{font-size:clamp(28px,4vw,44px);margin:0 0 6px}
+      .app.child-mode .move-screen .direction{font-size:clamp(30px,4.4vw,52px);margin:8px 0 12px;padding:10px 14px}
+      .app.child-mode .hear-direction{padding:7px 14px;margin-bottom:4px}
+      .app.child-mode .illustration{height:clamp(170px,38dvh,300px);min-height:0;margin-bottom:10px}
+      .app.child-mode .move-tip{margin-bottom:8px;font-size:18px}
+    }
     .activity-hidden{font-size:110px;color:#557991;padding:20px;font-weight:700}
     .fruit-graph{max-width:460px;margin:auto;padding:4px 14px;color:#173b66}
     .fruit-graph-title{font-size:22px;font-weight:700;margin-bottom:4px}
