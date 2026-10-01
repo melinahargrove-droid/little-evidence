@@ -1462,9 +1462,9 @@
       const id=String(record.objective_id),tasks=record.child_responses?.tasks||[];
       if(definition.source)return progressionFamilyNext(definition,Number(record.final_level)||0);
       if(id==='16a'){
-        const missed=tasks.filter(task=>task.matched===false).map(task=>task.prompt?.match(/letter\s+([A-Z])/i)?.[1]).filter(Boolean);
-        if(missed.length)return `Play an uppercase-letter hunt together. Revisit ${[...new Set(missed)].join(' and ')} in storybooks, names, or signs.`;
-        return 'Keep noticing uppercase letters in names, books, and signs. This short check sampled A, M, and S; it did not measure every letter.';
+        const missed=tasks.filter(task=>task.matched===false).map(task=>(task.prompt?.match(/(lowercase|uppercase)\s+([a-z])\b/i)||[]).slice(1).join(' ')).filter(Boolean);
+        if(missed.length)return `Play a letter hunt together. Revisit ${[...new Set(missed)].join(' and ')} in storybooks, names, or signs.`;
+        return 'Keep noticing uppercase and lowercase letters in names, books, and signs. This short check sampled lowercase a, uppercase M, and lowercase s; it did not measure every letter.';
       }
       if(id==='20a'){
         const missed=tasks.filter(task=>task.matched===false).map(task=>String(task.expected||'').match(/\d+/)?.[0]).filter(Boolean);
@@ -1584,8 +1584,9 @@
         const answer=taskAnswers[index],skipped=answer==='__skipped__',observed=task.mode==='observed';
         const label=LEChildActivities.label;
         const selected=observed?null:Array.isArray(answer)?answer.map(i=>label(task.choices[i])):Number.isInteger(answer)&&answer>=0?label(task.choices[answer]):null;
-        const expected=observed?null:task.order?task.order.map(i=>label(task.choices[i])):label(task.choices[task.answer]);
-        const matched=observed||skipped||selected===null?null:task.order?JSON.stringify(answer)===JSON.stringify(task.order):answer===task.answer;
+        const accepted=task.acceptedAnswers||[task.answer];
+        const expected=observed?null:task.order?task.order.map(i=>label(task.choices[i])):accepted.map(i=>label(task.choices[i])).join(' or ');
+        const matched=observed||skipped||selected===null?null:task.order?JSON.stringify(answer)===JSON.stringify(task.order):accepted.includes(answer);
         return {task_id:d.id+'-'+index,activity_version:d.activityVersion||1,prompt:task.prompt,selected,matched,expected,skipped,mode:observed?'observed':'touch',observation:observed&&answer&&typeof answer==='object'?answer.observation||null:null,presented:observed&&answer&&typeof answer==='object'?!!answer.presented:false};
       });
     }
@@ -1626,6 +1627,12 @@
       if(!data)return;
       evidenceRecordIds.feelings=data.id;
       const answers=data.teacher_answers||{};
+      if(answers.progression_version!==feelingsProgressionVersion&&(answers.behavior==='anticipate'||(answers.behavior==='unsure'&&answers.detail?.point>=11))){
+        const note=document.getElementById('feelingsNotes');if(note)note.value=data.teacher_notes||'';
+        setSaveStatus('feelings','An earlier saved result used different Level 12 interview wording. Review the updated questions before saving; your saved checkpoint has not changed.');
+        setEvidenceStatus('feelings','Earlier saved objective found. Private evidence is still available.');
+        await loadEvidenceItems('feelings');return;
+      }
       feelingsAnswers.behavior=answers.behavior??null;feelingsAnswers.detail=answers.detail??null;feelingsAnswers.frequency=answers.frequency??null;
       if(feelingsAnswers.behavior&&feelingsAnswers.detail&&feelingsAnswers.frequency){
         feelingsStep=2;finishFeelingsQuestions();
@@ -1656,7 +1663,7 @@
       await loadEvidenceItems('limits')
     }
     async function saveFeelingsObjectiveRecord(){
-      return persistObjectiveRecord('feelings',{objective_id:'1a',suggested_level:feelingsSuggested,final_level:feelingsSelected,teacher_answers:feelingsAnswers,child_responses:{mode:'teacher_observation'},teacher_notes:document.getElementById('feelingsNotes')?.value.trim()||null})
+      return persistObjectiveRecord('feelings',{objective_id:'1a',suggested_level:feelingsSuggested,final_level:feelingsSelected,teacher_answers:{...feelingsAnswers,progression_version:feelingsProgressionVersion},child_responses:{mode:'teacher_observation'},teacher_notes:document.getElementById('feelingsNotes')?.value.trim()||null})
     }
     async function saveLimitsObjectiveRecord(){
       return persistObjectiveRecord('limits',{objective_id:'1b',suggested_level:limitsSuggested,final_level:limitsSelected,teacher_answers:limitsAnswers,child_responses:{mode:'teacher_observation',optional_child_response:limitsAnswers.childEvidence||null},teacher_notes:document.getElementById('limitsNotes')?.value.trim()||null})
@@ -1820,6 +1827,8 @@
 
     // Objective 1a uses a tap-through teacher interview. The first answer branches
     // to a behavior-specific follow-up; no typing or child-facing feelings task is needed.
+    // Source: 1a-gold-odl-b3-online-progressions.pdf, page 1 (1a and 1b); see docs/GOLD-PROGRESSION-VERIFICATION.md.
+    const feelingsProgressionVersion='gold-1a-20261001';
     const feelingsLevels=[
       {n:2,text:'Calms with help from a familiar adult.'},
       {n:4,text:'Seeks a familiar person or comfort item when upset.'},
@@ -1855,9 +1864,9 @@
         {label:'The child intentionally chooses and uses a strategy.',point:10},
         {label:'It varies or I am not sure.',point:null}
       ]},
-      anticipate:{title:'How does the child handle a difficult moment they can see coming?',choices:[
-        {label:'The child prepares or uses a strategy with adult support.',point:11},
-        {label:'The child anticipates the challenge and manages feelings independently.',point:12},
+      anticipate:{title:'How does the child manage personal challenges and consider other people’s feelings?',choices:[
+        {label:'The child uses known strategies and is beginning to show patience with personal challenges or consider how their feelings affect others.',point:11},
+        {label:'The child shows patience with personal challenges and manages feelings with consideration for how they affect others.',point:12},
         {label:'It varies or I am not sure.',point:null}
       ]},
       notyet:{title:'What have you noticed when an adult supports the child?',choices:[
@@ -1871,7 +1880,7 @@
         {label:'The child waits, adjusts, or tries another plan.',point:6},
         {label:'The child expresses strong feelings appropriately.',point:8},
         {label:'The child chooses a strategy to manage feelings.',point:10},
-        {label:'The child anticipates a difficult moment and manages it.',point:12},
+        {label:'The child shows patience with personal challenges and manages feelings with consideration for others.',point:12},
         {label:'No clear example yet.',point:null}
       ]}
     };
@@ -1904,7 +1913,7 @@
         {id:'adjust',label:'Waits, adjusts, or tries another plan',detail:'The child manages a delay or small disappointment, sometimes with support.'},
         {id:'express',label:'Expresses strong feelings appropriately',detail:'The child communicates or shows feelings in an acceptable way.'},
         {id:'strategy',label:'Intentionally uses a calming strategy',detail:'The child chooses a strategy such as breathing, asking for help, or taking space.'},
-        {id:'anticipate',label:'Anticipates a hard moment',detail:'The child sees a challenge coming and prepares or manages feelings.'},
+        {id:'anticipate',label:'Shows patience and considers others',detail:'The child is patient with personal challenges and manages feelings with consideration for others.'},
         {id:'notyet',label:'Not yet / needs substantial help',detail:'The child is not yet settling even when an adult offers comfort.'},
         {id:'unsure',label:'It varies / I need more evidence',detail:'I cannot choose one description confidently yet.'}
       ]}}
@@ -1923,7 +1932,7 @@
     function finishFeelingsQuestions(){
       feelingsReady=true;feelingsSuggested=feelingsAnswers.detail?.point??null;feelingsSelected=feelingsSuggested;feelingsUserChanged=false;
       const behaviorLabel=document.querySelector('#feelingsQuestionChoices .question-choice.selected strong')?.textContent||feelingsAnswers.behavior;
-      const behaviorNames={adult:'Needs adult comfort to calm',seek:'Seeks a trusted adult or comfort item',adjust:'Waits, adjusts, or tries another plan',express:'Expresses strong feelings appropriately',strategy:'Intentionally uses a calming strategy',anticipate:'Anticipates a hard moment',notyet:'Not yet / needs substantial help',unsure:'It varies / more evidence needed'};
+      const behaviorNames={adult:'Needs adult comfort to calm',seek:'Seeks a trusted adult or comfort item',adjust:'Waits, adjusts, or tries another plan',express:'Expresses strong feelings appropriately',strategy:'Intentionally uses a calming strategy',anticipate:'Shows patience and considers others',notyet:'Not yet / needs substantial help',unsure:'It varies / more evidence needed'};
       const branch=feelingsBranches[feelingsAnswers.behavior];const detailChoice=branch.choices[Number(feelingsAnswers.detail.id.split('-')[1])];
       const freqNames={once:'One clear moment',repeated:'More than once in familiar routines',varied:'Across different routines or settings',inconsistent:'It varies / not sure'};
       document.getElementById('feelingsAnswerSummary').innerHTML=`<div><strong>What the child usually does</strong>${behaviorNames[feelingsAnswers.behavior]}</div><div><strong>What happens in more detail</strong>${detailChoice.label}</div><div><strong>How often it is seen</strong>${freqNames[feelingsAnswers.frequency]}</div><button class="secondary" id="feelingsEditAnswers" type="button">← Change answers</button>`;
@@ -1943,7 +1952,7 @@
       document.getElementById('feelingsNextEvidence').innerHTML=selected===null?'<strong>What to observe next</strong>Notice a naturally occurring moment of disappointment or transition. Watch what helps the child settle and return to play.':selected==='Not Yet'?'<strong>Evidence to look for next</strong>Notice whether comfort from a familiar adult helps the child settle, and what support is needed.':next?`<strong>Look for evidence of Level ${next.n}</strong>${next.text} Notice whether the child begins using this response with less adult support and across routines.`:'<strong>Continue documenting</strong>Use the official GOLD continuum to confirm higher-level evidence across different routines and over time.';
       document.getElementById('feelingsParentCopy').textContent=feelingsParentLanguage(selected);
     }
-    function feelingsParentLanguage(n){if(n===null)return 'We are learning what helps your child manage big feelings. We will keep offering support and noticing what works in everyday routines.';if(n==='Not Yet')return 'Your child is learning what helps them feel calm. We will continue offering comfort and support during everyday routines.';const numeric=Number(n);const lower=[...feelingsLevels].reverse().find(level=>level.n<=numeric)||feelingsLevels[0];const strengths={2:'is learning to feel calm with help from a trusted adult',4:'is beginning to seek a familiar person or comfort item when upset',6:'is practicing waiting, adjusting, or trying another plan when something feels hard',8:'is finding appropriate ways to express strong feelings',10:'is choosing strategies to help manage big feelings',12:'is beginning to anticipate challenging moments and use strategies independently'};const next=feelingsLevels.find(level=>level.n>numeric);const nextSteps={2:'accept comfort and return to play',4:'wait briefly or try another plan with support',6:'express strong feelings in safe, clear ways',8:'choose a helpful strategy when feelings grow',10:'use a strategy before a difficult moment becomes overwhelming',12:'keep using strategies in different routines'};return `Your child ${strengths[lower.n]||'is growing in managing big feelings'}. Next, we’ll encourage them to ${nextSteps[next?.n]||'keep using helpful strategies in different routines'}.`;}
+    function feelingsParentLanguage(n){if(n===null)return 'We are learning what helps your child manage big feelings. We will keep offering support and noticing what works in everyday routines.';if(n==='Not Yet'||Number(n)===0)return 'Your child is learning what helps them feel calm. We will continue offering comfort and support during everyday routines.';const numeric=Number(n);const lower=[...feelingsLevels].reverse().find(level=>level.n<=numeric)||feelingsLevels[0];const strengths={2:'is learning to feel calm with help from a trusted adult',4:'is beginning to seek a familiar person or comfort item when upset',6:'is practicing waiting, adjusting, or trying another plan when something feels hard',8:'is finding appropriate ways to express strong feelings',10:'is choosing strategies to help manage big feelings',12:'is showing patience with personal challenges and considering how their feelings affect others'};const next=feelingsLevels.find(level=>level.n>numeric);const nextSteps={2:'accept comfort from a trusted adult',4:'seek a familiar person or comfort item when upset',6:'wait or try another plan when something is disappointing',8:'express strong feelings in safe, clear ways most of the time',10:'choose a helpful strategy when feelings grow',12:'show patience with personal challenges and consider how their feelings affect others'};return `Your child ${strengths[lower.n]||'is growing in managing big feelings'}. Next, we’ll encourage them to ${nextSteps[next?.n]||'keep showing patience and care for others across different routines'}.`;}
 
     // Objective 1b is a teacher-observation interview; no child-facing task or typed answer is required.
     const limitsAnchors=[
@@ -2063,10 +2072,10 @@
     }
     function limitsParentLanguage(n){
       if(n===null)return 'We are learning how your child responds to classroom expectations. We will keep using calm, clear reminders and noticing what helps.';
-      if(n==='Not Yet')return 'Your child is learning classroom routines. We will continue offering calm, consistent reminders.';
+      if(n==='Not Yet'||Number(n)===0)return 'Your child is learning classroom routines. We will continue offering calm, consistent reminders.';
       const num=Number(n),lower=[...limitsAnchors].reverse().find(level=>level.n<=num)||limitsAnchors[0],next=limitsAnchors.find(level=>level.n>num);
-      const strengths={2:'is learning to respond to adult cues during classroom routines',4:'is beginning to respond when an adult redirects them',6:'is becoming independent with familiar classroom rules and routines',8:'is beginning to use familiar expectations in new but similar situations',10:'is learning why classroom expectations matter',12:'understands ideas like safety, kindness, respect, and caring for materials'};
-      const nextSteps={2:'respond to an adult reminder',4:'follow familiar rules and routines with fewer reminders',6:'use familiar expectations in new settings and situations',8:'explain why classroom expectations matter',10:'apply ideas like safety, kindness, and respect during different routines',12:'keep using these ideas across new situations and with different people'};
+      const strengths={2:'is learning to respond to adult cues during classroom routines',4:'is beginning to respond when an adult redirects them',6:'is handling familiar classroom rules and routines with occasional reminders',8:'is beginning to use familiar expectations in new but similar situations',10:'is learning why classroom expectations matter',12:'understands ideas like safety, kindness, respect, and caring for materials'};
+      const nextSteps={2:'respond to an adult’s tone or expression',4:'accept an adult’s redirection',6:'follow familiar rules and routines with occasional reminders',8:'use familiar expectations in new but similar settings and situations',10:'explain why classroom expectations matter',12:'apply ideas like safety, kindness, and respect during different routines'};
       return 'Your child '+(strengths[lower.n]||'is growing in following classroom expectations')+'. Next, we’ll encourage them to '+(nextSteps[next?.n]||'keep using these ideas in different routines')+'.';
     }
     document.getElementById('openLimits').addEventListener('click',()=>{document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1b';show('limitsObjectiveScreen')});
@@ -2282,17 +2291,17 @@
         {n:6,text:'Decides whether two words rhyme.'},
         {n:8,text:'Generates several rhyming words when given a starting word.'},
         {n:10,text:'Creates rhymes without a prompt and notices rhyme patterns in print to help read.'}],questions:['How does the child join in with familiar rhymes, songs, or word games?','Can the child identify whether two words rhyme or fill in a missing rhyme?','Does the child generate rhymes without a model or use rhyme patterns while reading?'],next:'Use the short SmartBoard rhyme choices, then listen during songs and stories for spontaneous rhyming or use of rhyme to decode.'},
-      {id:'15b',title:'Notices and Discriminates Alliteration',domain:'Literacy',family:'Beginning Sounds',draft:false,tasks:[
+      {id:'15b',activityVersion:2,title:'Notices and Discriminates Alliteration',domain:'Literacy',family:'Beginning Sounds',draft:false,tasks:[
         {prompt:'Which picture starts with the same sound as moon?',choices:['🐭 Mouse','☀️ Sun','🐟 Fish'],answer:0},
         {prompt:'Which picture starts with the same sound as sun?',choices:['🍎 Apple','🧦 Sock','🐢 Turtle'],answer:1},
-        {prompt:'Which picture starts with the same sound as bear?',choices:['🚗 Car','🐝 Bee','🚌 Bus'],answer:2}
+        {prompt:'Which picture starts with the same sound as bear?',choices:['🚗 Car','🐝 Bee','🚌 Bus'],answer:2,acceptedAnswers:[1,2]}
       ],summary:'A blended check. The SmartBoard records simple beginning-sound matches; teacher observation helps distinguish noticing repeated sounds from independently identifying a word’s first sound.',anchors:[
         {n:2,text:'Joins songs or rhymes that repeat beginning sounds.'},
         {n:4,text:'Notices that some words begin with the same sound.'},
         {n:6,text:'Matches words or pictures that share a beginning sound.'},
         {n:8,text:'Isolates and identifies the beginning sound in a word.'}],questions:['Does the child join in with songs or rhymes that repeat the same beginning sound?','Does the child notice when familiar names or words start alike?','Can the child match shared beginning sounds or say the first sound independently?'],next:'Use the picture-matching task, then notice whether the child identifies initial sounds during names, stories, and play without answer choices.'},
-      {id:'15c',title:'Notices and Discriminates Discrete Units of Sound',domain:'Literacy',family:'Listening to Word Parts',draft:false,tasks:[
-        {prompt:'Which sentence has four separate words? Tap it.',choices:['I like ice cream.','I see a dog.','Run!'],answer:0},
+      {id:'15c',activityVersion:2,title:'Notices and Discriminates Discrete Units of Sound',domain:'Literacy',family:'Listening to Word Parts',draft:false,tasks:[
+        {prompt:'Which sentence has four separate words? Tap it.',choices:['I like ice cream.','I see a dog.','Run!'],answer:0,acceptedAnswers:[0,1]},
         {prompt:'Which word has two beats?',choices:['☀️ Sun','🍎 Apple','🦋 Butterfly'],answer:1},
         {prompt:'Which word begins with /m/?',choices:['🌙 Moon','🐟 Fish','☀️ Sun'],answer:0}
       ],summary:'A blended check. The SmartBoard records simple word-part and sound choices; teacher observation is needed for spoken blending, separating sounds, vowel distinctions, and decoding unfamiliar words.',anchors:[
@@ -2339,10 +2348,10 @@
         {n:10,text:'Explains differences between kinds of texts and finds information using basic features.'},
         {n:12,text:'Independently uses features such as captions, headings, glossaries, indexes, or menus to find information.'},
         {n:14,text:'Uses advanced text features and search tools and explains how parts of stories, poems, or plays work together.'}],questions:['How does the child choose, hold, or explore books and other texts?','Does the child notice book features, authors, or differences between story and information books?','How does the child use text features or search tools to locate information and talk about how a text is organized?'],next:'Observe during independent book choice, library visits, shared reading, and simple research. Notice whether the child uses book parts or text features independently to find information.'},
-      {id:'17b',title:'Uses Print Concepts',domain:'Literacy',family:'How Print Works',draft:false,maxLevel:11,tasks:[
+      {id:'17b',activityVersion:2,title:'Uses Print Concepts',domain:'Literacy',family:'How Print Works',draft:false,maxLevel:11,tasks:[
         {prompt:'Tap the words we read.',choices:['Just one pinch!','🐟','🍃'],answer:0},
         {prompt:'Where do we start reading this line?',choices:['← The cat is sleeping.','The cat is sleeping. →','↓ The cat is sleeping.'],answer:0},
-        {prompt:'Tap the mark that ends a sentence.',choices:['.','?','!'],answer:0}
+        {prompt:'Tap the mark that ends a sentence.',choices:['.','?','!'],answer:0,acceptedAnswers:[0,1,2]}
       ],summary:'A blended check. The SmartBoard records simple print-feature choices; teacher observation is needed to see how the child tracks words, follows lines of text, and uses punctuation in context.',anchors:[
         {n:2,text:'Understands that printed words carry a message and can be read.'},
         {n:4,text:'Shows where reading begins and follows the direction of print.'},
