@@ -1,0 +1,8 @@
+{
+  "name": "little-evidence",
+  "private": true,
+  "description": "Synthetic regression tooling for the standalone Little Evidence app",
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

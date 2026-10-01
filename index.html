@@ -27,6 +27,12 @@
     button, textarea, input { font: inherit; }
     button { cursor: pointer; }
     .app { min-height: 100vh; padding: 22px clamp(16px, 3vw, 48px) 34px; max-width: 1720px; margin: auto; }
+    .checkpoint-context { position:sticky;top:8px;z-index:20;max-width:1480px;margin:0 auto 20px;padding:16px 20px;border:2px solid var(--blue, #5885a1);border-radius:16px;background:#eef7fb;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap; }
+    .checkpoint-context strong { display:block;font-size:22px;line-height:1.3;overflow-wrap:anywhere; }
+    .checkpoint-context .assessment-objective {margin:8px 0;font-size:18px;font-weight:700;}
+    .checkpoint-context small { display:block;margin-top:4px; }
+    .app.child-mode .checkpoint-context,.app.scenario-mode .checkpoint-context,.remote-child-display .checkpoint-context { display:none!important; }
+    @media print { .checkpoint-context { display:none!important; } }
     .topbar { display:flex; align-items:center; justify-content:space-between; gap:20px; max-width:1480px; margin:0 auto 24px; }
     .brand { display:flex; align-items:center; gap:12px; color:var(--navy); font-weight:800; letter-spacing:.02em; }
     .brand-mark { width:44px; height:44px; display:grid; place-items:center; border-radius:15px; color:white; background:linear-gradient(145deg,#4b8bb8,#6fa4c4); box-shadow:0 5px 12px #437ca433; }
@@ -795,7 +801,7 @@
             <section class="parent-copy"><strong>Family-friendly strength & next step</strong><p id="feelingsParentCopy">Your child is building skills for managing big feelings. We’ll continue to offer comfort and simple strategies during everyday routines.</p></section>
           </aside>
         </div>
-        <div class="bottom-actions"><button class="text-button" id="feelingsBack">← Back to objective</button><button class="primary" id="finishFeelings" disabled>Finish teacher review&nbsp; ✓</button></div>
+        <div class="bottom-actions"><button class="text-button" id="feelingsBack">← Back to objective</button><button class="primary" id="finishFeelings" disabled>Save &amp; next objective →</button><button type="button" class="secondary" id="feelingsSaveStay">Save &amp; add evidence</button></div>
       </section>
 
       <section class="screen" id="limitsObjectiveScreen" aria-labelledby="limitsTitle">
@@ -835,7 +841,7 @@
           <section class="panel section-card"><h2 class="section-title">Evidence to look for next</h2><div class="next-evidence" id="limitsNextEvidence"><strong>Evidence to look for next</strong>Answer the guided questions to see what to notice.</div></section>
           <section class="parent-copy"><strong>Family-friendly strength & next step</strong><p id="limitsParentCopy">Your child is learning classroom routines. We will continue offering calm, consistent reminders.</p></section>
         </aside></div>
-        <div class="bottom-actions"><button class="text-button" id="limitsBackToObjective">← Back to objective</button><button class="primary" id="finishLimits" disabled>Finish teacher review&nbsp; ✓</button></div>
+        <div class="bottom-actions"><button class="text-button" id="limitsBackToObjective">← Back to objective</button><button class="primary" id="finishLimits" disabled>Save &amp; next objective →</button><button type="button" class="secondary" id="limitsSaveStay">Save &amp; add evidence</button></div>
       </section>
 
       
@@ -1035,7 +1041,7 @@
             </section>
           </aside>
         </div>
-        <div class="bottom-actions"><button class="text-button" id="backToObjective">← Back to objective</button><button class="text-button" type="button" id="movementSkipSave">All objectives · continue without saving</button><div><p class="small-note checkpoint-save-status" id="movementSaveStatus">Not saved to a child checkpoint yet.</p><button class="primary" id="finishReview">Save to checkpoint&nbsp; ✓</button></div></div>
+        <div class="bottom-actions"><button class="text-button" id="backToObjective">← Back to objective</button><button class="text-button" type="button" id="movementSkipSave">All objectives · continue without saving</button><div><p class="small-note checkpoint-save-status" id="movementSaveStatus">Not saved to a child checkpoint yet.</p><button class="primary" id="finishReview">Save &amp; next objective →</button><button type="button" class="secondary" id="movementSaveStay">Save &amp; add evidence</button></div></div>
       </section>
     </main>
   </div>
@@ -1047,12 +1053,14 @@
   <script src="./vendor/qrcode-generator.js"></script>
   <script src="./child-activities.js"></script>
   <script src="./verified-progressions.js"></script>
-  <script src="./activity-remote.js?v=20261001-3"></script>
+  <script src="./assessment-continuation.js"></script>
+  <script src="./activity-remote.js?v=20261001-continuity"></script>
   <script>
     const LE_SUPABASE_URL='https://pvgewltlxenguxmhiszm.supabase.co';
     const LE_SUPABASE_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
     const LE_EVIDENCE_BUCKET='little-evidence-private';
     let leDb=null,leUser=null,activeCheckpoint=null,activeCheckpointChildName='',returnScreenAfterWorkspace='objectiveLibraryScreen',assessmentCheckpointId=null,assessmentDirty=false;
+    let remoteCheckpointReturn=null,assessmentEditRevision=0;
     let evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null},pendingEvidenceUpload=null,voiceRecorder=null,voiceStream=null,voiceButton=null,voiceContext=null,voiceCapture=null,evidenceCaptureRevision=0;
     const leDbReady=import('https://esm.sh/@supabase/supabase-js@2.117.1').then(({createClient})=>{
       leDb=createClient(LE_SUPABASE_URL,LE_SUPABASE_PUBLIC_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -1098,14 +1106,14 @@
       button.addEventListener('click',()=>{selectedLevel=n;userChangedLevel=true;renderSuggestion()});levelPicks.append(button);
     }
     function art(kind){return LEChildActivities.image({run:'running',path:'path',gallop:'galloping'}[kind],{run:'A child running toward a blue cone',path:'A child moving around stepping stones',gallop:'A child galloping toward a finish flag'}[kind]);}
-    function show(id){cancelEvidenceCapture();if('speechSynthesis'in window)speechSynthesis.cancel();updateCheckpointContext();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+    function show(id){cancelEvidenceCapture();if('speechSynthesis'in window)speechSynthesis.cancel();document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));document.getElementById(id).classList.add('active');updateCheckpointContext();window.scrollTo({top:0,behavior:'smooth'});}
     function renderPrompt(){const p=prompts[promptIndex];document.getElementById('modeTag').textContent='CHILD VIEW · MOVEMENT CHECK';document.getElementById('stepLabel').textContent=`Move & explore · ${promptIndex+1} of ${prompts.length}`;document.getElementById('moveTitle').textContent=p.title;document.getElementById('movePrompt').textContent=p.text;document.getElementById('movementArt').innerHTML=art(p.kind);document.querySelector('.move-tip').textContent=p.tip;document.querySelectorAll('#progressDots i').forEach((dot,i)=>dot.classList.toggle('done',i<=promptIndex));}
     function renderRatingSelections(){document.querySelectorAll('[data-rating]').forEach(button=>button.classList.toggle('selected',ratings[Number(button.dataset.rating)]===Number(button.dataset.value)));}
     document.getElementById('hearDirection').addEventListener('click',()=>{const p=prompts[promptIndex];if('speechSynthesis' in window){window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(p.text);utterance.rate=.88;window.speechSynthesis.speak(utterance)}else{toast('Ask a grown-up to read the direction aloud.')}});
     function start(){promptIndex=0;movementCompleted=false;document.querySelector('.app').classList.add('child-mode');renderPrompt();show('movementScreen')}
     document.getElementById('startCheck').addEventListener('click',startPairedSession);
     document.getElementById('movementTeacherOnly').addEventListener('click',openRecording);
-    function openRecording(){document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';document.getElementById('recordBadge').innerHTML=movementCompleted?'<span>●</span> Movement Check · 3 prompts completed':'<span>●</span> Teacher review · movement check not run';show('recordScreen');renderSuggestion();void hydrateMovementObjectiveRecord()}
+    function openRecording(preserveCurrent=false){document.querySelector('.app').classList.remove('child-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · DEMO';document.getElementById('recordBadge').innerHTML=movementCompleted?'<span>●</span> Movement Check · 3 prompts completed':'<span>●</span> Teacher review · movement check not run';show('recordScreen');renderSuggestion();if(preserveCurrent!==true)void hydrateMovementObjectiveRecord()}
     document.getElementById('toRecording').addEventListener('click',()=>{
       if(pairRole==='display'){
         clearTimeout(pairPollTimer);
@@ -1152,7 +1160,7 @@
     function parentLanguage(n){if(!n)return 'This child is building coordination and confidence as they move through play. We’ll keep offering playful ways to explore movement.';const lower=[...levels].reverse().find(l=>l.n<=n)||levels[0];const phrases={1:'is practicing reaching, rolling, and shifting their body while staying steady',2:'is moving to explore the space around them',4:'is trying different ways to move during play',6:'is moving from place to place with growing control',8:'is combining more challenging movements during play and games',10:'is changing speed, direction, and pathways as they move',12:'is coordinating several complex movements while traveling'};const next=levels.find(l=>l.n>n);return `Your child ${phrases[lower.n]||'is building confidence as they move'}. Next, we’ll encourage them to ${next?parentNext(next.n):'keep combining complex movements in active play'}.`;}
     function parentNext(n){const p={2:'move to explore nearby spaces',4:'try different ways to travel',6:'move from place to place with more control',8:'combine more challenging movements in play',10:'vary their speed, direction, and pathway',12:'coordinate several movements while traveling'};return p[n]||'keep exploring movement in play';}
     
-    document.getElementById('finishReview').addEventListener('click',saveMovementObjectiveRecord);
+    document.getElementById('finishReview').addEventListener('click',()=>finishAssessment('movement','4',saveMovementObjectiveRecord));
     document.getElementById('movementSkipSave').textContent='Child Activities · continue without saving';
     document.getElementById('movementSkipSave').addEventListener('click',openChildActivityLibrary);
     function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2500)}
@@ -1175,6 +1183,18 @@
       const el=document.getElementById(ids[context]);
       if(el){el.textContent=message;el.style.color=isError?'#a14e46':''}
     }
+    function rememberRemoteCheckpoint(sessionId,target){
+      try{sessionStorage.setItem('littleEvidence:remote:'+sessionId,JSON.stringify(target))}catch{}
+    }
+    function recallRemoteCheckpoint(sessionId){
+      try{const target=JSON.parse(sessionStorage.getItem('littleEvidence:remote:'+sessionId));return target?.ownerId&&target?.checkpointId?target:null}catch{return null}
+    }
+    function remoteCheckpointMatches(target){return !!target&&leUser?.id===target.ownerId&&activeCheckpoint?.id===target.checkpointId}
+    function lockedRemoteCheckpoint(){return LEActivityRemote.lockedCheckpoint()||(pairRole==='teacher'&&!controllerReviewStarted?movementRemoteTarget:null)}
+    function returnFromCheckpointWorkspace(){
+      if(remoteCheckpointReturn){const resume=remoteCheckpointReturn;remoteCheckpointReturn=null;resume();return true}
+      return false;
+    }
     async function initializeCheckpointWorkspace(){
       // Wire the workspace immediately; the authentication SDK loads asynchronously.
       document.getElementById('sendCheckpointLink').addEventListener('click',sendCheckpointSignIn);
@@ -1185,9 +1205,9 @@
         else{leUser=null;activeCheckpoint=null;activeCheckpointChildName='';resetAssessmentForChild();renderCheckpointAuth();checkpointStatus('Signed out.')}
       });
       document.getElementById('addCheckpointChild').addEventListener('click',addCheckpointChild);
-      document.getElementById('checkpointActivities').addEventListener('click',()=>{if(!activeCheckpoint){checkpointStatus('Open a child checkpoint first.',true);return}openLibrary()});
+      document.getElementById('checkpointActivities').addEventListener('click',()=>{if(!activeCheckpoint){checkpointStatus('Open a child checkpoint first.',true);return}if(!returnFromCheckpointWorkspace())openLibrary()});
       document.getElementById('openCheckpoint').addEventListener('click',openOrCreateCheckpoint);
-      ['checkpointChildSelect','checkpointSchoolYear','checkpointSeason'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true;updateCheckpointContext()}));
+      ['checkpointChildSelect','checkpointSchoolYear','checkpointSeason'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{if(lockedRemoteCheckpoint()&&activeCheckpoint){document.getElementById('checkpointChildSelect').value=activeCheckpoint.child_id;document.getElementById('checkpointSchoolYear').value=activeCheckpoint.school_year;document.getElementById('checkpointSeason').value=activeCheckpoint.season;checkpointStatus('Finish this iPad activity before changing children.',true);return}activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true;updateCheckpointContext()}));
       document.getElementById('createParentReport').addEventListener('click',openParentReport);
       document.getElementById('createGoldEntrySheet').addEventListener('click',openGoldEntrySheet);
       document.getElementById('backFromGoldEntrySheet').addEventListener('click',()=>show('checkpointScreen'));
@@ -1195,13 +1215,16 @@
       document.getElementById('backToCheckpointReport').addEventListener('click',()=>show('checkpointScreen'));
       document.getElementById('closeParentReport').addEventListener('click',()=>show('checkpointScreen'));
       document.getElementById('printParentReport').addEventListener('click',()=>{document.body.classList.add('family-report-printing');window.print();setTimeout(()=>document.body.classList.remove('family-report-printing'),1200)});
-      document.getElementById('checkpointBack').addEventListener('click',()=>show(returnScreenAfterWorkspace||'objectiveLibraryScreen'));
-      document.getElementById('checkpointReturnAssessment').addEventListener('click',()=>{const target=returnScreenAfterWorkspace||'guidedObjectiveScreen';show(target);if(target==='guidedObjectiveScreen'&&activeDefinition)void hydrateGuidedObjectiveRecord(activeDefinition);if(target==='recordScreen')void hydrateMovementObjectiveRecord();if(target==='feelingsRecordScreen')void hydrateFeelingsObjectiveRecord();if(target==='limitsRecordScreen')void hydrateLimitsObjectiveRecord()});
-      document.getElementById('openCheckpoints').addEventListener('click',()=>{returnScreenAfterWorkspace=activeScreenId();void openCheckpointWorkspace()});
+      document.getElementById('checkpointBack').addEventListener('click',()=>{if(!returnFromCheckpointWorkspace())show(returnScreenAfterWorkspace||'objectiveLibraryScreen')});
+      document.getElementById('checkpointReturnAssessment').addEventListener('click',()=>{if(returnFromCheckpointWorkspace())return;const target=returnScreenAfterWorkspace||'guidedObjectiveScreen';show(target)});
+      document.getElementById('openCheckpoints').addEventListener('click',()=>{returnScreenAfterWorkspace=activeScreenId();if(LEActivityRemote.isTeacher()){LEActivityRemote.pauseForCheckpoint();remoteCheckpointReturn=()=>LEActivityRemote.resumeAfterCheckpoint()}else if(pairRole==='teacher'&&!controllerReviewStarted){remoteCheckpointReturn=()=>show('controllerScreen')}void openCheckpointWorkspace()});
       document.getElementById('sharedPhotoInput').addEventListener('change',handleEvidenceFileChosen);
       document.getElementById('sharedVideoInput').addEventListener('change',handleEvidenceFileChosen);
       document.addEventListener('click',handleEvidenceButtonClick);
       document.getElementById('checkpointSchoolYear').value=schoolYearDefault();
+      document.getElementById('movementSaveStay').onclick=()=>saveAndStay(saveMovementObjectiveRecord);
+      document.getElementById('feelingsSaveStay').onclick=()=>saveAndStay(saveFeelingsObjectiveRecord);
+      document.getElementById('limitsSaveStay').onclick=()=>saveAndStay(saveLimitsObjectiveRecord);
       wireLegacyEvidenceButtons();
       renderCheckpointAuth();
 
@@ -1222,6 +1245,7 @@
       leUser=nextUser;
       if(changed){activeCheckpoint=null;activeCheckpointChildName='';resetAssessmentForChild();}
       renderCheckpointAuth();
+      updateCheckpointContext();
       if(leUser&&changed)await loadCheckpointChildren();
     }
     async function sendCheckpointSignIn(){
@@ -1245,7 +1269,8 @@
       document.getElementById('checkpointWorkspace').classList.toggle('hidden',!signedIn);
       document.getElementById('checkpointSignedInAs').textContent=signedIn?leUser.email||'Signed in teacher':'';
       const returnButton=document.getElementById('checkpointReturnAssessment');
-      returnButton.classList.toggle('hidden',!['guidedObjectiveScreen','recordScreen','feelingsObjectiveScreen','limitsObjectiveScreen','feelingsRecordScreen','limitsRecordScreen'].includes(returnScreenAfterWorkspace));
+      returnButton.textContent=remoteCheckpointReturn?'Return to iPad activity →':'Return to current assessment →';
+      returnButton.classList.toggle('hidden',!remoteCheckpointReturn&&!['guidedObjectiveScreen','recordScreen','feelingsObjectiveScreen','limitsObjectiveScreen','feelingsRecordScreen','limitsRecordScreen'].includes(returnScreenAfterWorkspace));
     }
     async function openCheckpointWorkspace(){
       document.getElementById('checkpointSchoolYear').value ||= schoolYearDefault();
@@ -1291,31 +1316,43 @@
       const season=document.getElementById('checkpointSeason').value;
       if(!childId){checkpointStatus('Choose or add a child first.',true);return}
       if(!/^\d{4}-\d{4}$/.test(schoolYear)){checkpointStatus('Enter the school year like 2026-2027.',true);return}
+      const childName=document.getElementById('checkpointChildSelect').selectedOptions[0]?.textContent||'Child',openingOwnerId=leUser.id;
       const button=document.getElementById('openCheckpoint');button.disabled=true;
       try{
         let {data,error}=await leDb.from('little_evidence_checkpoints').select('*').eq('child_id',childId).eq('school_year',schoolYear).eq('season',season).maybeSingle();
         if(error)throw error;
+        if(leUser?.id!==openingOwnerId||document.getElementById('checkpointChildSelect').value!==childId||document.getElementById('checkpointSchoolYear').value.trim()!==schoolYear||document.getElementById('checkpointSeason').value!==season)return;
         if(!data){
-          const created=await leDb.from('little_evidence_checkpoints').insert({owner_id:leUser.id,child_id:childId,school_year:schoolYear,season}).select('*').single();
+          const created=await leDb.from('little_evidence_checkpoints').insert({owner_id:openingOwnerId,child_id:childId,school_year:schoolYear,season}).select('*').single();
           if(created.error)throw created.error;
           data=created.data;
         }
-        evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null};
+        if(leUser?.id!==openingOwnerId||document.getElementById('checkpointChildSelect').value!==childId||document.getElementById('checkpointSchoolYear').value.trim()!==schoolYear||document.getElementById('checkpointSeason').value!==season)return;
+        const locked=lockedRemoteCheckpoint();if(locked&&(locked.ownerId!==openingOwnerId||locked.checkpointId!==data.id)){checkpointStatus('This activity belongs to the original child checkpoint on this iPad. Reopen that checkpoint, or start a new pairing for another child.',true);return}
         if(assessmentCheckpointId&&assessmentCheckpointId!==data.id){if(assessmentDirty&&!window.confirm('There is unsaved work for the previous checkpoint. Switch and discard that unfinished work?'))return;resetAssessmentForChild();}
+        evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null};
         assessmentCheckpointId=data.id;
         activeCheckpoint=data;
-        activeCheckpointChildName=document.getElementById('checkpointChildSelect').selectedOptions[0]?.textContent||'Child';
+        activeCheckpointChildName=childName;
         document.getElementById('activeCheckpointLabel').textContent=activeCheckpointChildName+' · '+season[0].toUpperCase()+season.slice(1)+' '+schoolYear;
         checkpointStatus('Checkpoint ready. Save each objective after you finish its teacher review.');
         await refreshCheckpointRecords();
         updateCheckpointContext();
+        returnFromCheckpointWorkspace();
       }catch(error){checkpointStatus('Could not open this checkpoint: '+error.message,true)}
       finally{button.disabled=false}
     }
     function updateCheckpointContext(){
       let label=document.getElementById('checkpointContext');
-      if(!label){label=document.createElement('span');label.id='checkpointContext';label.className='small-note';document.getElementById('openCheckpoints').insertAdjacentElement('afterend',label);}
-      label.textContent=activeCheckpoint?activeCheckpointCaption():'Practice mode · no child checkpoint selected';
+      if(!label){label=document.createElement('section');label.id='checkpointContext';label.className='checkpoint-context';label.setAttribute('aria-label','Current assessment child');document.querySelector('.topbar').insertAdjacentElement('afterend',label);}
+      const screen=activeScreenId();
+      const objectiveId=screen==='guidedObjectiveScreen'?(LEActivityRemote.objectiveId()||activeDefinition?.id):['objectiveScreen','recordScreen','controllerScreen','pairScreen','movementScreen','completeScreen'].includes(screen)?'4':screen.startsWith('feelings')?'1a':screen.startsWith('limits')?'1b':null;
+      const objectiveTitle=objectiveId==='4'?'Demonstrates Traveling Skills':objectiveId==='1a'?'Manages Feelings':objectiveId==='1b'?'Follows Limits and Expectations':objectiveDefinitions.find(d=>d.id===objectiveId)?.title;
+      const objective=objectiveId&&objectiveTitle?'Objective '+objectiveId+' · '+objectiveTitle:'';
+      const title=activeCheckpoint?'Assessing: '+activeCheckpointChildName:'Practice mode · no child selected';
+      const detail=activeCheckpoint?activeCheckpointCaption()+' · This child stays selected as you move between objectives.':'Choose a child checkpoint on this device before saving assessments.';
+      label.innerHTML='<div><strong>'+escapeHTML(title)+'</strong>'+(objective?'<p class="assessment-objective">'+escapeHTML(objective)+'</p>':'')+'<small>'+escapeHTML(detail)+'</small></div><button type="button" class="secondary" id="changeAssessmentChild">'+(activeCheckpoint?'Change child':'Choose child')+'</button>';
+      document.getElementById('changeAssessmentChild').onclick=()=>document.getElementById('openCheckpoints').click();
     }
     function resetAssessmentForChild(){
       cancelEvidenceCapture();
@@ -1335,8 +1372,8 @@
       updateCheckpointContext();
     }
     window.addEventListener('beforeunload',event=>{if(assessmentDirty){event.preventDefault();event.returnValue='';}});
-    document.addEventListener('click',event=>{if(event.target.closest('[data-child-task-choice],[data-scenario-choice],[data-choice],[data-rating],[data-flevel],[data-limit-level],[data-level],#taskNext,#taskSkip'))assessmentDirty=true;});
-    document.addEventListener('input',event=>{if(event.target.matches('textarea,[data-task-observation]'))assessmentDirty=true;});
+    document.addEventListener('click',event=>{if(event.target.closest('[data-child-task-choice],[data-scenario-choice],[data-choice],[data-rating],[data-anchor],[data-consistency],[data-child-evidence],#emergingNext,[data-flevel],[data-limit-level],[data-level],#taskNext,#taskSkip')){assessmentDirty=true;assessmentEditRevision++}});
+    document.addEventListener('input',event=>{if(event.target.matches('textarea,[data-task-observation]')){assessmentDirty=true;assessmentEditRevision++}});
     function isIncludedObjective(id){
       const number=Number.parseInt(String(id),10);
       return number>=1&&number<=23;
@@ -1474,7 +1511,9 @@
       const season=activeCheckpoint.season;
       return activeCheckpointChildName+' · '+season[0].toUpperCase()+season.slice(1)+' '+activeCheckpoint.school_year;
     }
+    let objectivePersistenceBusy=false;
     async function persistObjectiveRecord(context,payload){
+      if(objectivePersistenceBusy)return null;
       if(!leUser||!activeCheckpoint){
         const message=!leUser?'Not saved yet. Sign in and choose a checkpoint when ready.':'Not saved yet. Choose a child and checkpoint when ready.';
         setSaveStatus(context,message,true);
@@ -1484,19 +1523,51 @@
       const normalize=value=>value==='Not Yet'?0:value===null||value===undefined?null:Number(value);
       payload={...payload,final_level:normalize(payload.final_level),suggested_level:normalize(payload.suggested_level)};
       if(payload.final_level===null||!Number.isInteger(payload.final_level)||payload.final_level<0||payload.final_level>19){setSaveStatus(context,'Choose a checkpoint level before saving.',true);return null;}
+      objectivePersistenceBusy=true;const savingEditRevision=assessmentEditRevision;
       const savingCheckpointId=activeCheckpoint.id,savingOwnerId=leUser.id,savingRevision=evidenceCaptureRevision,savingCaption=activeCheckpointCaption();
+      try{
       const now=new Date().toISOString();
       const row={owner_id:leUser.id,checkpoint_id:activeCheckpoint.id,objective_id:payload.objective_id,suggested_level:payload.suggested_level??null,final_level:payload.final_level??null,teacher_answers:payload.teacher_answers||{},child_responses:payload.child_responses||{},teacher_notes:payload.teacher_notes||null,updated_at:now};
       const {data,error}=await leDb.from('little_evidence_objective_records').upsert(row,{onConflict:'checkpoint_id,objective_id'}).select('id').single();
       if(activeCheckpoint?.id!==savingCheckpointId||leUser?.id!==savingOwnerId||evidenceCaptureRevision!==savingRevision)return data?.id||null;
       if(error){setSaveStatus(context,'Could not save this assessment: '+error.message,true);toast('Save failed. Check your connection and try again.');return null}
-      assessmentDirty=false;
+      assessmentDirty=assessmentEditRevision!==savingEditRevision;
       evidenceRecordIds[context]=data.id;
-      setSaveStatus(context,'Saved for '+savingCaption+'. Add any supporting media below.');
+      setSaveStatus(context,assessmentDirty?'Earlier version saved for '+savingCaption+'. Your newer changes still need saving.':'Saved for '+savingCaption+'. Add any supporting media below.');
       setEvidenceStatus(context,'Assessment saved. You can attach private evidence now.');
       await refreshCheckpointRecords();
       await loadEvidenceItems(context);
       return data.id
+      }catch(error){if(activeCheckpoint?.id===savingCheckpointId&&leUser?.id===savingOwnerId&&evidenceCaptureRevision===savingRevision)setSaveStatus(context,'Could not save this assessment: '+(error.message||'Try again.'),true);return null}
+      finally{objectivePersistenceBusy=false}
+    }
+    let assessmentSaveBusy=false;
+    async function saveAndStay(save){if(assessmentSaveBusy||objectivePersistenceBusy)return;return save()}
+    async function finishAssessment(context,objectiveId,save){
+      if(assessmentSaveBusy||objectivePersistenceBusy)return;
+      const ownerId=leUser?.id,checkpointId=activeCheckpoint?.id,screen=activeScreenId(),navigationRevision=evidenceCaptureRevision,editRevision=assessmentEditRevision;
+      const stillHere=()=>leUser?.id===ownerId&&activeCheckpoint?.id===checkpointId&&activeScreenId()===screen&&evidenceCaptureRevision===navigationRevision&&assessmentEditRevision===editRevision&&(context!=='guided'||activeDefinition?.id===objectiveId);
+      assessmentSaveBusy=true;let savedSuccessfully=false;
+      try{
+        const recordId=await save();
+        savedSuccessfully=!!recordId;
+        if(assessmentEditRevision!==editRevision&&activeCheckpoint?.id===checkpointId)assessmentDirty=true;
+        if(!recordId||!stillHere())return;
+        const {data,error}=await leDb.from('little_evidence_objective_records').select('objective_id,final_level').eq('checkpoint_id',checkpointId);
+        if(!stillHere())return;
+        if(error)throw error;
+        const saved=(data||[]).filter(record=>record.final_level!==null).map(record=>String(record.objective_id));saved.push(String(objectiveId));
+        const next=LEAssessmentContinuation.next(objectiveDefinitions,saved,objectiveId);
+        if(!next){openLibrary();toast('All regular objectives are saved for '+activeCheckpointChildName+'. Optional extensions are still available.');return}
+        if(LEActivityRemote.hasTeacherSession()&&(next.tasks||next.scenarios||next.id==='4')){
+          if(!await LEActivityRemote.continueWith(next.id,stillHere))throw Error('The original child checkpoint is required to continue the paired activity.');
+        }else if(next.id==='4'){show('objectiveScreen')}
+        else if(next.id==='1a'){document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsObjectiveScreen')}
+        else if(next.id==='1b'){document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1b';show('limitsObjectiveScreen')}
+        else{openGuidedObjective(next.id);if(!next.tasks&&!next.scenarios)startGuidedInterview()}
+        toast('Saved. Continuing with the same child.');
+      }catch(error){if(stillHere()){setSaveStatus(context,(savedSuccessfully?'Your saved assessment is kept. Could not open the next objective: ':'Could not save this assessment: ')+(error.message||'Try again.'),true);toast(savedSuccessfully?'Could not continue. Your saved assessment is kept; try Save & next again.':'Save failed. Your answers are still here; try again.')}}
+      finally{assessmentSaveBusy=false}
     }
     function selectedTaskResponses(d){
       if(!d?.tasks)return [];
@@ -1512,7 +1583,7 @@
     async function saveGuidedObjectiveRecord(d){
       const payload={objective_id:d.id,suggested_level:guidedResult?.suggested,final_level:guidedResult?.selected,teacher_answers:{...guidedAnswers,...(d.source?{progression_version:'gold-b3-20261001'}:{})},teacher_notes:document.getElementById('guidedTeacherNotes')?.value.trim()||null};
       payload.child_responses=d.tasks?{mode:'touch',activity_version:d.activityVersion||1,task_score:scoreChildTasks(d),tasks:selectedTaskResponses(d)}:scenarioAnswers.length?{mode:'child_scenarios',responses:scenarioAnswers.map((answer,index)=>({prompt:d.scenarios[index]?.title,choice:d.scenarios[index]?.choices[answer]}))}:{};
-      await persistObjectiveRecord('guided',payload)
+      return persistObjectiveRecord('guided',payload)
     }
     async function hydrateMovementObjectiveRecord(){
       if(!activeCheckpoint||!leUser)return;
@@ -1535,7 +1606,7 @@
     }
     async function saveMovementObjectiveRecord(){
       const payload={objective_id:'4',suggested_level:suggestedAnchor,final_level:selectedLevel,teacher_answers:{ratings,observed_anchors:[...observedAnchors],emerging_next:emergingNext,consistency,teacher_changed_level:userChangedLevel},child_responses:{mode:'movement_prompts',completed:movementCompleted,prompts:prompts.map((prompt,index)=>({prompt:prompt.text,teacher_rating:ratings[index]}))},teacher_notes:document.getElementById('notes')?.value.trim()||null};
-      await persistObjectiveRecord('movement',payload)
+      return persistObjectiveRecord('movement',payload)
     }
     async function hydrateFeelingsObjectiveRecord(){
       if(!leUser||!activeCheckpoint)return;
@@ -1576,10 +1647,10 @@
       await loadEvidenceItems('limits')
     }
     async function saveFeelingsObjectiveRecord(){
-      await persistObjectiveRecord('feelings',{objective_id:'1a',suggested_level:feelingsSuggested,final_level:feelingsSelected,teacher_answers:feelingsAnswers,child_responses:{mode:'teacher_observation'},teacher_notes:document.getElementById('feelingsNotes')?.value.trim()||null})
+      return persistObjectiveRecord('feelings',{objective_id:'1a',suggested_level:feelingsSuggested,final_level:feelingsSelected,teacher_answers:feelingsAnswers,child_responses:{mode:'teacher_observation'},teacher_notes:document.getElementById('feelingsNotes')?.value.trim()||null})
     }
     async function saveLimitsObjectiveRecord(){
-      await persistObjectiveRecord('limits',{objective_id:'1b',suggested_level:limitsSuggested,final_level:limitsSelected,teacher_answers:limitsAnswers,child_responses:{mode:'teacher_observation',optional_child_response:limitsAnswers.childEvidence||null},teacher_notes:document.getElementById('limitsNotes')?.value.trim()||null})
+      return persistObjectiveRecord('limits',{objective_id:'1b',suggested_level:limitsSuggested,final_level:limitsSelected,teacher_answers:limitsAnswers,child_responses:{mode:'teacher_observation',optional_child_response:limitsAnswers.childEvidence||null},teacher_notes:document.getElementById('limitsNotes')?.value.trim()||null})
     }
     async function hydrateGuidedObjectiveRecord(d){
       if(!leUser||!activeCheckpoint||!d)return;
@@ -1810,7 +1881,7 @@
     document.getElementById('guideToRecord').addEventListener('click',()=>{feelingsAnswers.behavior=null;feelingsAnswers.detail=null;feelingsAnswers.frequency=null;feelingsStep=0;clearFeelingsResult();document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE 1a';show('feelingsRecordScreen');renderFeelingsQuestion();void hydrateFeelingsObjectiveRecord()});
     document.getElementById('guideBack').setAttribute('aria-label','Return to Objective 1a');
     document.getElementById('feelingsBack').addEventListener('click',()=>show('feelingsObjectiveScreen'));
-    document.getElementById('finishFeelings').addEventListener('click',saveFeelingsObjectiveRecord);
+    document.getElementById('finishFeelings').addEventListener('click',()=>finishAssessment('feelings','1a',saveFeelingsObjectiveRecord));
     document.getElementById('feelingsQuestionNext').addEventListener('click',()=>{if(feelingsStep<2){feelingsStep++;renderFeelingsQuestion()}else finishFeelingsQuestions()});
     document.getElementById('feelingsQuestionBack').addEventListener('click',()=>{if(feelingsStep>0){feelingsStep--;renderFeelingsQuestion()}});
     
@@ -1997,7 +2068,7 @@
     document.getElementById('limitsQuestionNext').addEventListener('click',()=>{if(limitsStep<2){limitsStep++;renderLimitsQuestion()}else finishLimitsQuestions()});
     document.getElementById('limitsQuestionBack').addEventListener('click',()=>{if(limitsStep>0){limitsStep--;renderLimitsQuestion()}});
     document.getElementById('limitsBackToObjective').addEventListener('click',()=>show('limitsObjectiveScreen'));
-    document.getElementById('finishLimits').addEventListener('click',saveLimitsObjectiveRecord);
+    document.getElementById('finishLimits').addEventListener('click',()=>finishAssessment('limits','1b',saveLimitsObjectiveRecord));
     
 
     // The library groups all 10 mapped objectives. Existing prototypes remain linked to their original flows.
@@ -2410,15 +2481,26 @@
       guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;guidedSavedRecord=null;evidenceRecordIds.guided=null;scenarioIndex=0;scenarioAnswers=priorChildEvidence?.mode==='child_scenarios'?[...priorChildEvidence.answers]:[];taskIndex=0;taskAnswers=priorChildEvidence?.mode==='touch'?JSON.parse(JSON.stringify(priorChildEvidence.answers)):[];taskSequence=[];
       const d=activeDefinition;
       guidedHome.innerHTML='<div class="objective-switch"><button id="guidedBackLibrary">← All objectives</button></div><div class="panel objective-head compact"><div><p class="eyebrow">'+escapeHTML(d.domain)+' · Objective '+d.id+'</p><h1>'+escapeHTML(d.title)+'</h1><p class="subtitle">'+escapeHTML(d.summary)+'</p></div><div class="start-card"><h3>Ready to begin?</h3><p>'+ (d.scenarios?'Three gentle, no-score child scenarios, then a few teacher taps.':d.tasks?'Short activities to look, talk, make, or tap, followed by teacher review.':'A short tap-only teacher check. No typing is needed.')+'</p><button class="primary wide" id="startGuidedObjective">'+(d.scenarios?'Start child scenarios':d.tasks?'Start child check':'Start guided check')+'&nbsp; →</button></div></div><details class="panel objective-reference"><summary><span class="guide-summary-title">View objective guide</span><span class="guide-summary-note">Progression · examples · evidence tips</span></summary><div class="section-grid"><section class="panel section-card"><h2 class="section-title">'+(d.draft?'Working progression cues':'Developmental progression')+'</h2><div class="level-list">'+d.anchors.map(a=>'<div class="level-row"><div class="level-n">'+a.n+'</div><div><strong>Level '+a.n+'</strong><span>'+escapeHTML(a.text)+'</span>'+(a.examples&&a.examples.length?'<p class="small-note"><strong>Examples:</strong> '+a.examples.map(x=>escapeHTML(x)).join('; ')+'</p>':'')+'</div></div>').join('')+'</div></section><aside class="panel section-card"><h2 class="section-title">Evidence to notice</h2><p class="small-note">'+escapeHTML(d.summary)+' Look across real routines and more than one moment. '+(d.draft?'These are working summaries, not confirmed GOLD wording. Verify the progression in your account before using a suggested level. ':'')+'These prompts support your professional judgment; they do not replace the official GOLD continuum.</p></aside></div></details>'+materialsDetailsMarkup(d.id,d);
+      if(d.tasks&&!priorChildEvidence){
+        const setup=guidedHome.querySelector('.start-card');
+        setup.querySelector('h3').textContent='Before inviting your child';
+        setup.querySelector('p').textContent='Touch choices advance automatically. For speaking, writing, or movement, the teacher watches and advances when ready.';
+        const materials=document.createElement('div');
+        materials.innerHTML=(d.advanced?'<p class="activity-prep-note">Optional extension: use only when the child is ready. Skipping does not mean “Not Yet.”</p>':'')+'<ul>'+materialsForObjective(d.id,d).map(item=>'<li>'+escapeHTML(item)+'</li>').join('')+'</ul><details><summary>Teacher prompts to notice</summary>'+d.tasks.filter(t=>t.note).map(t=>'<p><strong>'+escapeHTML(t.prompt)+'</strong><br>'+escapeHTML(t.note)+'</p>').join('')+'</details>';
+        setup.insertBefore(materials,document.getElementById('startGuidedObjective'));
+        const teacherOnly=document.createElement('button');teacherOnly.className='secondary wide';teacherOnly.textContent='Use teacher observations';teacherOnly.onclick=()=>{taskAnswers=[];startGuidedInterview()};setup.append(teacherOnly);
+        document.getElementById('startGuidedObjective').textContent='Ready for child →';
+      }
       const savedPanel=document.createElement('section');savedPanel.className='panel section-card hidden';savedPanel.id='guidedSavedRecordNotice';guidedHome.append(savedPanel);
       document.getElementById('guidedBackLibrary').addEventListener('click',openLibrary);
       if(d.tasks||d.scenarios)LEActivityRemote.button(guidedHome.querySelector('.start-card'),d.id);
       const startGuidedButton=document.getElementById('startGuidedObjective');
       if(priorChildEvidence){startGuidedButton.textContent='Continue to teacher review →';startGuidedButton.parentElement.querySelector('p').textContent='The child activity is complete for this visit. Continue with the teacher questions.'}
-      startGuidedButton.addEventListener('click',()=>priorChildEvidence?startGuidedInterview():d.scenarios?startChildScenarios():d.tasks?prepareChildTasks():startGuidedInterview());
+      startGuidedButton.addEventListener('click',()=>priorChildEvidence?startGuidedInterview():d.scenarios?startChildScenarios():d.tasks?startChildTasks():startGuidedInterview());
       document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+d.id;show('guidedObjectiveScreen');void hydrateGuidedObjectiveRecord(d);
     }
-    function startGuidedInterview(){document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+activeDefinition.id;guidedHome.classList.add('hidden');guidedChild.classList.add('hidden');guidedCheck.classList.remove('hidden');guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;renderGuidedQuestion()}
+    let guidedChoiceReadyAt=0;
+    function startGuidedInterview(){guidedChoiceReadyAt=0;document.querySelector('.app').classList.remove('scenario-mode');document.getElementById('modeTag').textContent='TEACHER VIEW · OBJECTIVE '+activeDefinition.id;guidedHome.classList.add('hidden');guidedChild.classList.add('hidden');guidedCheck.classList.remove('hidden');guidedQuestion=0;guidedAnswers={anchor:null,detail:null,frequency:null};guidedResult=null;renderGuidedQuestion()}
     function startChildScenarios(){childTapReadyAt=0;guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.add('scenario-mode');scenarioIndex=0;scenarioAnswers=[];renderChildScenario()}
     function scenarioIllustration(s){return LEChildActivities.image({'One tricycle':'tricycle','Dramatic play':'restaurant','Block-building plan':'building'}[s.title],s.title);}
     function renderChildScenario(){
@@ -2512,11 +2594,17 @@
         if(next)choices.push({id:'independent',label:'Some parts of Level '+next.n+' are emerging',detail:next.text});
       }
       else{title='How consistently have you seen this skill?';help='Think about more than one day, activity, or adult when possible.';choices=frequencyOptions.map(f=>({id:f.id,label:f.label,detail:f.detail}))}
-      guidedCheck.innerHTML='<div class="guided-shell"><div class="objective-switch"><button id="guidedBackObjective">← Back to objective</button></div><div class="panel guided-question-card"><div class="guided-progress">Question '+(guidedQuestion+1)+' of 3</div><h2>'+title+'</h2><p class="small-note">'+help+'</p><div class="guided-options">'+choices.map(c=>'<button type="button" class="question-choice '+(isChoiceSelected(c)?'selected':'')+'" data-choice="'+escapeHTML(c.id)+'"><span><strong>'+escapeHTML(c.label)+'</strong>'+escapeHTML(c.detail||'')+'</span></button>').join('')+'</div><div class="guided-actions"><button class="text-button" id="guidedQuestionBack" '+(guidedQuestion===0?'disabled':'')+'>← Back</button><button class="primary" id="guidedQuestionNext" '+(!currentGuidedAnswer()?'disabled':'')+'>'+(guidedQuestion===2?'See checkpoint support':'Next question')+'&nbsp; →</button></div></div></div>';
+      guidedCheck.innerHTML='<div class="guided-shell"><div class="objective-switch"><button id="guidedBackObjective">← Back to objective</button></div><div class="panel guided-question-card"><div class="guided-progress">Question '+(guidedQuestion+1)+' of 3 · Tap an answer to continue</div><h2>'+title+'</h2><p class="small-note">'+help+'</p><div class="guided-options">'+choices.map(c=>'<button type="button" class="question-choice '+(isChoiceSelected(c)?'selected':'')+'" data-choice="'+escapeHTML(c.id)+'"><span><strong>'+escapeHTML(c.label)+'</strong>'+escapeHTML(c.detail||'')+'</span></button>').join('')+'</div><div class="guided-actions"><button class="text-button" id="guidedQuestionBack" '+(guidedQuestion===0?'disabled':'')+'>← Back</button><button class="primary" id="guidedQuestionNext" '+(!currentGuidedAnswer()?'disabled':'')+'>'+(guidedQuestion===2?'See checkpoint support':'Next question')+'&nbsp; →</button></div></div></div>';
       document.getElementById('guidedBackObjective').addEventListener('click',()=>{guidedCheck.classList.add('hidden');guidedHome.classList.remove('hidden');document.querySelector('.app').classList.remove('scenario-mode')});
-      guidedCheck.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.choice;if(guidedQuestion===0){guidedAnswers.anchor=Number(id);guidedAnswers.detail=null;guidedAnswers.frequency=null}else if(guidedQuestion===1){guidedAnswers.detail=id;guidedAnswers.frequency=null}else guidedAnswers.frequency=id;renderGuidedQuestion()}));
+      const renderedQuestion=guidedQuestion;
+      guidedCheck.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>{if(renderedQuestion!==guidedQuestion||Date.now()<guidedChoiceReadyAt)return;guidedChoiceReadyAt=Date.now()+350;const id=button.dataset.choice;if(guidedQuestion===0){guidedAnswers.anchor=Number(id);guidedAnswers.detail=null;guidedAnswers.frequency=null}else if(guidedQuestion===1){guidedAnswers.detail=id;guidedAnswers.frequency=null}else guidedAnswers.frequency=id;advanceGuidedQuestion()}));
       document.getElementById('guidedQuestionBack').addEventListener('click',()=>{if(guidedQuestion>0){guidedQuestion--;renderGuidedQuestion()}});
-      document.getElementById('guidedQuestionNext').addEventListener('click',()=>{if(guidedQuestion<2){guidedQuestion++;renderGuidedQuestion()}else{const point=progressionSuggestedLevel(d,guidedAnswers);guidedResult={suggested:point,selected:point};renderGuidedResult()}});
+      document.getElementById('guidedQuestionNext').addEventListener('click',advanceGuidedQuestion);
+    }
+    function advanceGuidedQuestion(){
+      if(!currentGuidedAnswer())return;
+      if(guidedQuestion<2){guidedQuestion++;renderGuidedQuestion()}
+      else{const point=progressionSuggestedLevel(activeDefinition,guidedAnswers);guidedResult={suggested:point,selected:point};renderGuidedResult()}
     }
     function currentGuidedAnswer(){return guidedQuestion===0?guidedAnswers.anchor!==null:guidedQuestion===1?!!guidedAnswers.detail:!!guidedAnswers.frequency}
     function isChoiceSelected(c){return guidedQuestion===0?String(guidedAnswers.anchor)===c.id:guidedQuestion===1?guidedAnswers.detail===c.id:guidedAnswers.frequency===c.id}
@@ -2527,13 +2615,14 @@
       const options=['Not Yet',...Array.from({length:progressionMaxLevel(d)},(_,i)=>String(i+1))];
       const strength=exact?exact.text.toLowerCase():'is showing emerging skills between nearby descriptions';
       const nextAction=next?next.text.toLowerCase():d.next;
-      guidedCheck.innerHTML='<div class="guided-shell"><div class="objective-switch"><button id="guidedEditAnswers">← Change answers</button><button class="text-button" type="button" id="guidedSkipSave">All objectives · continue without saving</button></div><div class="panel record-head"><div><p class="eyebrow">Objective '+d.id+' · Teacher recording</p><h1>'+escapeHTML(d.title)+'</h1><p>Your taps summarize the evidence. You make the final checkpoint decision.</p></div><span class="badge">● Guided check complete</span></div><div class="guided-result-grid"><div class="record-main"><section class="panel section-card"><h2 class="section-title">Suggested checkpoint point</h2><div class="suggest-box"><div class="suggest-kicker">Prototype suggestion · teacher decides</div><div class="suggested">'+escapeHTML(desc)+'</div><p class="suggest-text">Based on the selected developmental description and evidence of the next skill. A short child activity does not establish the full level. '+escapeHTML(frequency?.confidence||'')+(scenarioAnswers.length?' Child scenario choices are supporting conversation evidence, not an automatic score.':'')+(d.tasks&&taskAnswers.length?' '+escapeHTML(taskEvidenceSummary(d)):'')+'</p><div class="select-levels">'+options.map(o=>'<button type="button" class="level-pick '+((o==='Not Yet'?n===0:Number(o)===n)?'selected':'')+'" data-level="'+o+'">'+o+'</button>').join('')+'</div><p class="level-help">Tap a different level if your broader evidence supports it. Confirm the official checkpoint in Teaching Strategies GOLD.</p></div><details class="optional-note" style="margin-top:18px"><summary>Add a note (optional)</summary><textarea id="guidedTeacherNotes" aria-label="Optional evidence note" placeholder="Optional note about the context or what the child did"></textarea></details></section><section class="panel section-card"><h2 class="section-title">Evidence to look for next</h2><div class="next-evidence"><strong>'+(next?'Look for evidence near Level '+next.n:'Continue documenting')+'</strong>'+escapeHTML(next?'Notice how this appears in everyday classroom situations: '+next.text:d.next)+'</div></section></div><aside class="record-side"><section class="parent-copy family-report-print"><p class="family-print-objective">'+escapeHTML(d.title)+'</p><strong>What we’re noticing</strong><p id="guidedFamilyCopy"></p><button type="button" class="secondary" id="printFamilyNote">Print family note</button></section><section class="panel section-card"><h2 class="section-title">Evidence captured</h2><p class="small-note">'+(d.tasks?escapeHTML(taskEvidenceSummary(d)):scenarioAnswers.length?'The child’s choices: '+escapeHTML(d.scenarios.map((s,i)=>s.title+' — '+s.choices[scenarioAnswers[i]]).join('; '))+'. Use them as conversation evidence; they do not determine a checkpoint by themselves.':'Guided teacher answers only. No typing required.')+'</p><p class="small-note">Teacher observation remains the primary evidence for this objective. The suggested point is editable and requires your review.</p></section><details class="optional-note checkpoint-evidence-tools" style="margin-bottom:14px"><summary>Add photo, video, or voice evidence</summary><p class="small-note">Save the assessment first, then attach evidence to this objective.</p><div class="evidence-tools"><button type="button" class="secondary" data-capture-evidence="photo" data-evidence-context="guided">＋ Photo</button><button type="button" class="secondary" data-capture-evidence="video" data-evidence-context="guided">＋ Video</button><button type="button" class="secondary" data-capture-evidence="voice" data-evidence-context="guided">＋ Voice note</button></div><p class="small-note" id="guidedEvidenceStatus">Attachments are private to your signed-in account.</p><div class="checkpoint-evidence-list" id="guidedEvidenceList"></div></details><p class="small-note checkpoint-save-status" id="guidedSaveStatus">Not saved to a child checkpoint yet.</p><button class="primary wide" id="guidedFinish">Save to checkpoint&nbsp; ✓</button></aside></div></div>';
+      guidedCheck.innerHTML='<div class="guided-shell"><div class="objective-switch"><button id="guidedEditAnswers">← Change answers</button><button class="text-button" type="button" id="guidedSkipSave">All objectives · continue without saving</button></div><div class="panel record-head"><div><p class="eyebrow">Objective '+d.id+' · Teacher recording</p><h1>'+escapeHTML(d.title)+'</h1><p>Your taps summarize the evidence. You make the final checkpoint decision.</p></div><span class="badge">● Guided check complete</span></div><div class="guided-result-grid"><div class="record-main"><section class="panel section-card"><h2 class="section-title">Suggested checkpoint point</h2><div class="suggest-box"><div class="suggest-kicker">Prototype suggestion · teacher decides</div><div class="suggested">'+escapeHTML(desc)+'</div><p class="suggest-text">Based on the selected developmental description and evidence of the next skill. A short child activity does not establish the full level. '+escapeHTML(frequency?.confidence||'')+(scenarioAnswers.length?' Child scenario choices are supporting conversation evidence, not an automatic score.':'')+(d.tasks&&taskAnswers.length?' '+escapeHTML(taskEvidenceSummary(d)):'')+'</p><div class="select-levels">'+options.map(o=>'<button type="button" class="level-pick '+((o==='Not Yet'?n===0:Number(o)===n)?'selected':'')+'" data-level="'+o+'">'+o+'</button>').join('')+'</div><p class="level-help">Tap a different level if your broader evidence supports it. Confirm the official checkpoint in Teaching Strategies GOLD.</p></div><details class="optional-note" style="margin-top:18px"><summary>Add a note (optional)</summary><textarea id="guidedTeacherNotes" aria-label="Optional evidence note" placeholder="Optional note about the context or what the child did"></textarea></details></section><section class="panel section-card"><h2 class="section-title">Evidence to look for next</h2><div class="next-evidence"><strong>'+(next?'Look for evidence near Level '+next.n:'Continue documenting')+'</strong>'+escapeHTML(next?'Notice how this appears in everyday classroom situations: '+next.text:d.next)+'</div></section></div><aside class="record-side"><section class="parent-copy family-report-print"><p class="family-print-objective">'+escapeHTML(d.title)+'</p><strong>What we’re noticing</strong><p id="guidedFamilyCopy"></p><button type="button" class="secondary" id="printFamilyNote">Print family note</button></section><section class="panel section-card"><h2 class="section-title">Evidence captured</h2><p class="small-note">'+(d.tasks?escapeHTML(taskEvidenceSummary(d)):scenarioAnswers.length?'The child’s choices: '+escapeHTML(d.scenarios.map((s,i)=>s.title+' — '+s.choices[scenarioAnswers[i]]).join('; '))+'. Use them as conversation evidence; they do not determine a checkpoint by themselves.':'Guided teacher answers only. No typing required.')+'</p><p class="small-note">Teacher observation remains the primary evidence for this objective. The suggested point is editable and requires your review.</p></section><details class="optional-note checkpoint-evidence-tools" style="margin-bottom:14px"><summary>Add photo, video, or voice evidence</summary><p class="small-note">Save the assessment first, then attach evidence to this objective.</p><div class="evidence-tools"><button type="button" class="secondary" data-capture-evidence="photo" data-evidence-context="guided">＋ Photo</button><button type="button" class="secondary" data-capture-evidence="video" data-evidence-context="guided">＋ Video</button><button type="button" class="secondary" data-capture-evidence="voice" data-evidence-context="guided">＋ Voice note</button></div><p class="small-note" id="guidedEvidenceStatus">Attachments are private to your signed-in account.</p><div class="checkpoint-evidence-list" id="guidedEvidenceList"></div></details><p class="small-note checkpoint-save-status" id="guidedSaveStatus">Not saved to a child checkpoint yet.</p><button class="primary wide" id="guidedFinish">Save &amp; next objective&nbsp; →</button><button type="button" class="secondary wide" id="guidedSaveStay">Save &amp; add evidence</button></aside></div></div>';
       renderTaskObservationReview(d);
       guidedCheck.querySelectorAll('[data-level]').forEach(button=>button.addEventListener('click',()=>{r.selected=button.dataset.level==='Not Yet'?0:Number(button.dataset.level);guidedCheck.querySelectorAll('[data-level]').forEach(b=>b.classList.toggle('selected',b===button));guidedCheck.querySelector('.suggested').textContent=progressionDescription(d,r.selected);const upcoming=d.anchors.find(a=>a.n>r.selected);guidedCheck.querySelector('.next-evidence').innerHTML='<strong>'+(upcoming?'Look for evidence near Level '+upcoming.n:'Continue documenting')+'</strong>'+escapeHTML(upcoming?upcoming.text:d.next);updateFamilyCopy()}));
-      document.getElementById('guidedEditAnswers').addEventListener('click',()=>{guidedQuestion=0;renderGuidedQuestion()});
+      document.getElementById('guidedEditAnswers').addEventListener('click',()=>{guidedQuestion=0;guidedResult=null;guidedChoiceReadyAt=0;renderGuidedQuestion()});
       document.getElementById('guidedSkipSave').textContent='Child Activities · continue without saving';
       document.getElementById('guidedSkipSave').addEventListener('click',openChildActivityLibrary);
-      document.getElementById('guidedFinish').addEventListener('click',()=>saveGuidedObjectiveRecord(d));
+      document.getElementById('guidedFinish').addEventListener('click',()=>finishAssessment('guided',d.id,()=>saveGuidedObjectiveRecord(d)));
+      document.getElementById('guidedSaveStay').onclick=()=>saveAndStay(()=>saveGuidedObjectiveRecord(d));
       document.getElementById('printFamilyNote').addEventListener('click',()=>{document.body.classList.add('family-printing');window.print();setTimeout(()=>document.body.classList.remove('family-printing'),1000)});
       updateFamilyCopy();
       void hydrateGuidedObjectiveRecord(d);
@@ -2576,29 +2665,14 @@
 
     const PAIR_API='https://pvgewltlxenguxmhiszm.supabase.co/functions/v1/little-evidence-session';
     const PAIR_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
-    let pairRole=null,pairSessionId=null,pairToken=null,pairPollTimer=null,controllerRating=null,lastDisplayStatus='';
+    let pairRole=null,pairSessionId=null,pairToken=null,pairPollTimer=null,controllerRating=null,lastDisplayStatus='',movementRemoteTarget=null,controllerReviewStarted=false;
     async function pairApi(payload){
       const response=await fetch(PAIR_API,{method:'POST',headers:{'Content-Type':'application/json','apikey':PAIR_PUBLIC_KEY},body:JSON.stringify(payload)});
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(data.error||'Could not reach the paired session.');
       return data;
     }
-    async function startPairedSession(){
-      const button=document.getElementById('startCheck');button.disabled=true;button.textContent='Starting secure session…';
-      try{
-        const created=await pairApi({action:'create'});
-        pairRole='display';pairSessionId=created.id;pairToken=created.display_token;lastDisplayStatus='';promptIndex=0;movementCompleted=false;
-        const teacherUrl=new URL(location.href);if(childActivityOnly||activeScreenId()==='childActivitiesScreen')teacherUrl.searchParams.set('childActivities','1');teacherUrl.hash=`controller=${created.id}.${created.teacher_token}`;
-        const link=teacherUrl.toString();document.getElementById('pairLinkText').textContent=link;
-        document.getElementById('pairStatus').textContent=`Temporary pairing expires at ${new Date(created.expires_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}.`;
-        const qrBox=document.getElementById('pairingQr');
-        if(window.qrcode){const qr=window.qrcode(0,'M');qr.addData(link);qr.make();qrBox.innerHTML=`<img alt="Secure teacher iPad pairing QR code" src="${qr.createDataURL(8,4)}">`}
-        else qrBox.innerHTML='<span class="small-note">QR code is unavailable here. Use “Copy iPad link” below.</span>';
-        show('pairScreen');
-        clearTimeout(pairPollTimer);pollDisplay();
-      }catch(error){toast(error.message)}
-      finally{button.disabled=false;button.innerHTML='Start paired movement check&nbsp; →'}
-    }
+    async function startPairedSession(){return LEActivityRemote.start('4')}
     document.getElementById('copyPairLink').addEventListener('click',async()=>{
       try{await navigator.clipboard.writeText(document.getElementById('pairLinkText').textContent);toast('iPad link copied.')}
       catch{toast('Open your camera and scan the QR code on this screen.')}
@@ -2626,6 +2700,7 @@
     }
     function showControllerState(state){
       document.getElementById('controllerConnection').textContent='● Connected to the SmartBoard';
+      document.getElementById('controllerStart').textContent=activeCheckpoint&&leUser?'Start movement check →':'Choose child to begin →';
       document.getElementById('controllerLobby').classList.toggle('hidden',state.status!=='waiting');
       document.getElementById('controllerActive').classList.toggle('hidden',state.status!=='active');
       document.getElementById('controllerDone').classList.toggle('hidden',state.status!=='complete');
@@ -2642,7 +2717,7 @@
     function beginController(){
       const match=location.hash.match(/^#controller=([0-9a-f-]{36})\.([A-Za-z0-9_-]{43})$/i);
       if(!match)return;
-      pairRole='teacher';pairSessionId=match[1];pairToken=match[2];
+      pairRole='teacher';pairSessionId=match[1];pairToken=match[2];movementRemoteTarget=recallRemoteCheckpoint(pairSessionId);controllerReviewStarted=false;
       document.getElementById('modeTag').textContent='TEACHER IPAD · PAIRED';
       setupControllerRatings();show('controllerScreen');
       const poll=()=>pairApi({action:'state',id:pairSessionId,role:'teacher',token:pairToken})
@@ -2652,11 +2727,14 @@
       poll();
     }
     document.getElementById('controllerStart').addEventListener('click',async()=>{
+      if(!leUser||!activeCheckpoint){document.getElementById('openCheckpoints').click();return}
+      movementRemoteTarget={ownerId:leUser.id,checkpointId:activeCheckpoint.id};rememberRemoteCheckpoint(pairSessionId,movementRemoteTarget);
       const button=document.getElementById('controllerStart');button.disabled=true;
       try{const {state}=await pairApi({action:'start',id:pairSessionId,role:'teacher',token:pairToken});showControllerState(state)}
       catch(error){toast(error.message)}finally{button.disabled=false}
     });
     document.getElementById('controllerAdvance').addEventListener('click',async()=>{
+      if(!remoteCheckpointMatches(movementRemoteTarget)){toast('Reopen the original child checkpoint on this iPad before continuing.');return}
       if(controllerRating===null)return;
       ratings[promptIndex]=controllerRating;renderRatingSelections();renderSuggestion();
       const action=promptIndex===prompts.length-1?'finish':'advance';const button=document.getElementById('controllerAdvance');button.disabled=true;
@@ -2664,10 +2742,13 @@
       catch(error){button.disabled=false;toast(error.message)}
     });
     document.getElementById('openTeacherRecord').addEventListener('click',()=>{
+      if(!remoteCheckpointMatches(movementRemoteTarget)){toast('Choose the original child checkpoint on this iPad before reviewing these responses.');return}
+      controllerReviewStarted=true;
       document.getElementById('recordBadge').innerHTML='<span>●</span> Teacher review · movement check';
       document.getElementById('modeTag').textContent='TEACHER IPAD · RECORDING';show('recordScreen');renderSuggestion();void hydrateMovementObjectiveRecord();
     });
     void initializeCheckpointWorkspace();
+    updateCheckpointContext();
     beginController();
     renderSuggestion();
     LEActivityRemote.init();

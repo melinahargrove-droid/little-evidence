@@ -4,7 +4,23 @@ A standalone, browser-openable prototype for the Teaching Strategies GOLD Checkp
 
 ## Try it
 
-Open the published GitHub Pages URL on the SmartBoard. Select **Start Movement Check** and scan the temporary pairing QR code with the teacher iPad. The iPad opens the teacher controller; the SmartBoard switches to one full-screen child movement prompt at a time. The teacher selects a quick observation on the iPad and taps **Next movement**; the SmartBoard advances without requiring a child button. After the final prompt, the SmartBoard shows a cheerful completion screen and the iPad opens the teacher recording view.
+Open the published GitHub Pages URL on the SmartBoard and start a paired activity. Scan the temporary QR code with the teacher iPad. On the iPad, sign in and select the child's checkpoint once; the teacher's screen shows the child's name, checkpoint, and full objective number/title. Child identity is not shared with the SmartBoard or pairing service.
+
+Child picture choices advance automatically. For spoken, hands-on, or movement prompts, the teacher records an observation and advances from the iPad. Teacher review still determines the final checkpoint level. **Save & next objective** saves and opens the next unfinished ordinary objective for the same child, using the established objective order; optional advanced activities stay optional. **Save & add evidence** saves while keeping the review open for photos, video, or voice evidence.
+
+The paired activity stays connected while the iPad selects a checkpoint. A running activity cannot be reassigned to another child. New movement pairings use the same controller as other activities, allowing the same SmartBoard/iPad connection to continue between objectives.
+
+## Run regression checks
+
+The published app remains a standalone static page. Test-only dependencies are pinned in `package-lock.json`.
+
+```sh
+npm ci --ignore-scripts
+for script in scripts/verify-*; do node "$script" || exit; done
+```
+
+Tests use synthetic learners and mocked private storage. They do not substitute for authenticated iPad/SmartBoard, microphone, file-picker, or classroom-device testing.
+
 
 ## Prototype scope
 

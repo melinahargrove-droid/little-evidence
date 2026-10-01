@@ -2,7 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const nodes=new Map(),el=id=>{if(!nodes.has(id))nodes.set(id,{value:'old note',classList:{add(){},remove(){}}});return nodes.get(id)};
 let cleared=0,loaded=0;
-const ctx=vm.createContext({leUser:{id:'teacher'},activeCheckpoint:{id:'child-a-fall'},activeCheckpointChildName:'A',resetAssessmentForChild(){cleared++},renderCheckpointAuth(){},loadCheckpointChildren:async()=>loaded++});
+const ctx=vm.createContext({leUser:{id:'teacher'},activeCheckpoint:{id:'child-a-fall'},activeCheckpointChildName:'A',resetAssessmentForChild(){cleared++},renderCheckpointAuth(){},updateCheckpointContext(){},loadCheckpointChildren:async()=>loaded++});
 function load(name){const start=html.search(new RegExp('    (?:async )?function '+name+'\\('));assert.ok(start>=0);const tail=html.slice(start+4),end=tail.slice(1).search(/\n    (?:async )?function |\n    (?:window|document)\./)+1;vm.runInContext(tail.slice(0,end),ctx);}
 (async()=>{
  load('handleCheckpointAuthSession');await ctx.handleCheckpointAuthSession({user:{id:'teacher'}});assert.equal(ctx.activeCheckpoint.id,'child-a-fall');assert.equal(cleared,0);assert.equal(loaded,0);
