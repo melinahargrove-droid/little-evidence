@@ -1,4 +1,39 @@
-# GOLD companion development checkpoint
+# Little Evidence development checkpoint
+
+## Current workstream — October 1, 2026
+
+Little Evidence is separate from Early Eagle Classroom Companion. Preserve its existing teacher checkpoint, child activity, remote-control, and evidence-capture flows; do not rebuild them from the historical sections below.
+
+### Complete in main at recovery baseline `26acfd0fb7fe31053eb4c16d296046bad76200d0`
+- Objectives 1–23, teacher interviews, editable GOLD suggestions, saved checkpoint records, family reports, and per-objective photo/video/voice attachments are implemented.
+- All 44 guided child-facing routes have iPad remote configurations; movement keeps its separate pairing flow.
+- GOLD 18–23 progression verification was completed in `a5204d1`. See `docs/GOLD-PROGRESSION-VERIFICATION.md`. The September 30 “next unfinished work” below is historical and superseded.
+- October 1 checkpoint isolation, Not Yet normalization, repeated-tap protections, automatic child choices, iPad touch sizing, and responsive illustrations are in the baseline. See `docs/CLASSROOM-READINESS-2026-10-01.md`.
+
+### Current bounded change: evidence capture isolation
+- Reproduced a pending file-picker race using synthetic data: a capture started on checkpoint A could target checkpoint B after a switch.
+- Capture now snapshots the account, checkpoint, objective record, and cancellation revision. Pending file/voice results are discarded when their target is no longer current.
+- Checkpoint or view changes cancel pending capture and stop the microphone. Reset also clears old preview links. Late microphone permission cannot resurrect a cancelled recording; repeated starts cannot create competing recorders.
+- Uploads already started retain their original target, and delayed status/preview results cannot paint another checkpoint's screen.
+- No database schema, RLS, bucket permissions, deployment, or scoring changes.
+
+### Verification
+- All five `scripts/verify-*` suites pass, including the new synthetic evidence-isolation races. Existing suites cover 44 remote configurations, child advance, checkpoint state, progression suggestions, and synthetic save/resume.
+- Inline JavaScript syntax passes. A read-only PR workflow now runs the synthetic suites and inline syntax check.
+- Live baseline browser smoke check: app opens, teacher-only movement review opens, and signed-out Photo shows “Save this assessment first, then attach evidence.” No real child data or evidence was uploaded.
+- Local browser preview was blocked by the cloud browser (`ERR_BLOCKED_BY_CLIENT` for localhost). The live baseline smoke check is not a browser test of the patched branch.
+- The isolation change is a reviewable branch change, not yet merged or deployed. Synthetic tests do not establish device microphone/file-picker behavior or authenticated storage success.
+
+### Blocked / needs user
+- A classroom-device sign-in → synthetic test child → save → reopen and photo/voice test remains to be verified. Use a synthetic learner and sample media, never real child information in shared tests.
+- The desired capture-first objective suggestions and “strong / possible evidence” design are not present in this repository's current UI. Preserve that direction, but reconcile the established design/source before implementing a new flow; do not silently replace the existing checkpoint app.
+
+### Next
+- Review the isolated capture fix, then merge/deploy only with authorization and verify the exact deployed revision.
+- Reconcile the capture-first design while authenticated/device-specific validation is pending.
+
+---
+
 
 2026-09-30 — Remaining child-facing activity pages
 
