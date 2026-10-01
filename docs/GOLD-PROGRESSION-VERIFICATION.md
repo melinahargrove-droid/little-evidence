@@ -37,3 +37,12 @@ Verification: inspected resulting constraints; inserted all 20 values from 0 thr
 Run `node scripts/verify-progressions.cjs` for all objective ranges, established/emerging suggestions, high writing levels, skipped/unanswered/observed responses, save/resume through synthetic storage, family report content, and the signed-out save guard. These are isolated app tests, not a signed-in production checkpoint write.
 
 Live browser verification: completed all three 22c activities, selected Level 4 with emerging Level 6 evidence, received Level 5, then changed to Level 4. Description, next evidence, and family wording updated. The two touch answers and one presented observation stayed separate. The signed-out save button accurately reported that nothing was saved. A signed-in production checkpoint write was not exercised.
+
+## Objective 1 source check — 2026-10-01
+
+- Source: user-supplied `1a-gold-odl-b3-online-progressions.pdf`, page 1, containing both Objective 1a and 1b. Text extraction and rendered page inspection agree.
+- SHA-256: `6801673e8afcee11246c45d15df8c681bacb5e48b968e2eb6435e8cf79d5053b`.
+- Objective 1a Level 12 requires patience with personal limitations and managing feelings with consideration for their impact on others. Anticipating a difficult moment alone does not establish this anchor. The interview and family wording now reflect both elements, using paraphrases.
+- Family next-step copy follows the immediately next source anchor. At Level 2, 1a looks next for seeking a comforting person/object; 1b looks next for accepting adult redirection. 1b Level 6 allows occasional reminders.
+- The 1a interview records a version marker. Previously saved anticipation-based high-level answers are not silently relabeled as new evidence: reopening asks the teacher to review updated questions, while preserving the saved checkpoint, note, and evidence.
+- This is a bounded correction to confirmed inconsistencies, not a claim that the entire legacy interview scoring rubric has been validated by Teaching Strategies.
