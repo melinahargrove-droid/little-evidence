@@ -1372,7 +1372,7 @@
       updateCheckpointContext();
     }
     window.addEventListener('beforeunload',event=>{if(assessmentDirty){event.preventDefault();event.returnValue='';}});
-    document.addEventListener('click',event=>{if(event.target.closest('[data-child-task-choice],[data-scenario-choice],[data-choice],[data-rating],[data-anchor],[data-consistency],[data-child-evidence],#emergingNext,[data-flevel],[data-limit-level],[data-level],#taskNext,#taskSkip')){assessmentDirty=true;assessmentEditRevision++}});
+    document.addEventListener('click',event=>{if(event.target.closest('.question-choice,[data-child-task-choice],[data-scenario-choice],[data-choice],[data-rating],[data-anchor],[data-consistency],[data-child-evidence],#emergingNext,[data-flevel],[data-limit-level],[data-level],#taskNext,#taskSkip')){assessmentDirty=true;assessmentEditRevision++}},true);
     document.addEventListener('input',event=>{if(event.target.matches('textarea,[data-task-observation]')){assessmentDirty=true;assessmentEditRevision++}});
     function isIncludedObjective(id){
       const number=Number.parseInt(String(id),10);
@@ -1403,11 +1403,18 @@
       const right=String(b.id).match(/^(\d+)([a-z]*)$/i)||[,Number.MAX_SAFE_INTEGER,String(b.id)];
       return Number(left[1])-Number(right[1])||String(left[2]).localeCompare(String(right[2]),'en',{sensitivity:'base'});
     }
+    let reportRequestRevision=0;
+    function captureReportContext(){
+      const checkpoint={...activeCheckpoint},ownerId=leUser.id,childName=activeCheckpointChildName,navigationRevision=evidenceCaptureRevision,requestRevision=++reportRequestRevision;
+      return {checkpoint,childName,isCurrent:()=>leUser?.id===ownerId&&activeCheckpoint?.id===checkpoint.id&&activeCheckpointChildName===childName&&evidenceCaptureRevision===navigationRevision&&reportRequestRevision===requestRevision};
+    }
     async function openGoldEntrySheet(){
       if(!activeCheckpoint||!leUser){toast('Open a child checkpoint first.');return}
-      const button=document.getElementById('createGoldEntrySheet');button.disabled=true;button.textContent='Preparing sheet…';
+      const report=captureReportContext();
+      const button=document.getElementById('createGoldEntrySheet');button.dataset.reportRequest=String(reportRequestRevision);const buttonRequest=button.dataset.reportRequest;button.disabled=true;button.textContent='Preparing sheet…';
       try{
-        const {data,error}=await leDb.from('little_evidence_objective_records').select('objective_id,final_level').eq('checkpoint_id',activeCheckpoint.id);
+        const {data,error}=await leDb.from('little_evidence_objective_records').select('objective_id,final_level').eq('checkpoint_id',report.checkpoint.id);
+        if(!report.isCurrent())return;
         if(error)throw error;
         const records=new Map((data||[]).filter(record=>isIncludedObjective(record.objective_id)).map(record=>[String(record.objective_id),record]));
         const definitions=new Map(objectiveDefinitions.map(definition=>[String(definition.id),definition]));
@@ -1415,9 +1422,9 @@
         records.forEach((_record,id)=>{if(!definitions.has(id))definitions.set(id,parentObjectiveDefinition(id))});
         const ordered=[...definitions.values()].sort(objectiveIdCompare);
         const split=Math.ceil(ordered.length/2);
-        const child=escapeHTML(activeCheckpointChildName||'Child');
-        const season=String(activeCheckpoint.season||'').replace(/^./,letter=>letter.toUpperCase());
-        const caption=escapeHTML((season+' '+(activeCheckpoint.school_year||'')).trim());
+        const child=escapeHTML(report.childName||'Child');
+        const season=String(report.checkpoint.season||'').replace(/^./,letter=>letter.toUpperCase());
+        const caption=escapeHTML((season+' '+(report.checkpoint.school_year||'')).trim());
         const columns=[ordered.slice(0,split),ordered.slice(split)];
         const rowMarkup=definition=>{
           const id=String(definition.id),record=records.get(id);
@@ -1429,8 +1436,8 @@
         const columnsMarkup=columns.map(column=>'<div class="gold-entry-column">'+column.map(rowMarkup).join('')+'</div>').join('');
         document.getElementById('goldEntrySheetContent').innerHTML='<article class="gold-entry-page" aria-label="One-page Teaching Strategies GOLD checkpoint entry sheet"><div class="gold-entry-brand"><span>✦</span> Early Eagle Academy · Little Evidence</div><h1 id="goldEntrySheetTitle">GOLD checkpoint entry sheet</h1><p class="gold-entry-meta"><strong>Child:</strong> '+child+' &nbsp; · &nbsp; <strong>Checkpoint:</strong> '+caption+'</p><p class="gold-entry-instructions">Enter the final level shown for each objective in Teaching Strategies GOLD. “Not Yet” is shown explicitly. A dash means no final level has been selected in Little Evidence.</p><div class="gold-entry-grid">'+columnsMarkup+'</div><p class="gold-entry-foot">Teacher reference for manual checkpoint entry. Review blank objectives and confirm each rating in Teaching Strategies GOLD, the official checkpoint record.</p></article>';
         document.getElementById('modeTag').textContent='GOLD CHECKPOINT ENTRY · 1 PAGE';show('goldEntrySheetScreen');
-      }catch(error){toast('Could not prepare the entry sheet: '+(error.message||'Try again.'))}
-      finally{button.disabled=false;button.textContent='Print GOLD entry sheet  ↓'}
+      }catch(error){if(report.isCurrent())toast('Could not prepare the entry sheet: '+(error.message||'Try again.'))}
+      finally{if(button.dataset.reportRequest===buttonRequest){button.disabled=false;button.textContent='Print GOLD entry sheet  ↓'}}
     }
     const familyDomainOrder=['Social-Emotional','Physical','Language','Cognitive','Literacy','Mathematics','Science','Science & Technology','Social Studies','The Arts','English Language Acquisition'];
     const familyDomainNames={'Social-Emotional':'Social & Emotional Growth','Physical':'Physical Development','Language':'Language & Communication','Cognitive':'Thinking & Learning','Literacy':'Early Literacy','Mathematics':'Math','Science':'Science & Discovery','Science & Technology':'Science & Technology','Social Studies':'Community & People','The Arts':'Creative Arts','English Language Acquisition':'Learning English'};
@@ -1472,18 +1479,20 @@
     }
     async function openParentReport(){
       if(!activeCheckpoint||!leUser){toast('Open a child checkpoint first.');return}
-      const button=document.getElementById('createParentReport');button.disabled=true;button.textContent='Building report…';
+      const report=captureReportContext();
+      const button=document.getElementById('createParentReport');button.dataset.reportRequest=String(reportRequestRevision);const buttonRequest=button.dataset.reportRequest;button.disabled=true;button.textContent='Building report…';
       try{
-        const {data,error}=await leDb.from('little_evidence_objective_records').select('objective_id,final_level,suggested_level,teacher_answers,child_responses,updated_at').eq('checkpoint_id',activeCheckpoint.id).order('objective_id');
+        const {data,error}=await leDb.from('little_evidence_objective_records').select('objective_id,final_level,suggested_level,teacher_answers,child_responses,updated_at').eq('checkpoint_id',report.checkpoint.id).order('objective_id');
+        if(!report.isCurrent())return;
         if(error)throw error;
-        renderParentReport((data||[]).filter(record=>isIncludedObjective(record.objective_id)&&record.final_level!==null&&record.final_level!==undefined));
+        renderParentReport((data||[]).filter(record=>isIncludedObjective(record.objective_id)&&record.final_level!==null&&record.final_level!==undefined),report);
         document.getElementById('modeTag').textContent='FAMILY REPORT · 2 PAGES';show('parentReportScreen');
-      }catch(error){toast('Could not build the report: '+error.message)}
-      finally{button.disabled=false;button.textContent='Create 2-page family report  →'}
+      }catch(error){if(report.isCurrent())toast('Could not build the report: '+error.message)}
+      finally{if(button.dataset.reportRequest===buttonRequest){button.disabled=false;button.textContent='Create 2-page family report  →'}}
     }
-    function renderParentReport(records){
-      const season=(activeCheckpoint?.season||'').replace(/^./,letter=>letter.toUpperCase());
-      const caption=activeCheckpoint?`${season} ${activeCheckpoint.school_year}`:'';
+    function renderParentReport(records,report={checkpoint:activeCheckpoint,childName:activeCheckpointChildName}){
+      const season=(report.checkpoint?.season||'').replace(/^./,letter=>letter.toUpperCase());
+      const caption=report.checkpoint?`${season} ${report.checkpoint.school_year}`:'';
       const byDomain=new Map();
       records.forEach(record=>{const definition=parentObjectiveDefinition(record.objective_id);if(!byDomain.has(definition.domain))byDomain.set(definition.domain,[]);byDomain.get(definition.domain).push({record,definition})});
       const domains=[...byDomain.keys()].sort((a,b)=>{const ai=familyDomainOrder.indexOf(a),bi=familyDomainOrder.indexOf(b);return (ai<0?999:ai)-(bi<0?999:bi)||a.localeCompare(b)});
@@ -1497,7 +1506,7 @@
       for(const item of candidates){if(!seenDomains.has(item.definition.domain)){picked.push(item);seenDomains.add(item.definition.domain)}if(picked.length===8)break}
       for(const item of candidates){if(picked.length===8)break;if(!picked.includes(item))picked.push(item)}
       const practiceMarkup=picked.length?picked.map(({definition,practice})=>`<article class="family-practice-card"><h2>${escapeHTML(definition.family||definition.title||'At-home idea')}</h2><p>${escapeHTML(practice)}</p></article>`).join(''):'<div class="family-empty">When there is assessment evidence to build on, this page will offer a few simple activities to try together.</div>';
-      const name=escapeHTML(activeCheckpointChildName||'Your child');
+      const name=escapeHTML(report.childName||'Your child');
       const pageOne=`<article class="family-report-page" aria-label="Family report, page 1 of 2"><div class="family-report-brand"><span>✦</span> Early Eagle Academy · Little Evidence</div><h1 id="parentReportTitle">${name}’s learning snapshot</h1><p class="family-report-meta">${escapeHTML(caption)} checkpoint · A look at the skills your child is showing</p><h2 class="section-title">Growth across learning areas</h2><div class="family-domain-grid">${domainMarkup}</div><p class="family-report-note">This snapshot describes skills recorded at this checkpoint. Each learning area includes different skills, so the report shares demonstrated strengths instead of combining them into one score.</p><div class="family-report-brand" style="position:absolute;bottom:22px;right:46px;color:#94a6b2;font-size:10px">PAGE 1 OF 2</div></article>`;
       const pageTwo=`<article class="family-report-page" aria-label="Family report, page 2 of 2"><div class="family-report-brand"><span>♡</span> Little things to practice together</div><h1>Ideas for home</h1><p class="family-report-meta">${name} · Small playful moments help new skills grow.</p><div class="family-practice-list">${practiceMarkup}</div><p class="family-report-note">These ideas are based on the checkpoint entries saved by your child’s teacher. Short activities are samples, so a result on one task does not describe everything your child knows.</p><div class="family-report-brand" style="position:absolute;bottom:22px;right:46px;color:#94a6b2;font-size:10px">PAGE 2 OF 2</div></article>`;
       document.getElementById('parentReportPages').innerHTML=pageOne+pageTwo;
@@ -1587,9 +1596,9 @@
     }
     async function hydrateMovementObjectiveRecord(){
       if(!activeCheckpoint||!leUser)return;
-      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision,loadingEditRevision=assessmentEditRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','4').maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision||assessmentEditRevision!==loadingEditRevision)return;
       if(error){setSaveStatus('movement','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.movement=data.id;suggestedAnchor=data.suggested_level;selectedLevel=data.final_level;
@@ -1610,9 +1619,9 @@
     }
     async function hydrateFeelingsObjectiveRecord(){
       if(!leUser||!activeCheckpoint)return;
-      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision,loadingEditRevision=assessmentEditRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','1a').maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision||assessmentEditRevision!==loadingEditRevision)return;
       if(error){setSaveStatus('feelings','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.feelings=data.id;
@@ -1629,9 +1638,9 @@
     }
     async function hydrateLimitsObjectiveRecord(){
       if(!leUser||!activeCheckpoint)return;
-      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision,loadingEditRevision=assessmentEditRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id','1b').maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision||assessmentEditRevision!==loadingEditRevision)return;
       if(error){setSaveStatus('limits','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       evidenceRecordIds.limits=data.id;
@@ -1654,9 +1663,9 @@
     }
     async function hydrateGuidedObjectiveRecord(d){
       if(!leUser||!activeCheckpoint||!d)return;
-      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision;
+      const loadingCheckpointId=activeCheckpoint.id,loadingOwnerId=leUser.id,loadingRevision=evidenceCaptureRevision,loadingEditRevision=assessmentEditRevision;
       const {data,error}=await leDb.from('little_evidence_objective_records').select('*').eq('checkpoint_id',activeCheckpoint.id).eq('objective_id',d.id).maybeSingle();
-      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision||activeDefinition?.id!==d.id)return;
+      if(activeCheckpoint?.id!==loadingCheckpointId||leUser?.id!==loadingOwnerId||evidenceCaptureRevision!==loadingRevision||assessmentEditRevision!==loadingEditRevision||activeDefinition?.id!==d.id)return;
       if(error){setSaveStatus('guided','Could not check for an earlier saved version.',true);return}
       if(!data)return;
       guidedSavedRecord=data;evidenceRecordIds.guided=data.id;

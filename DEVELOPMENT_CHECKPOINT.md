@@ -133,3 +133,10 @@ Verify existing draft progression anchors for 18–23 against the uploaded PDFs 
 - A fresh tab without the original session storage, or an expired pairing, requires re-pairing. This change does not introduce fresh-tab recovery or a new storage backend.
 - Simultaneous teacher clients submitting identical generic observations at the same revision cannot be distinguished by the existing relay contract. A relay operation identifier would be a separate backend change and is outside this release. Later or nonmatching transitions do not inherit a pending precise rating.
 - The authorized recovery engineering work is complete. Wait for the user's paired-device findings before proposing adjacent features or further changes.
+
+## 2026-10-01 — Report and delayed-load audit fixes
+
+- Family reports and GOLD entry sheets capture the requesting account, checkpoint, child name, and navigation revision. Stale results or errors cannot render or navigate after a child/account change, navigation away/back, or a newer report request. Report identity and checkpoint captions come from the same captured request as the records.
+- Movement, feelings, limits, and guided saved-record hydration now reject responses when a newer assessment edit occurred while loading. This preserves newer notes, ratings, and interview answers rather than replacing them with an older saved version.
+- Added a full-app synthetic regression suite covering report identity/account/logout/navigation/repeated-request races and all four hydration paths. Actual feelings/limits answer taps now mark edits, and capture-phase tracking ensures the final guided answer does not invalidate the saved-record load it starts. All 13 suites and inline JavaScript syntax pass locally. No schema, security, relay, or curriculum changes.
+- Publication verification will be recorded after exact-head CI, merge, Pages deployment, and live checks. Actual authenticated iPad/SmartBoard testing remains unverified; these tests use only synthetic learners and mocked private storage.
