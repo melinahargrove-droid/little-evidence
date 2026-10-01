@@ -8,7 +8,7 @@ async function setup(){
  w.scrollTo=()=>{};w.structuredClone=structuredClone;w.fetch=async()=>{throw Error('No external network')};
  w.eval(deps+'\n'+code+`\nwindow.test={
  setChild(name='A'){leUser={id:'synthetic-owner'};activeCheckpoint={id:name,child_id:name,season:'fall',school_year:'2026-2027'};activeCheckpointChildName='Synthetic Child '+name;assessmentCheckpointId=name;},
- setOwner(id){leUser=id?{id}:null},setDB(db){leDb=db},show,openGoldEntrySheet,openParentReport,
+ openGuidedObjective,startGuidedInterview,renderFeelingsQuestion,renderLimitsQuestion,setOwner(id){leUser=id?{id}:null},setDB(db){leDb=db},show,openGoldEntrySheet,openParentReport,
  hydrators:{movement:hydrateMovementObjectiveRecord,feelings:hydrateFeelingsObjectiveRecord,limits:hydrateLimitsObjectiveRecord,guided:()=>hydrateGuidedObjectiveRecord(activeDefinition)},
  prepareGuided(){activeDefinition=objectiveDefinitions.find(d=>d.id==='20a');document.getElementById('guidedObjectiveCheck').innerHTML='<textarea id="guidedTeacherNotes"></textarea>';},
  edit(context){if(context==='movement'){selectedLevel=8;ratings[0]=3;}if(context==='feelings')feelingsAnswers.behavior='new-answer';if(context==='limits')limitsAnswers.behavior='new-answer';const id={movement:'notes',feelings:'feelingsNotes',limits:'limitsNotes',guided:'guidedTeacherNotes'}[context];const node=document.getElementById(id);node.value='New unsaved observation';node.dispatchEvent(new Event('input',{bubbles:true}));},
@@ -37,6 +37,18 @@ const rows=[{objective_id:'20a',final_level:8,teacher_answers:{},child_responses
   let h=await setup(),pending=h.t[flow]();await Promise.resolve();h.queries[0].resolve({data:rows,error:null});await pending;
   assert.match(h.w.document.getElementById(contentId).textContent,/Synthetic Child A/);assert.match(h.w.document.getElementById(contentId).textContent,/Fall 2026-2027/);assert.equal(h.w.document.querySelector('.screen.active').id,screen);h.close();
   h=await setup();const first=h.t[flow]();await Promise.resolve();const second=h.t[flow]();await Promise.resolve();h.queries[0].resolve({data:rows,error:null});await first;assert.equal(h.w.document.getElementById(buttonId).disabled,true,'old request cannot release newer button');h.queries[1].resolve({data:rows,error:null});await second;assert.equal(h.w.document.getElementById(buttonId).disabled,false);assert.equal(h.w.document.querySelector('.screen.active').id,screen);h.close();
+ }
+ {
+  const h=await setup();h.t.openGuidedObjective('20a');h.queries[0].resolve({data:null,error:null});await Promise.resolve();h.t.startGuidedInterview();
+  for(const choice of ['4','matches','repeated']){h.w.document.querySelector('[data-choice="'+choice+'"]').click();await new Promise(r=>setTimeout(r,360));}
+  assert.equal(h.queries.length,2,'result opens its saved-record load');h.queries[1].resolve({data:{id:'saved-guided',final_level:4,teacher_notes:'Earlier saved note',teacher_answers:{}},error:null});await Promise.resolve();await Promise.resolve();
+  assert.equal(h.w.document.getElementById('guidedTeacherNotes').value,'Earlier saved note','final answer click does not invalidate its own load');assert.equal(h.t.snapshot().ids.guided,'saved-guided');
+  if(h.queries[2])h.queries[2].resolve({data:[],error:null});await Promise.resolve();h.close();
+ }
+ for(const context of ['feelings','limits']){
+  const h=await setup();h.t[context==='feelings'?'renderFeelingsQuestion':'renderLimitsQuestion']();const pending=h.t.hydrators[context]();
+  h.w.document.querySelector('#'+context+'QuestionChoices .question-choice strong').click();const chosen=h.t.snapshot()[context];assert.ok(chosen);assert.equal(h.t.snapshot().dirty,true,context+' actual answer tap marks an edit');
+  h.queries[0].resolve({data:{id:'old-record',teacher_answers:{behavior:'old-answer'},teacher_notes:'Old saved note'},error:null});await pending;assert.equal(h.t.snapshot()[context],chosen,context+' actual answer survives delayed load');h.close();
  }
  for(const context of ['movement','feelings','limits','guided']){
   const h=await setup();if(context==='guided')h.t.prepareGuided();const pending=h.t.hydrators[context]();h.t.edit(context);

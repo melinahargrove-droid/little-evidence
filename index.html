@@ -1372,7 +1372,7 @@
       updateCheckpointContext();
     }
     window.addEventListener('beforeunload',event=>{if(assessmentDirty){event.preventDefault();event.returnValue='';}});
-    document.addEventListener('click',event=>{if(event.target.closest('[data-child-task-choice],[data-scenario-choice],[data-choice],[data-rating],[data-anchor],[data-consistency],[data-child-evidence],#emergingNext,[data-flevel],[data-limit-level],[data-level],#taskNext,#taskSkip')){assessmentDirty=true;assessmentEditRevision++}});
+    document.addEventListener('click',event=>{if(event.target.closest('.question-choice,[data-child-task-choice],[data-scenario-choice],[data-choice],[data-rating],[data-anchor],[data-consistency],[data-child-evidence],#emergingNext,[data-flevel],[data-limit-level],[data-level],#taskNext,#taskSkip')){assessmentDirty=true;assessmentEditRevision++}},true);
     document.addEventListener('input',event=>{if(event.target.matches('textarea,[data-task-observation]')){assessmentDirty=true;assessmentEditRevision++}});
     function isIncludedObjective(id){
       const number=Number.parseInt(String(id),10);
