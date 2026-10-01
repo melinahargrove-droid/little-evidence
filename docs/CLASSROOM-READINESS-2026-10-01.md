@@ -24,8 +24,12 @@ These cover progression bounds, synthetic save/resume, Not Yet storage, touch/se
 
 ## Practical limits for today's trial
 
-- Internet is required for sign-in, saves, and paired movement controls.
+- Internet is required for sign-in, saves, and paired activity controls.
 - Save each teacher-reviewed objective before switching children or closing the page.
-- iPad/phone remote control is currently specific to the movement check. Other observation activities use Teacher: next on the activity device.
+- iPad/phone remote control now covers every child-facing objective. Use “Use iPad remote” on a guided objective or its preparation page; movement retains “Start paired movement check.” Child touch answers advance automatically. Observed prompts advance from the iPad, with optional observation, Previous, Skip, and Repeat direction controls. Each activity uses a temporary pairing.
 - A real signed-in add-child → save → reopen test on the classroom device is still required. Synthetic storage tests do not establish that email sign-in or the school network works.
 - Browser testing cannot certify the classroom SmartBoard's touch hardware, audio settings, or network.
+
+## Paired activity verification
+
+Live two-screen check: Objective 22c child choices advance automatically, including an incorrect choice; hands-on prompt waits for iPad Next; completion leaves SmartBoard in child view and opens teacher review on iPad. Reducer checks cover role restrictions, stale requests, ordered selections, skipped prompts and scenarios. Every guided activity passes configuration validation. Real signed-in checkpoint saving was not exercised in this test.
