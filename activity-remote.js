@@ -1,14 +1,60 @@
 /* Temporary, role-separated iPad controls for every guided child activity. */
 const LEActivityRemote=(()=>{
-  let session=null,state=null,timer=null,busy=false,shown='',speech=-1,reviewing=false,workspaceOpen=false,target=null,movementRatings=[];
+  let session=null,state=null,timer=null,busy=false,shown='',speech=-1,reviewing=false,workspaceOpen=false,target=null,movementRatings=[],pendingObservation=null,pendingConfigure=null;
   const esc=v=>escapeHTML(v),by=id=>document.getElementById(id);
   function definition(id){if(id==='4')return {id:'4',title:'Demonstrates Traveling Skills',family:'Demonstrates Traveling Skills',tasks:prompts.map(p=>({mode:'observed',prompt:p.text,visual:art(p.kind),note:p.tip}))};const d=objectiveDefinitions.find(d=>d.id===id);if(!d)throw Error('This activity is unavailable. Refresh both screens.');return d.scenarios?{...d,tasks:d.scenarios.map(s=>({prompt:s.text,visual:scenarioIllustration(s),choices:s.choices,mode:'scenario'}))}:d;}
   function config(id){const d=definition(id);return {objective_id:id,tasks:d.tasks.map(t=>t.mode==='observed'?{mode:'observed'}:{mode:t.mode==='scenario'?'scenario':t.order?'order':'touch',choices:t.choices.length,...(t.order?{length:t.order.length}:{})})};}
   async function api(body){const r=await fetch(PAIR_API.replace('little-evidence-session','little-evidence-activity-session'),{method:'POST',headers:{'Content-Type':'application/json',apikey:PAIR_PUBLIC_KEY},body:JSON.stringify({...session,...body})});const data=await r.json();if(!r.ok)throw Error(data.error||'Connection interrupted');return data;}
   function status(text){let e=by('remoteConnection');if(!e){e=document.createElement('p');e.id='remoteConnection';e.setAttribute('role','status');guidedChild.append(e);}e.textContent=text;}
   function surface(){show('guidedObjectiveScreen');guidedHome.classList.add('hidden');guidedCheck.classList.add('hidden');guidedChild.classList.remove('hidden');document.querySelector('.app').classList.toggle('scenario-mode',session.role==='display');}
-  function accept(next){if(state&&next.revision<state.revision)return;state=next;render();}
-  async function action(action,extra={}){if(busy||!state)return;if(session.role==='teacher'){if(action==='start'){if(!leUser||!activeCheckpoint){document.getElementById('openCheckpoints').click();return}target={ownerId:leUser.id,checkpointId:activeCheckpoint.id};if(state.config.objective_id==='4'){movementRatings=[];ratings.fill(null)}rememberRemoteCheckpoint(session.id,{...target,movementRatings})}else if(!remoteCheckpointMatches(target)){status('Return to the original child checkpoint on this iPad before continuing.');return}}busy=true;const {localMovementRating,...remoteExtra}=extra;const payload={action,revision:state.revision,prompt_index:state.prompt_index,...remoteExtra};try{const data=await api(payload);if(!data.conflict&&state.config.objective_id==='4'&&session.role==='teacher'){if(action==='observe')movementRatings[payload.prompt_index]=localMovementRating;if(action==='skip')movementRatings[payload.prompt_index]=0;if(action==='back'||action==='retry')movementRatings=movementRatings.slice(0,data.state.prompt_index);rememberRemoteCheckpoint(session.id,{...target,movementRatings})}accept(data.state);if(data.conflict)status('Screen updated. Please try your action again.');}catch(e){status(e.message+' Your place is kept. Try again.');if(session.role==='display'){shown='';render();status(e.message+' Tap your answer again.');}}finally{busy=false;}}
+  function remember(){rememberRemoteCheckpoint(session.id,{...target,movementRatings,pendingObservation})}
+  function reconcileObservation(next){
+    if(!pendingObservation)return;
+    const p=pendingObservation;
+    if(next.revision<=p.revision)return;
+    // Reconcile this device’s original rating only with the immediate matching transition.
+    // Later/nonmatching revisions may have replaced a response; never guess their precise rating.
+    if(next.revision===p.revision+1&&next.config.objective_id===p.objectiveId&&
+       next.responses[p.promptIndex]?.observation===p.observation&&
+       (next.prompt_index===p.promptIndex+1||next.status==='complete'&&next.prompt_index===p.promptIndex)){
+      movementRatings[p.promptIndex]=p.rating;
+    }
+    pendingObservation=null;remember();
+  }
+  function accept(next,showState=true){if(state&&next.revision<state.revision)return;reconcileObservation(next);state=next;if(showState)render();}
+  async function action(action,extra={}){
+    if(busy||!state)return;
+    if(session.role==='teacher'){
+      if(action==='start'){
+        if(!leUser||!activeCheckpoint){document.getElementById('openCheckpoints').click();return}
+        target={ownerId:leUser.id,checkpointId:activeCheckpoint.id};
+        if(state.config.objective_id==='4'){movementRatings=[];pendingObservation=null;ratings.fill(null)}
+        remember();
+      }else if(!remoteCheckpointMatches(target)){status('Return to the original child checkpoint on this iPad before continuing.');return}
+    }
+    busy=true;
+    const {localMovementRating,...remoteExtra}=extra;
+    const payload={action,revision:state.revision,prompt_index:state.prompt_index,...remoteExtra};
+    const objectiveId=state.config.objective_id;
+    if(action==='observe'&&objectiveId==='4'&&session.role==='teacher'){
+      // Persist on the teacher device BEFORE sending: the relay may commit even if its reply is lost.
+      // Keep the original intent on a stale retry, rather than replacing it with the reset dropdown.
+      if(!pendingObservation)pendingObservation={objectiveId,promptIndex:payload.prompt_index,revision:payload.revision,observation:payload.observation,rating:localMovementRating};
+      else {payload.observation=pendingObservation.observation;}
+      remember();
+    }
+    try{
+      const data=await api(payload);
+      if(!data.conflict&&objectiveId==='4'&&session.role==='teacher'){
+        if(action==='skip')movementRatings[payload.prompt_index]=0;
+        if(action==='back'||action==='retry'){movementRatings=movementRatings.slice(0,data.state.prompt_index);pendingObservation=null;}
+        remember();
+      }
+      accept(data.state);
+      if(data.conflict)status('Screen updated. Please try your action again.');
+    }catch(e){status(e.message+' Your place is kept. Try again.');if(session.role==='display'){shown='';render();status(e.message+' Tap your answer again.');}}
+    finally{busy=false;}
+  }
   function poll(){clearTimeout(timer);if(!session)return;const current=session;api({action:'state'}).then(data=>{if(session===current){accept(data.state);if(!reviewing)status('● Connected');}}).catch(e=>{if(session===current)status('Reconnecting… '+e.message)}).finally(()=>{if(session===current&&!reviewing)timer=setTimeout(poll,900)});}
   function render(){if(reviewing||workspaceOpen)return;if(session.role==='display'){if(state.speech_seq!==speech&&speech!==-1&&state.status==='active')by('taskHear')?.click();speech=state.speech_seq;}const key=state.config.objective_id+':'+state.status+':'+state.prompt_index+':'+(session.role==='teacher'?state.revision:'');if(key===shown)return;shown=key;surface();const d=definition(state.config.objective_id),t=d.tasks[state.prompt_index];
     if(session.role==='display'){
@@ -35,17 +81,40 @@ const LEActivityRemote=(()=>{
     }
   }
   async function continueWith(id,shouldContinue=()=>true){
-    if(session?.role!=='teacher'||!remoteCheckpointMatches(target))return false;
-    const continuingSession=session;
-    const data=await api({action:'configure',revision:state.revision,prompt_index:state.prompt_index,config:config(id)});
-    if(data.conflict)throw Error('The paired screen changed. Try continuing again.');
-    if(session!==continuingSession)return false;
-    if(!shouldContinue()||!remoteCheckpointMatches(target)){state=data.state;return false}
-    if(id==='4'){movementRatings=[];rememberRemoteCheckpoint(session.id,{...target,movementRatings})}
-    reviewing=false;shown='';workspaceOpen=false;accept(data.state);poll();return true;
+    if(busy||session?.role!=='teacher'||!remoteCheckpointMatches(target))return false;
+    const continuingSession=session,wanted=config(id);
+    let configured=false;
+    busy=true;
+    try{
+      // A failed request may already have configured the display. Read before resending so
+      // a retry cannot reset an objective that has started or collected responses meanwhile.
+      if(pendingConfigure){
+        const current=await api({action:'state'});
+        if(session!==continuingSession)return false;
+        accept(current.state,false);
+        if(pendingConfigure.id===id&&JSON.stringify(state.config)===JSON.stringify(wanted)&&state.revision>pendingConfigure.revision){
+          pendingConfigure=null;configured=true;
+        }else if(state.revision>pendingConfigure.revision){
+          pendingConfigure=null;
+          throw Error('The paired screen changed. Review it before continuing again.');
+        }else pendingConfigure=null;
+      }
+      if(JSON.stringify(state.config)!==JSON.stringify(wanted)){
+        if(!shouldContinue()||!remoteCheckpointMatches(target))return false;
+        pendingConfigure={id,revision:state.revision};
+        const data=await api({action:'configure',revision:state.revision,prompt_index:state.prompt_index,config:wanted});
+        if(session!==continuingSession)return false;
+        accept(data.state,false);
+        if(data.conflict){pendingConfigure=null;throw Error('The paired screen changed. Try continuing again.');}
+        pendingConfigure=null;configured=true;
+      }
+      if(configured&&id==='4'){movementRatings=[];pendingObservation=null;remember();}
+      if(!shouldContinue()||!remoteCheckpointMatches(target))return false;
+      reviewing=false;shown='';workspaceOpen=false;render();poll();return true;
+    }finally{busy=false;}
   }
   async function start(id){try{const data=await api({action:'create',config:config(id)});session={id:data.id,role:'display',token:data.display_token};state=data.state;shown='';reviewing=false;workspaceOpen=false;target=null;surface();const url=new URL(location.href);url.hash='activityRemote='+data.id+'.'+data.teacher_token;const link=url.toString();history.replaceState(null,'','#activityDisplay='+data.id+'.'+data.display_token);guidedChild.innerHTML='<section class="panel activity-prep"><h1>Connect your iPad</h1><p>Scan this code with the iPad camera. Select the child once on the iPad and save their assessments there. A child chosen on this SmartBoard is not shared with the iPad. Child selections advance automatically.</p><div id="remotePairQr"></div><p><a id="remotePairLink">Open iPad remote</a></p><button id="remoteCopy">Copy iPad link</button><p id="remoteConnection">Waiting for your iPad…</p></section>';by('remotePairLink').href=link;by('remoteCopy').onclick=()=>navigator.clipboard.writeText(link).then(()=>toast('iPad link copied.')).catch(()=>toast('Scan the QR code with your iPad camera.'));const qr=window.qrcode(0,'M');qr.addData(link);qr.make();by('remotePairQr').innerHTML='<img alt="Scan with your iPad camera" src="'+qr.createDataURL(6,4)+'">';poll();}catch(e){toast(e.message);}}
   function button(container,id){if(!container||container.querySelector('[data-remote-start]'))return;const b=document.createElement('button');b.dataset.remoteStart='true';b.className='primary';b.textContent='Use iPad remote';b.onclick=()=>start(id);container.append(b);}
-  function init(){const style=document.createElement('style');style.textContent='.remote-child-display #taskBack,.remote-child-display #taskSkip,.remote-child-display #taskNext,.remote-child-display .topbar,.remote-child-display #checkpointContext{display:none!important} #remotePairQr img{max-width:100%;width:280px} #remoteNext{display:block;margin:20px 0} #remoteObservation{display:block;min-height:48px;width:100%;font:inherit;margin:10px 0}';document.head.append(style);const match=location.hash.match(/^#activity(Remote|Display)=([0-9a-f-]{36})\.([A-Za-z0-9_-]{43})$/i);if(match){session={id:match[2],role:match[1].toLowerCase()==='remote'?'teacher':'display',token:match[3]};target=session.role==='teacher'?recallRemoteCheckpoint(session.id):null;movementRatings=target?.movementRatings||[];surface();guidedChild.innerHTML='<section class="panel"><h1>Connecting to your activity…</h1></section>';poll();}}
+  function init(){const style=document.createElement('style');style.textContent='.remote-child-display #taskBack,.remote-child-display #taskSkip,.remote-child-display #taskNext,.remote-child-display .topbar,.remote-child-display #checkpointContext{display:none!important} #remotePairQr img{max-width:100%;width:280px} #remoteNext{display:block;margin:20px 0} #remoteObservation{display:block;min-height:48px;width:100%;font:inherit;margin:10px 0}';document.head.append(style);const match=location.hash.match(/^#activity(Remote|Display)=([0-9a-f-]{36})\.([A-Za-z0-9_-]{43})$/i);if(match){session={id:match[2],role:match[1].toLowerCase()==='remote'?'teacher':'display',token:match[3]};target=session.role==='teacher'?recallRemoteCheckpoint(session.id):null;movementRatings=target?.movementRatings||[];pendingObservation=target?.pendingObservation||null;surface();guidedChild.innerHTML='<section class="panel"><h1>Connecting to your activity…</h1></section>';poll();}}
   return {init,start,button,continueWith,hasTeacherSession:()=>session?.role==='teacher',objectiveId:()=>session?.role==='teacher'&&!reviewing?state?.config.objective_id:null,isTeacher:()=>session?.role==='teacher'&&!reviewing,lockedCheckpoint:()=>session?.role==='teacher'&&!reviewing&&state?.status!=='waiting'?target:null,pauseForCheckpoint:()=>{workspaceOpen=true},resumeAfterCheckpoint:()=>{workspaceOpen=false;shown='';if(state)render();else surface()},isDisplay:()=>session?.role==='display',answer:()=>action('answer',{answer:taskAnswers[taskIndex]}),decorate:()=>{if(session?.role==='display')for(const id of ['taskBack','taskSkip','taskNext'])by(id).hidden=true;}};
 })();
