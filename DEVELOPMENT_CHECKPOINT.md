@@ -1,5 +1,7 @@
 # Little Evidence development checkpoint
 
+Latest release: the assessment continuity and reconnect recovery changes below are merged and live. Earlier workstream status is retained as history; the latest published status and remaining acceptance limits are in the final two sections.
+
 ## Current workstream — October 1, 2026
 
 Little Evidence is separate from Early Eagle Classroom Companion. Preserve its existing teacher checkpoint, child activity, remote-control, and evidence-capture flows; do not rebuild them from the historical sections below.
@@ -113,4 +115,21 @@ Verify existing draft progression anchors for 18–23 against the uploaded PDFs 
 - Exact-head CI `36888205946`, main CI `36888328115`, and Pages deployment `36888328441` all succeeded. The published `index.html`, `activity-remote.js`, and `assessment-continuation.js` exactly matched the tested source.
 - Post-deployment cloud-browser checks passed for the persistent objective banner, consolidated prep, one-tap teacher questions, editable final review, signed-out save guard, new movement pairing, iPad child-selection gate, and return to the same pairing.
 - Real-device acceptance remains pending: authenticated child selection, save/reopen, automatic next objective on an actual paired iPad/SmartBoard, media capture, and interrupted-device recovery have not been accepted as complete. Use a synthetic learner and sample media; do not treat synthetic DOM tests as real-device acceptance.
-- Next bounded engineering verification: exercise refresh/reopen and network-reconnect recovery in the synthetic paired-flow harness before proposing any further behavior change. This is separate from pending classroom-device acceptance.
+- The bounded refresh/reopen and network-reconnect verification is complete; its two confirmed defects were fixed and published as documented below. Classroom-device acceptance remains pending.
+
+
+## 2026-10-01 — Published reconnect recovery closure
+
+- Recovery PR #4 (https://github.com/melinahargrove-droid/little-evidence/pull/4) is merged at `36564fb28a638309a153204b45b01da21eab8c45`. Its exact tested head is `8aee7e552444e029ae602a3140def6696fb86169`.
+- A next-objective configure that commits but loses its acknowledgement now reconciles current relay state before retrying. Repeated attempts do not reset an objective that already started or acquired responses. Overlapping continuations are serialized; child and navigation checks remain enforced before opening the next screen.
+- Movement observations now retain a private pending intent on the teacher device before transmission. Matching immediate objective/prompt/revision recovery preserves the precise local movement rating through a lost acknowledgement, direct stale retry, or same-tab refresh. Child identity, checkpoint identifiers, and precise ratings are not sent to the relay. No backend, schema, permission, or scoring change was introduced.
+- All 12 regression scripts passed locally and in GitHub CI, using synthetic learners and mocked network responses against the real relay-transition implementation. Added cases cover loss before/after commit, direct retries before polling, repeated continuation, same-tab refresh, older/conflicting revisions, progress preservation, child/navigation changes, and overlapping requests. Independent QA reproduced both original failures and verified the fixes; independent review found no blocker within this bounded same-device recovery scope.
+- Exact-head PR CI run `36890829421` passed. Merged-main verification `36890950070` and Pages deployment `36890950094` passed. The live root returned HTTP 200 and matched the tested HTML. Live `activity-remote.js` exactly matched the tested controller; SHA-256: `5194f0de80f2f2f04eee83774d1760faa7b2f6f176b1deb339493c6355b7144a`.
+- Live app: https://melinahargrove-droid.github.io/little-evidence/. This entry records the verified application release; publishing this documentation-only update does not change app behavior.
+
+### Remaining acceptance limits and stopping point
+
+- Authenticated physical iPad/SmartBoard child selection, save/reopen, automatic next objective, and media capture remain unverified. Use a synthetic learner and sample media. No real child data was entered or uploaded for these regression tests.
+- A fresh tab without the original session storage, or an expired pairing, requires re-pairing. This change does not introduce fresh-tab recovery or a new storage backend.
+- Simultaneous teacher clients submitting identical generic observations at the same revision cannot be distinguished by the existing relay contract. A relay operation identifier would be a separate backend change and is outside this release. Later or nonmatching transitions do not inherit a pending precise rating.
+- The authorized recovery engineering work is complete. Wait for the user's paired-device findings before proposing adjacent features or further changes.
