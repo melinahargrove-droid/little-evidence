@@ -35,3 +35,5 @@ Verification: inspected resulting constraints; inserted all 20 values from 0 thr
 ## Regression checks
 
 Run `node scripts/verify-progressions.cjs` for all objective ranges, established/emerging suggestions, high writing levels, skipped/unanswered/observed responses, save/resume through synthetic storage, family report content, and the signed-out save guard. These are isolated app tests, not a signed-in production checkpoint write.
+
+Live browser verification: completed all three 22c activities, selected Level 4 with emerging Level 6 evidence, received Level 5, then changed to Level 4. Description, next evidence, and family wording updated. The two touch answers and one presented observation stayed separate. The signed-out save button accurately reported that nothing was saved. A signed-in production checkpoint write was not exercised.

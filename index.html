@@ -2397,9 +2397,9 @@
     function renderGuidedQuestion(){
       const d=activeDefinition, isResult=guidedResult!==null;
       if(isResult){renderGuidedResult();return}
-      const anchorChoices=[{n:0,text:'Not yet / needs substantial adult support'},...d.anchors];
+      const anchorChoices=[{n:0,text:'The first described skill is not yet demonstrated'},...d.anchors];
       let title,help,choices;
-      if(guidedQuestion===0){title=d.questions[0];help='Choose the strongest pattern you have seen in real classroom moments.';choices=anchorChoices.map(a=>({id:String(a.n),point:a.n,label:a.n===0?'Not yet · substantial support':'Level '+a.n,detail:a.text}))}
+      if(guidedQuestion===0){title=d.source?'Which description best matches what you have observed?':d.questions[0];help='Choose the strongest pattern you have seen in real classroom moments.';choices=anchorChoices.map(a=>({id:String(a.n),point:a.n,label:a.n===0?'Not yet':'Level '+a.n,detail:a.text}))}
       else if(guidedQuestion===1){
         const at=guidedAnswers.anchor??0,current=d.anchors.find(a=>a.n===at),next=d.anchors.find(a=>a.n>at);
         title='How does the evidence fit this description?';
