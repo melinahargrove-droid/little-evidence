@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Install pinned test dependencies
+        run: npm ci --ignore-scripts
       - name: Run synthetic regression checks
         run: |
           for script in scripts/verify-*; do

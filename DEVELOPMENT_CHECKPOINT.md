@@ -85,3 +85,25 @@ Verify existing draft progression anchors for 18–23 against the uploaded PDFs 
 - Transparent WebP assets are at most 640px; images use contained sizing to avoid cropping and fit smaller screens. Prompt subjects documented beside assets.
 - Checks: all scripts parse; 33 catalog routes retain identical task semantics. All 32 task image references resolve locally, plus six social/movement illustrations. Live browser verification confirmed new fruit images and 4/2/3 votes, selectable choices, listening action pictures, puppy spatial compositions, and the feelings page. The movement entry still uses its existing iPad pairing setup; no paired session or child record was saved.
 - Published commit `8bf3a13e9640264f81e94731f61df29bc684c971`; deployment `36771954493` completed its deploy job successfully, and the new art was verified on the live page. The previously waiting spacing deployment was superseded. No environment or permission changes.
+
+## 2026-10-01 — Single-child iPad assessment continuity
+
+### Current media-fix status
+- Capture isolation PR #1 is merged at `74279830963b6295309a249894fc1a5ccf28ce1b` and deployed. CI run `36882529097` and Pages run `36882529022` passed; the published index matched the tested source.
+- Authenticated media upload/reopen and real iPad microphone/file-picker behavior remain unverified. Use synthetic learners and sample media for validation.
+
+### Assessment continuity
+- The teacher chooses the child on the iPad before starting. Child name, checkpoint season, and the full existing GOLD objective number/title remain prominent on teacher screens; child displays and printed artifacts hide this context banner.
+- A running activity is bound locally to its child/account/checkpoint. Child identity and exact movement ratings are never added to pairing links or anonymous relay payloads. Local session storage preserves the binding and movement-rating distinctions on reload.
+- Opening the private checkpoint workspace preserves the paired activity and returns after selection. During an active activity, a different child cannot silently inherit its responses. Returning from the workspace preserves the in-progress review instead of overwriting it with an older saved record.
+- New movement sessions use the existing guided-activity relay so the same pair can continue across objectives. The existing service already supports objective configuration; no backend, schema, RLS, permissions, or scoring changes were required. Old movement links remain supported for their original movement assessment.
+- Save & next opens the next unfinished ordinary objective in established numeric order, wrapping to earlier gaps when needed. Optional advanced activities remain optional. Save & add evidence keeps the review open for media attachments.
+- Materials and optional-extension warnings remain visible. Guided teacher answers advance on a tap; Back and editable final checkpoint judgment remain available. Change answers now correctly returns to the interview.
+- Captured child identity prevents stale checkpoint loads from showing a different child's name. Shared save locks and child/account/navigation/edit freshness guards prevent overlapping saves or stale continuation from discarding newer work.
+
+### Verification
+- All synthetic regression scripts pass after `npm ci --ignore-scripts`; pinned jsdom is test-only. Coverage includes full-app DOM boot, child/title banners, selection/return, question progression, movement ratings, retry/skip, private relay payloads, same-pair objective change, save concurrency, and stale child/account/navigation/edit responses.
+- Inline/external JavaScript syntax and `git diff --check` pass. Independent code review findings were fixed and relevant tests rerun.
+- Live baseline cloud-browser navigation reproduced redundant start/prep and answer/Next stops.
+- Live anonymous service smoke test confirmed objective 4 configuration and same-session switch to 20a on the display role. No child, owner, checkpoint, or rating information was transmitted in that smoke test.
+- Local Chromium cannot create required sockets in this runtime. Synthetic DOM tests verify application behavior but do not verify rendered layout or real iPad input. Authenticated save/reopen, actual cross-device behavior, microphone/file picker, and interrupted-device recovery still require classroom-device validation.

@@ -1,7 +1,7 @@
 // Run with node scripts/verify-progressions.cjs. Synthetic evidence; no network or real child records.
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
 const root=path.resolve(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-const context=vm.createContext({console,evidenceCaptureRevision:0,window:{},document:{getElementById:()=>({value:''})}});
+const context=vm.createContext({objectivePersistenceBusy:false,assessmentEditRevision:0,console,evidenceCaptureRevision:0,window:{},document:{getElementById:()=>({value:''})}});
 vm.runInContext(fs.readFileSync(path.join(root,'child-activities.js'),'utf8')+'\nvar LEChildActivities=window.LEChildActivities;',context);
 vm.runInContext(fs.readFileSync(path.join(root,'verified-progressions.js'),'utf8'),context);
 const start=html.indexOf('const objectiveDefinitions='),end=html.indexOf('    const objectiveMaterialsById=',start);

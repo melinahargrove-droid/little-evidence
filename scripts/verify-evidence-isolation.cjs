@@ -6,7 +6,7 @@ const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {
 function setup(){
  const nodes=new Map(),uploads=[],rows=[],statuses=[],recorders=[];let stops=0;
  const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',click(){}});return nodes.get(id)};
- const ctx=vm.createContext({console,Blob,File,Date,Set,crypto:{randomUUID:()=> 'synthetic-id'},evidenceCaptureRevision:0,pendingEvidenceUpload:null,voiceCapture:null,voiceRecorder:null,voiceStream:null,voiceButton:null,voiceContext:null,leUser:{id:'owner-A'},activeCheckpoint:{id:'checkpoint-A'},evidenceRecordIds:{guided:'record-A'},LE_EVIDENCE_BUCKET:'synthetic',escapeHTML:String,document:{getElementById:node},setEvidenceStatus:(...args)=>statuses.push(args)});
+ const ctx=vm.createContext({objectivePersistenceBusy:false,assessmentEditRevision:0,console,Blob,File,Date,Set,crypto:{randomUUID:()=> 'synthetic-id'},evidenceCaptureRevision:0,pendingEvidenceUpload:null,voiceCapture:null,voiceRecorder:null,voiceStream:null,voiceButton:null,voiceContext:null,leUser:{id:'owner-A'},activeCheckpoint:{id:'checkpoint-A'},evidenceRecordIds:{guided:'record-A'},LE_EVIDENCE_BUCKET:'synthetic',escapeHTML:String,document:{getElementById:node},setEvidenceStatus:(...args)=>statuses.push(args)});
  const stream={getTracks:()=>[{stop(){stops++}}]};
  ctx.navigator={mediaDevices:{getUserMedia:async()=>stream}};
  ctx.MediaRecorder=class {static isTypeSupported(){return true}constructor(){this.state='inactive';this.mimeType='audio/webm';recorders.push(this)}start(){this.state='recording'}stop(){this.state='inactive';this.stopped=Promise.resolve().then(()=>{this.ondataavailable({data:new Blob(['synthetic'])});return this.onstop()})}};
