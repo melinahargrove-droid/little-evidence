@@ -1629,6 +1629,10 @@
       const answers=data.teacher_answers||{};
       if(answers.progression_version!==feelingsProgressionVersion&&(answers.behavior==='anticipate'||(answers.behavior==='unsure'&&answers.detail?.point>=11))){
         const note=document.getElementById('feelingsNotes');if(note)note.value=data.teacher_notes||'';
+        document.getElementById('feelingsSuggested').textContent='Review the updated questions';
+        document.getElementById('feelingsRationale').textContent='The earlier interview used different Level 12 wording. Answer the updated questions using your observations before choosing a checkpoint level.';
+        document.getElementById('feelingsNextEvidence').innerHTML='<strong>What to observe next</strong>Use the updated questions and your everyday observations to review this saved result.';
+        document.getElementById('feelingsParentCopy').textContent=feelingsParentLanguage(null);
         setSaveStatus('feelings','An earlier saved result used different Level 12 interview wording. Review the updated questions before saving; your saved checkpoint has not changed.');
         setEvidenceStatus('feelings','Earlier saved objective found. Private evidence is still available.');
         await loadEvidenceItems('feelings');return;
