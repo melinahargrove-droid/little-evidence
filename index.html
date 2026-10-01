@@ -611,10 +611,11 @@
 
 
     /* Recognizable classroom pictures; exact math diagrams remain native. */
-    .activity-art{display:block;width:100%;height:100%;object-fit:contain;margin:auto;}
+    .activity-art{display:block;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain;object-position:center;margin:auto;}
     .activity-picture>.activity-art{height:230px;max-width:540px}
     .activity-page .scenario-choice>.activity-art{height:145px;max-width:230px;pointer-events:none}
     .app.scenario-mode .scenario-illustration>.activity-art{height:230px;max-width:450px}
+    @media(max-width:760px){.app.scenario-mode .scenario-illustration>.activity-art{height:180px;max-height:180px}}
     /* Bound raster art to the frame instead of its intrinsic grid-track size. */
     .illustration>.activity-art,.app.child-mode .illustration>.activity-art{position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:100%;padding:10px;box-sizing:border-box;object-fit:contain;object-position:center;filter:none}
     .illustration{position:relative}
