@@ -3,6 +3,8 @@
   "private": true,
   "description": "Synthetic regression tooling for the standalone Little Evidence app",
   "devDependencies": {
-    "jsdom": "26.1.0"
+    "@electric-sql/pglite": "0.5.8",
+    "jsdom": "26.1.0",
+    "playwright": "1.63.0"
   }
 }
