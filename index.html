@@ -1054,13 +1054,14 @@
   <script src="./child-activities.js"></script>
   <script src="./verified-progressions.js"></script>
   <script src="./assessment-continuation.js"></script>
-  <script src="./activity-remote.js?v=20261001-continuity"></script>
+  <script src="./activity-remote.js?v=20261003-private-recovery"></script>
   <script>
     const LE_SUPABASE_URL='https://pvgewltlxenguxmhiszm.supabase.co';
     const LE_SUPABASE_PUBLIC_KEY='sb_publishable_uwPiH_j23b8nzcJTOM3Wug_jGH6oExI';
     const LE_EVIDENCE_BUCKET='little-evidence-private';
+    const checkpointEmailReturn=/(?:^#|&)access_token=/.test(location.hash)||new URLSearchParams(location.search).has('code');
     let leDb=null,leUser=null,activeCheckpoint=null,activeCheckpointChildName='',returnScreenAfterWorkspace='objectiveLibraryScreen',assessmentCheckpointId=null,assessmentDirty=false;
-    let remoteCheckpointReturn=null,assessmentEditRevision=0;
+    let remoteCheckpointReturn=null,assessmentEditRevision=0,checkpointAuthReady=false,checkpointSelectionRevision=0,checkpointChildrenRevision=0;
     let evidenceRecordIds={guided:null,movement:null,feelings:null,limits:null},pendingEvidenceUpload=null,voiceRecorder=null,voiceStream=null,voiceButton=null,voiceContext=null,voiceCapture=null,evidenceCaptureRevision=0;
     const leDbReady=import('https://esm.sh/@supabase/supabase-js@2.117.1').then(({createClient})=>{
       leDb=createClient(LE_SUPABASE_URL,LE_SUPABASE_PUBLIC_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -1189,6 +1190,27 @@
     function recallRemoteCheckpoint(sessionId){
       try{const target=JSON.parse(sessionStorage.getItem('littleEvidence:remote:'+sessionId));return target?.ownerId&&target?.checkpointId?target:null}catch{return null}
     }
+    async function restorePrivateRemoteCheckpoint(target,isCurrent){
+      if(!target||leUser?.id!==target.ownerId||activeCheckpoint)return false;
+      const ownerId=leUser.id,selectionRevision=checkpointSelectionRevision;
+      const current=()=>leUser?.id===ownerId&&checkpointSelectionRevision===selectionRevision&&!activeCheckpoint&&isCurrent();
+      const {data:checkpoint,error}=await leDb.from('little_evidence_checkpoints').select('*').eq('id',target.checkpointId).eq('owner_id',ownerId).maybeSingle();
+      if(!current())return false;
+      if(error)throw error;
+      if(!checkpoint||checkpoint.id!==target.checkpointId||checkpoint.owner_id!==ownerId)throw Error('The original checkpoint is unavailable. Choose a checkpoint or start a new pairing.');
+      const {data:child,error:childError}=await leDb.from('little_evidence_children').select('id,display_name,owner_id').eq('id',checkpoint.child_id).eq('owner_id',ownerId).is('archived_at',null).maybeSingle();
+      if(!current())return false;
+      if(childError)throw childError;
+      if(!child||child.id!==checkpoint.child_id||child.owner_id!==ownerId)throw Error('The original child is unavailable in this account. Start a new pairing for another child.');
+      activeCheckpoint=checkpoint;activeCheckpointChildName=child.display_name;assessmentCheckpointId=checkpoint.id;
+      document.getElementById('checkpointChildSelect').value=child.id;
+      document.getElementById('checkpointSchoolYear').value=checkpoint.school_year;
+      document.getElementById('checkpointSeason').value=checkpoint.season;
+      document.getElementById('activeCheckpointLabel').textContent=activeCheckpointCaption();
+      updateCheckpointContext();
+      await refreshCheckpointRecords();
+      return remoteCheckpointMatches(target)&&isCurrent();
+    }
     function remoteCheckpointMatches(target){return !!target&&leUser?.id===target.ownerId&&activeCheckpoint?.id===target.checkpointId}
     function lockedRemoteCheckpoint(){return LEActivityRemote.lockedCheckpoint()||(pairRole==='teacher'&&!controllerReviewStarted?movementRemoteTarget:null)}
     function returnFromCheckpointWorkspace(){
@@ -1202,12 +1224,12 @@
         const client=await leDbReady;if(!client)return;
         const {error}=await client.auth.signOut();
         if(error)toast('Could not sign out yet. Try again.');
-        else{leUser=null;activeCheckpoint=null;activeCheckpointChildName='';resetAssessmentForChild();renderCheckpointAuth();checkpointStatus('Signed out.')}
+        else{await handleCheckpointAuthSession(null);checkpointStatus('Signed out.')}
       });
       document.getElementById('addCheckpointChild').addEventListener('click',addCheckpointChild);
       document.getElementById('checkpointActivities').addEventListener('click',()=>{if(!activeCheckpoint){checkpointStatus('Open a child checkpoint first.',true);return}if(!returnFromCheckpointWorkspace())openLibrary()});
       document.getElementById('openCheckpoint').addEventListener('click',openOrCreateCheckpoint);
-      ['checkpointChildSelect','checkpointSchoolYear','checkpointSeason'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{if(lockedRemoteCheckpoint()&&activeCheckpoint){document.getElementById('checkpointChildSelect').value=activeCheckpoint.child_id;document.getElementById('checkpointSchoolYear').value=activeCheckpoint.school_year;document.getElementById('checkpointSeason').value=activeCheckpoint.season;checkpointStatus('Finish this iPad activity before changing children.',true);return}activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true;updateCheckpointContext()}));
+      ['checkpointChildSelect','checkpointSchoolYear','checkpointSeason'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{if(lockedRemoteCheckpoint()&&activeCheckpoint){document.getElementById('checkpointChildSelect').value=activeCheckpoint.child_id;document.getElementById('checkpointSchoolYear').value=activeCheckpoint.school_year;document.getElementById('checkpointSeason').value=activeCheckpoint.season;checkpointStatus('Finish this iPad activity before changing children.',true);return}checkpointSelectionRevision++;activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('activeCheckpointLabel').textContent='Open a checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true;updateCheckpointContext()}));
       document.getElementById('createParentReport').addEventListener('click',openParentReport);
       document.getElementById('createGoldEntrySheet').addEventListener('click',openGoldEntrySheet);
       document.getElementById('backFromGoldEntrySheet').addEventListener('click',()=>show('checkpointScreen'));
@@ -1230,23 +1252,26 @@
 
       const client=await leDbReady;
       if(!client){
+        checkpointAuthReady=true;LEActivityRemote.refreshContext();
         const message=document.getElementById('checkpointAuthMessage');
         if(message)message.textContent='The secure sign-in service could not load. Refresh and try again.';
         return;
       }
+      let authEventRevision=0;
+      client.auth.onAuthStateChange((_event,session)=>{authEventRevision++;setTimeout(()=>{void handleCheckpointAuthSession(session)},0)});
+      const initialRevision=authEventRevision;
       const {data:{session}}=await client.auth.getSession();
-      leUser=session?.user||null;
-      renderCheckpointAuth();
-      client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>{void handleCheckpointAuthSession(session)},0)});
-      if(leUser)await loadCheckpointChildren();
+      if(initialRevision===authEventRevision)await handleCheckpointAuthSession(session);
     }
     async function handleCheckpointAuthSession(session){
       const nextUser=session?.user||null,changed=(leUser?.id||null)!==(nextUser?.id||null);
-      leUser=nextUser;
-      if(changed){activeCheckpoint=null;activeCheckpointChildName='';resetAssessmentForChild();}
+      checkpointAuthReady=true;leUser=nextUser;
+      if(changed){checkpointSelectionRevision++;activeCheckpoint=null;activeCheckpointChildName='';document.getElementById('checkpointChildSelect').innerHTML='<option value="">Choose a child</option>';document.getElementById('activeCheckpointLabel').textContent='Choose a child and checkpoint to see saved assessments.';document.getElementById('checkpointSavedRecords').innerHTML='';document.getElementById('createParentReport').disabled=true;document.getElementById('createGoldEntrySheet').disabled=true;resetAssessmentForChild();}
       renderCheckpointAuth();
       updateCheckpointContext();
+      LEActivityRemote.refreshContext();
       if(leUser&&changed)await loadCheckpointChildren();
+      await LEActivityRemote.restoreCheckpoint();
     }
     async function sendCheckpointSignIn(){
       const message=document.getElementById('checkpointAuthMessage');
@@ -1259,7 +1284,7 @@
         const redirectTo=location.origin+location.pathname;
         const {error}=await client.auth.signInWithOtp({email,options:{emailRedirectTo:redirectTo,shouldCreateUser:true}});
         if(error)throw error;
-        message.textContent='Check your email for the secure sign-in link, then reopen Little Evidence on this device.';
+        message.textContent='Open the secure sign-in email on this phone or iPad, then return to this paired activity tab. Use the same teacher account as on the computer; your existing children will be listed.';
       }catch(error){message.textContent=error.message||'Could not send the sign-in link. Try again.'}
       finally{button.disabled=false;button.textContent='Email me a sign-in link'}
     }
@@ -1283,13 +1308,14 @@
     async function loadCheckpointChildren(selectChildId=''){
       if(!leUser)return;
       const select=document.getElementById('checkpointChildSelect');
-      const keepChildId=selectChildId||activeCheckpoint?.child_id||select.value;
+      const keepChildId=selectChildId||activeCheckpoint?.child_id||select.value,loadingOwnerId=leUser.id,loadingRevision=++checkpointChildrenRevision,selectionRevision=checkpointSelectionRevision;
       checkpointStatus('Loading children…');
       const {data,error}=await leDb.from('little_evidence_children').select('id,display_name').is('archived_at',null);
+      if(leUser?.id!==loadingOwnerId||loadingRevision!==checkpointChildrenRevision||selectionRevision!==checkpointSelectionRevision)return;
       if(error){checkpointStatus('Could not load children: '+error.message,true);return}
       const children=[...(data||[])].sort((a,b)=>checkpointFirstName(a.display_name).localeCompare(checkpointFirstName(b.display_name),'en',{sensitivity:'base'})||String(a.display_name).localeCompare(String(b.display_name),'en',{sensitivity:'base'}));
       select.innerHTML='<option value="">Choose a child</option>'+children.map(child=>'<option value="'+escapeHTML(child.id)+'">'+escapeHTML(child.display_name)+'</option>').join('');
-      if(keepChildId)select.value=keepChildId;
+      const selectedChildId=selectChildId||activeCheckpoint?.child_id||keepChildId;if(selectedChildId)select.value=selectedChildId;
       checkpointStatus((data||[]).length?'Choose a child and checkpoint season.':'Add your first child to begin.');
     }
     function checkpointFirstName(name){
@@ -1317,6 +1343,7 @@
       if(!childId){checkpointStatus('Choose or add a child first.',true);return}
       if(!/^\d{4}-\d{4}$/.test(schoolYear)){checkpointStatus('Enter the school year like 2026-2027.',true);return}
       const childName=document.getElementById('checkpointChildSelect').selectedOptions[0]?.textContent||'Child',openingOwnerId=leUser.id;
+      checkpointSelectionRevision++;
       const button=document.getElementById('openCheckpoint');button.disabled=true;
       try{
         let {data,error}=await leDb.from('little_evidence_checkpoints').select('*').eq('child_id',childId).eq('school_year',schoolYear).eq('season',season).maybeSingle();
@@ -1334,6 +1361,7 @@
         assessmentCheckpointId=data.id;
         activeCheckpoint=data;
         activeCheckpointChildName=childName;
+        LEActivityRemote.checkpointSelected();
         document.getElementById('activeCheckpointLabel').textContent=activeCheckpointChildName+' · '+season[0].toUpperCase()+season.slice(1)+' '+schoolYear;
         checkpointStatus('Checkpoint ready. Save each objective after you finish its teacher review.');
         await refreshCheckpointRecords();
@@ -1349,8 +1377,9 @@
       const objectiveId=screen==='guidedObjectiveScreen'?(LEActivityRemote.objectiveId()||activeDefinition?.id):['objectiveScreen','recordScreen','controllerScreen','pairScreen','movementScreen','completeScreen'].includes(screen)?'4':screen.startsWith('feelings')?'1a':screen.startsWith('limits')?'1b':null;
       const objectiveTitle=objectiveId==='4'?'Demonstrates Traveling Skills':objectiveId==='1a'?'Manages Feelings':objectiveId==='1b'?'Follows Limits and Expectations':objectiveDefinitions.find(d=>d.id===objectiveId)?.title;
       const objective=objectiveId&&objectiveTitle?'Objective '+objectiveId+' · '+objectiveTitle:'';
-      const title=activeCheckpoint?'Assessing: '+activeCheckpointChildName:'Practice mode · no child selected';
-      const detail=activeCheckpoint?activeCheckpointCaption()+' · This child stays selected as you move between objectives.':'Choose a child checkpoint on this device before saving assessments.';
+      const phoneSetup=LEActivityRemote.isTeacher();
+      const title=activeCheckpoint?'Assessing: '+activeCheckpointChildName:phoneSetup?(checkpointAuthReady?'Set up this teacher device':'Checking teacher sign-in…'):'Practice mode · no child selected';
+      const detail=activeCheckpoint?activeCheckpointCaption()+' · This child stays selected as you move between objectives.':phoneSetup?'Your teacher account keeps child records private. Use the same account as on the computer.':checkpointEmailReturn&&leUser?'Signed in. Return to your paired activity tab, or scan the same QR code again in this browser.':'Choose a child checkpoint on this device before saving assessments.';
       label.innerHTML='<div><strong>'+escapeHTML(title)+'</strong>'+(objective?'<p class="assessment-objective">'+escapeHTML(objective)+'</p>':'')+'<small>'+escapeHTML(detail)+'</small></div><button type="button" class="secondary" id="changeAssessmentChild">'+(activeCheckpoint?'Change child':'Choose child')+'</button>';
       document.getElementById('changeAssessmentChild').onclick=()=>document.getElementById('openCheckpoints').click();
     }

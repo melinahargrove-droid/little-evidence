@@ -152,3 +152,13 @@ Verify existing draft progression anchors for 18–23 against the uploaded PDFs 
 ### Audit-fix completion checkpoint
 
 The two bounded audit-fix groups above are merged and live. Confirmed audit bugs are corrected; no further adjacent feature work is part of this release. Actual authenticated iPad/SmartBoard save/reopen, child selection, automatic next objective, media capture, and physical-device interruption behavior remain pending classroom acceptance using a synthetic learner and sample media.
+
+
+## 2026-10-03 — Private choose-once computer-to-phone handoff
+
+- Reproduced the reported device boundary: prior QR links connected an activity but never carried the computer's selected checkpoint. Selecting the same existing child on the phone was a workaround, not an automatic handoff.
+- New pairings with a selected checkpoint now create an immutable owner-protected mapping before showing the QR. A signed-in phone resolves the same child/year/checkpoint through private reads and starts the waiting activity directly. Signed-out phones can resume after signing into the same account; wrong accounts cannot resolve the mapping or start the mapped assessment.
+- QR and public relay retain random pairing tokens only, with a non-identifying private-handoff marker. Names, child IDs, checkpoint IDs and precise ratings are never placed in those public payloads. Mapping RLS requires the authenticated owner, ownership of the referenced checkpoint, and a live expiry bounded to two hours. Existing table grants and policies are unchanged.
+- Same-tab and mapped fresh-tab recovery restore the exact private checkpoint. Delayed auth, account/selection changes during reads, stale rosters, premature QR publication, duplicate pairing clicks and wrong-child starts are guarded. Same-user token refresh preserves in-progress controls; controls are disabled during restoration. Legacy unassigned pairings remain supported.
+- Added synthetic independent-context application tests, PostgreSQL RLS tests and a real Chromium two-context CI suite. The latter intercepts all requests with synthetic fixtures and does not access live child data. Physical device/authenticated service acceptance remains distinct from automated coverage.
+- Deployment status and exact CI results are recorded after publication; do not treat a draft PR as a live fix.
